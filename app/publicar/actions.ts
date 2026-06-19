@@ -23,8 +23,7 @@ export async function crearPublicacion(data: PublicacionData) {
   const email = user.email;
   if (!email) return { error: "No se encontró el email del usuario." };
 
-  const token = crypto.randomUUID();
-
+  // La publicación queda visible al instante (sin paso de confirmación por email).
   const { error: dbError } = await supabase.from("publicaciones").insert({
     title: data.title,
     description: "",
@@ -35,33 +34,49 @@ export async function crearPublicacion(data: PublicacionData) {
     photos: data.photos,
     posted_by: nombre ?? "Anónimo",
     user_id: user.id,
-    status: "pendiente_confirmacion",
-    confirmation_token: token,
+    status: "abierto",
   });
 
   if (dbError) return { error: `Error al guardar: ${dbError.message}` };
 
-  const confirmUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://solvit.homes"}/api/confirmar-publicacion?token=${token}`;
+  // A partir de acá la publicación YA está publicada. El email es solo un aviso
+  // informativo: best-effort. Si Resend no está configurado o falla, no pasa nada
+  // (no bloquea ni hace fallar la publicación).
+  enviarAvisoPublicacion(email, nombre, data).catch((err) => {
+    console.error("[crearPublicacion] no se pudo enviar el aviso:", err);
+  });
+
+  return { success: true, email };
+}
+
+async function enviarAvisoPublicacion(
+  email: string,
+  nombre: string | undefined,
+  data: PublicacionData
+) {
+  const resendConfigurado =
+    !!process.env.RESEND_API_KEY &&
+    !process.env.RESEND_API_KEY.startsWith("re_REEMPLAZAR");
+
+  if (!resendConfigurado) return;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://solvit.homes";
 
   const urgencyLabel = data.urgency === "hoy" ? "Hoy mismo"
     : data.urgency === "esta_semana" ? "Esta semana"
     : "Flexible";
 
-  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith("re_REEMPLAZAR")) {
-    return { success: true, email };
-  }
-
   await resend.emails.send({
     from: "SolvIT <noreply@solvit.homes>",
     to: email,
-    subject: "Confirmá tu publicación en SolvIT",
+    subject: "Publicamos tu pedido en SolvIT",
     html: `
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Confirmá tu publicación</title>
+  <title>Tu publicación está activa</title>
 </head>
 <body style="margin:0;padding:0;background:#f5fdf9;font-family:system-ui,-apple-system,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;padding:40px 16px;">
@@ -80,10 +95,10 @@ export async function crearPublicacion(data: PublicacionData) {
           <tr>
             <td style="background:#ffffff;border-radius:20px;padding:40px 32px;border:1px solid #e4ede7;">
 
-              <p style="margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:#3d9b5e;">Confirmación de publicación</p>
-              <h1 style="margin:0 0 16px;font-size:26px;font-weight:700;color:#1a2e1e;line-height:1.2;">Ya casi está, ${nombre ?? ""}!</h1>
+              <p style="margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:#3d9b5e;">Publicación creada</p>
+              <h1 style="margin:0 0 16px;font-size:26px;font-weight:700;color:#1a2e1e;line-height:1.2;">¡Listo${nombre ? `, ${nombre}` : ""}! Tu pedido ya está publicado.</h1>
               <p style="margin:0 0 24px;font-size:15px;color:#64748b;line-height:1.6;">
-                Tu publicación quedó guardada. Solo falta que la confirmes haciendo clic en el botón de abajo para que aparezca en el marketplace y los técnicos puedan verte.
+                Lo estamos mostrando a los técnicos verificados de tu zona. Te avisamos cuando lleguen las primeras ofertas — no tenés que hacer nada más.
               </p>
 
               <!-- Detalle de la publicación -->
@@ -99,13 +114,13 @@ export async function crearPublicacion(data: PublicacionData) {
                 </tr>
               </table>
 
-              <!-- CTA -->
-              <a href="${confirmUrl}" style="display:block;text-align:center;background:#3d9b5e;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 24px;border-radius:12px;margin-bottom:20px;">
-                Confirmar mi publicación →
+              <!-- CTA informativo -->
+              <a href="${appUrl}/mis-publicaciones" style="display:block;text-align:center;background:#3d9b5e;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 24px;border-radius:12px;margin-bottom:20px;">
+                Ver mis publicaciones →
               </a>
 
               <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;line-height:1.6;">
-                Si no creaste esta publicación, ignorá este mail.<br/>El link expira en 48 horas.
+                No te cobramos nada hasta que aceptes una oferta.
               </p>
             </td>
           </tr>
@@ -126,6 +141,4 @@ export async function crearPublicacion(data: PublicacionData) {
 </body>
 </html>`,
   });
-
-  return { success: true, email };
 }

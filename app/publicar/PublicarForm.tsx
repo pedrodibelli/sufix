@@ -112,7 +112,7 @@ function PublicarInner() {
       return;
     }
 
-    router.push(`/publicar/pendiente?email=${encodeURIComponent(result.email ?? "")}`);
+    router.push("/publicar/exito");
   }
 
   const canContinue = (() => {
