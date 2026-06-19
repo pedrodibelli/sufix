@@ -67,7 +67,12 @@ export default function RegistrarPage() {
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: metadata },
+      options: {
+        data: metadata,
+        // Redirige la confirmación al deploy actual (no a la Site URL global de
+        // Supabase, que es compartida con el deploy original en solvit.homes).
+        emailRedirectTo: `${window.location.origin}/`,
+      },
     });
 
     if (signUpError) {
