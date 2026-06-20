@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "@/components/CategoryArt";
-import { rechazarPropuesta } from "./actions";
+import { rechazarPropuesta, eliminarPublicacion } from "./actions";
 import { AceptarModal, type PropuestaParaPago, type PublicacionParaPago } from "@/components/AceptarModal";
 import { ReportarProblemaModal } from "./ReportarProblemaModal";
 
@@ -341,6 +341,25 @@ function MiConsultaCard({
   onAceptar: (p: Propuesta, pub: Publicacion) => void;
   perfilMap: Record<string, PerfilProfesional>;
 }) {
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmandoBorrar, setConfirmandoBorrar] = useState(false);
+  const [borrando, startBorrar] = useTransition();
+  const [borrarError, setBorrarError] = useState("");
+
+  function handleEliminar() {
+    setBorrarError("");
+    startBorrar(async () => {
+      const r = await eliminarPublicacion(pub.id);
+      if ("error" in r) {
+        setBorrarError(r.error);
+        return;
+      }
+      setMenuOpen(false);
+      router.refresh();
+    });
+  }
+
   const cat = CATEGORIES.find((c) => c.slug === pub.category_slug);
   const pendingCount = pub.propuestas.filter(
     (p) => !p.estado || p.estado === "pendiente"
@@ -392,7 +411,57 @@ function MiConsultaCard({
         {pub.status === "abierto" && pendingCount === 0 && pub.propuestas.length > 0 && (
           <span className="hidden sm:flex shrink-0 self-center text-xs text-ink-400">Sin nuevas</span>
         )}
+
+        {pub.status === "abierto" && (
+          <button
+            type="button"
+            onClick={() => { setMenuOpen((v) => !v); setConfirmandoBorrar(false); }}
+            aria-label="Opciones de la publicación"
+            className="shrink-0 self-start rounded-lg px-2 py-1 text-lg leading-none text-ink-400 transition hover:bg-ink-50 hover:text-ink-700"
+          >
+            ⋯
+          </button>
+        )}
       </div>
+
+      {/* Menú ⋯ — eliminar publicación (solo abiertas) */}
+      {menuOpen && pub.status === "abierto" && (
+        <div className="border-t border-ink-100 bg-rose-50/60 px-5 py-4">
+          {!confirmandoBorrar ? (
+            <button
+              type="button"
+              onClick={() => setConfirmandoBorrar(true)}
+              className="text-sm font-semibold text-rose-600 hover:underline"
+            >
+              🗑 Eliminar publicación
+            </button>
+          ) : (
+            <div>
+              <p className="text-sm text-ink-700">
+                ¿Seguro que querés eliminarla? No se puede deshacer.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmandoBorrar(false)}
+                  className="rounded-lg border border-ink-200 px-3 py-1.5 text-sm font-medium text-ink-600 transition hover:bg-ink-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={borrando}
+                  onClick={handleEliminar}
+                  className="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50"
+                >
+                  {borrando ? "Eliminando…" : "Sí, eliminar"}
+                </button>
+              </div>
+              {borrarError && <p className="mt-1.5 text-xs text-rose-600">{borrarError}</p>}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Nuevas propuestas recibidas — aviso destacado para el demandante */}
       {pub.status === "abierto" && pendingCount > 0 && !expanded && (

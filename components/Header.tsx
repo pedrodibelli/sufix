@@ -3,6 +3,7 @@ import Image from "next/image";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { UserMenu } from "@/components/UserMenu";
 import { MobileMenu } from "@/components/MobileMenu";
+import { BottomNav } from "@/components/BottomNav";
 import { isAdminEmail } from "@/lib/admin";
 
 export async function Header() {
@@ -30,6 +31,7 @@ export async function Header() {
     : "rounded-lg px-3.5 py-2 text-sm font-medium text-ink-500 transition-colors hover:bg-zap-100 hover:text-sv-dark";
 
   return (
+    <>
     <header className={`relative sticky top-0 z-40 border-b backdrop-blur-lg ${
       dk ? "border-white/10 bg-[#0e1a17]/95" : "border-ink-100/80 bg-white/90"
     }`}>
@@ -78,5 +80,7 @@ export async function Header() {
 
       </div>
     </header>
+    {user && <BottomNav dark={dk} />}
+    </>
   );
 }

@@ -47,6 +47,21 @@ export async function rechazarPropuesta(propuestaId: string) {
   revalidatePath("/mis-consultas");
 }
 
+// Elimina una publicación propia que esté ABIERTA (sin trato en curso).
+export async function eliminarPublicacion(
+  publicacionId: string
+): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autenticado" };
+
+  const { error } = await supabase.rpc("eliminar_publicacion", { p_id: publicacionId });
+  if (error) return { error: error.message };
+
+  revalidatePath("/mis-consultas");
+  return { ok: true };
+}
+
 export async function confirmarCodigo(
   propuestaId: string,
   codigo: string
