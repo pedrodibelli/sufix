@@ -25,7 +25,8 @@ type Propuesta = {
 type Tab = "todas" | "pendiente" | "aceptada" | "completada" | "rechazada";
 
 const ESTADO_MAP: Record<string, { label: string; cls: string; darkCls: string }> = {
-  pendiente:  { label: "Pendiente",  cls: "bg-amber-100 text-amber-700",       darkCls: "bg-amber-400/15 text-amber-300" },
+  pendiente:        { label: "Pendiente",        cls: "bg-amber-100 text-amber-700",     darkCls: "bg-amber-400/15 text-amber-300" },
+  pago_en_revision: { label: "Pago en revisión",  cls: "bg-amber-100 text-amber-700",     darkCls: "bg-amber-400/15 text-amber-300" },
   aceptada:   { label: "Aceptada",   cls: "bg-sv-primary/10 text-sv-olive",    darkCls: "bg-zap-500/20 text-zap-300" },
   completada: { label: "Completada", cls: "bg-emerald-100 text-emerald-700",   darkCls: "bg-emerald-500/20 text-emerald-300" },
   rechazada:  { label: "Rechazada",  cls: "bg-rose-100 text-rose-700",         darkCls: "bg-rose-500/15 text-rose-400" },

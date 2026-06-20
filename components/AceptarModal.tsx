@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "./CategoryArt";
-import { aceptarPropuesta } from "@/app/mis-consultas/actions";
-import { supabase } from "@/lib/supabase";
+import { declararPago } from "@/app/mis-consultas/actions";
 
 export type PropuestaParaPago = {
   id: string;
@@ -49,12 +48,17 @@ function ProgressBar({ step }: { step: number }) {
   );
 }
 
+// TODO: reemplazar por los datos de SolvIT cuando se cree la cuenta + Mercado Pago.
 const DATOS_TRANSFERENCIA = [
   { label: "CVU",    value: "0000003100036596584321" },
   { label: "Alias",  value: "matteo.osunaa" },
   { label: "Número", value: "+541157980934" },
   { label: "Mail",   value: "matteo.osuna@gmail.com" },
 ];
+
+// Número de WhatsApp al que el demandante envía el comprobante.
+// TODO: cambiar por el número de SolvIT cuando exista.
+const WHATSAPP_COMPROBANTE = "541157980934";
 
 const COMISION = 4500;
 
@@ -172,11 +176,13 @@ function StepResumen({
 function StepPago({
   total,
   isPending,
+  error,
   onAtras,
   onPagar,
 }: {
   total: number;
   isPending: boolean;
+  error?: string | null;
   onAtras: () => void;
   onPagar: () => void;
 }) {
@@ -234,7 +240,7 @@ function StepPago({
         </div>
 
         <p className="mt-3 text-[11.5px] leading-relaxed text-ink-400">
-          Una vez realizada la transferencia por el monto total, tocá <strong className="text-sv-dark">"Confirmar pago"</strong> para desbloquear el contacto del profesional.
+          Hacé la transferencia por el monto total y luego <strong className="text-sv-dark">enviá el comprobante</strong> por WhatsApp. Verificamos el pago y desbloqueamos el contacto del profesional (suele tardar unas horas).
         </p>
       </div>
 
@@ -258,9 +264,12 @@ function StepPago({
               Procesando…
             </span>
           ) : (
-            `Confirmar pago $${total.toLocaleString("es-AR")}`
+            "Ya hice la transferencia"
           )}
         </button>
+        {error && (
+          <p className="mt-2 text-center text-xs font-medium text-rose-600">{error}</p>
+        )}
         <p className="mt-2 text-center text-[11px] text-ink-400">
           Al confirmar aceptás los{" "}
           <span className="text-sv-primary">términos del servicio</span> de SolvIT.
@@ -270,66 +279,18 @@ function StepPago({
   );
 }
 
-// ─── Step 3: Desbloqueado ─────────────────────────────────────────────────────
-function ContactRow({
-  label,
-  value,
-  action,
-}: {
-  label: string;
-  value: string;
-  action?: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-3 border-t border-ink-100 px-4 py-3 first:border-t-0">
-      <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-400">{label}</p>
-        <p className="mt-0.5 truncate text-sm font-medium text-sv-dark">{value}</p>
-      </div>
-      {action}
-    </div>
-  );
-}
-
-function StepDesbloqueado({
-  nombre,
-  profesionalId,
-  publicacion,
-  cat,
+// ─── Step 3: Pago en revisión ─────────────────────────────────────────────────
+function StepEnRevision({
+  total,
   onClose,
 }: {
-  nombre: string;
-  profesionalId: string;
-  publicacion: PublicacionParaPago;
-  cat: ReturnType<typeof CATEGORIES.find>;
+  total: number;
   onClose: () => void;
 }) {
-  const [perfil, setPerfil] = useState<{ telefono?: string | null; email?: string | null; zona?: string | null } | null>(null);
-
-  useEffect(() => {
-    supabase
-      .from("perfiles_profesionales")
-      .select("telefono, email, zona")
-      .eq("user_id", profesionalId)
-      .single()
-      .then(({ data }) => setPerfil(data ?? {}));
-  }, [profesionalId]);
-
-  const telefono = perfil?.telefono ?? null;
-  const email = perfil?.email ?? null;
-  const zona = perfil?.zona ?? null;
-
-  const initials = nombre
-    .split(" ")
-    .filter(Boolean)
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  const waLink = telefono
-    ? `https://wa.me/${telefono.replace(/\D/g, "")}`
-    : null;
+  const waMsg = encodeURIComponent(
+    "Hola! Te envío el comprobante de mi transferencia en SolvIT."
+  );
+  const waLink = `https://wa.me/${WHATSAPP_COMPROBANTE}?text=${waMsg}`;
 
   return (
     <>
@@ -338,66 +299,47 @@ function StepDesbloqueado({
       <div className="max-h-[calc(90vh-5rem)] overflow-y-auto px-5 pb-6 pt-2">
         {/* Header */}
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sv-primary/10">
-            <svg className="h-8 w-8 text-sv-primary" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-3xl">
+            ⏳
           </div>
-          <h2 className="display mt-3 text-xl text-sv-dark">¡Pago confirmado!</h2>
-          <p className="mt-1 text-sm text-ink-400">Ya podés coordinar la visita con el profesional.</p>
+          <h2 className="display mt-3 text-xl text-sv-dark">Pago en revisión</h2>
+          <p className="mt-1 text-sm text-ink-400">
+            Registramos tu transferencia por{" "}
+            <strong className="text-sv-dark">${total.toLocaleString("es-AR")}</strong>. Falta un último paso.
+          </p>
         </div>
 
-        {/* Datos desbloqueados */}
-        <div className="mt-5 overflow-hidden rounded-2xl border border-sv-primary/20 bg-white">
-          {/* Pro header */}
-          <div className="flex items-center gap-3 bg-sv-primary/5 px-4 py-3.5">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sv-dark to-sv-primary font-display text-base font-semibold text-white">
-              {initials}
-            </span>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-semibold text-sv-dark">{nombre}</span>
-                <span className="rounded-full bg-sv-primary/15 px-2 py-0.5 text-[10px] font-semibold text-sv-olive">
-                  🔓 Datos desbloqueados
-                </span>
-              </div>
-              <p className="mt-0.5 text-[11px] text-ink-400">Profesional verificado en SolvIT</p>
-            </div>
-          </div>
-
-          {/* Filas de contacto */}
-          {telefono && (
-            <ContactRow label="Teléfono" value={telefono} />
-          )}
-          {telefono && waLink && (
-            <ContactRow label="WhatsApp" value={telefono} />
-          )}
-          {email && (
-            <ContactRow label="Email" value={email} />
-          )}
-          {zona && (
-            <ContactRow label="Zona" value={`${zona} · zona de trabajo`} />
-          )}
+        {/* Enviar comprobante */}
+        <div className="mt-5 rounded-2xl border border-amber-300 bg-amber-50 p-4">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-amber-800">
+            📲 Enviá el comprobante
+          </p>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-amber-900">
+            Mandanos la captura de la transferencia por WhatsApp. Apenas verificamos el pago,{" "}
+            <strong>se desbloquea el contacto del profesional</strong> (suele tardar unas horas).
+          </p>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-white hover:brightness-95"
+          >
+            Enviar comprobante por WhatsApp
+          </a>
         </div>
 
-        {/* Próximo paso */}
+        {/* Estado bloqueado */}
         <div className="mt-4 flex items-start gap-3 rounded-xl border border-ink-100 bg-ink-50 px-4 py-3">
-          <span className="text-lg">📅</span>
-          <div>
-            <p className="text-[11.5px] font-semibold text-sv-dark">Próximo paso</p>
-            <p className="mt-0.5 text-[11.5px] leading-relaxed text-ink-400">
-              Contactá a <strong className="text-sv-dark">{nombre.split(" ")[0]}</strong> para coordinar día y hora. La primera interacción debe realizarse dentro de las próximas <strong className="text-sv-dark">24 horas</strong>.
-            </p>
-          </div>
+          <span className="text-lg">🔒</span>
+          <p className="text-[11.5px] leading-relaxed text-ink-400">
+            El contacto del profesional sigue bloqueado hasta que confirmemos el pago. Vas a ver el estado{" "}
+            <strong className="text-sv-dark">"Pago en revisión"</strong> en tus consultas.
+          </p>
         </div>
 
         {/* Botones */}
         <div className="mt-5">
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-primary w-full"
-          >
+          <button type="button" onClick={onClose} className="btn-primary w-full">
             Ver mis consultas
           </button>
         </div>
@@ -417,16 +359,21 @@ export function AceptarModal({ propuesta, publicacion, onClose, onPagoExitoso }:
   const precio = Number(propuesta.precio);
   const comision = COMISION;
   const total = precio + comision;
-  const nombre = propuesta.nombre_profesional ?? "Profesional";
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  function handlePagar() {
+  function handleYaTransferi() {
+    setError(null);
     startTransition(async () => {
-      await aceptarPropuesta(propuesta.id, publicacion.id);
+      const result = await declararPago(propuesta.id, publicacion.id);
+      if ("error" in result) {
+        setError(result.error);
+        return;
+      }
       router.refresh();
       setStep(3);
     });
@@ -459,17 +406,15 @@ export function AceptarModal({ propuesta, publicacion, onClose, onPagoExitoso }:
           <StepPago
             total={total}
             isPending={isPending}
+            error={error}
             onAtras={() => setStep(0)}
-            onPagar={handlePagar}
+            onPagar={handleYaTransferi}
           />
         )}
 
         {step === 3 && (
-          <StepDesbloqueado
-            nombre={nombre}
-            profesionalId={propuesta.profesional_id}
-            publicacion={publicacion}
-            cat={cat}
+          <StepEnRevision
+            total={total}
             onClose={onPagoExitoso ?? onClose}
           />
         )}

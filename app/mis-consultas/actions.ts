@@ -3,38 +3,42 @@
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
 
-export async function aceptarPropuesta(propuestaId: string, publicacionId: string) {
+// El demandante declara que hizo la transferencia. NO desbloquea el contacto:
+// deja la propuesta en revisión hasta que un admin verifique el comprobante.
+export async function declararPago(
+  propuestaId: string,
+  publicacionId: string
+): Promise<{ ok: true } | { error: string }> {
   const supabase = await createSupabaseServer();
 
   // Verificar que la publicación pertenece al usuario autenticado
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("No autenticado");
+  if (!user) return { error: "No autenticado" };
 
   const { data: pub } = await supabase
     .from("publicaciones")
-    .select("user_id")
+    .select("user_id, status")
     .eq("id", publicacionId)
     .single();
 
-  if (!pub || pub.user_id !== user.id) throw new Error("No autorizado");
+  if (!pub || pub.user_id !== user.id) return { error: "No autorizado" };
 
-  const codigo_pago = String(Math.floor(1000 + Math.random() * 9000));
   const now = new Date().toISOString();
 
   const [{ error: errProp }, { error: errPub }] = await Promise.all([
     supabase.from("propuestas").update({
-      estado: "aceptada",
-      codigo_pago,
-      aceptada_at: now,
+      estado: "pago_en_revision",
+      pago_revision_at: now,
     }).eq("id", propuestaId),
-    // en_curso: propuesta aceptada, trabajo en progreso (NO cerrado todavía)
-    supabase.from("publicaciones").update({ status: "en_curso" }).eq("id", publicacionId),
+    // en_revision: pago declarado, pendiente de verificación. Bloquea aceptar otra propuesta.
+    supabase.from("publicaciones").update({ status: "en_revision" }).eq("id", publicacionId),
   ]);
 
-  if (errProp) console.error("[aceptarPropuesta] propuestas update:", errProp.message);
-  if (errPub)  console.error("[aceptarPropuesta] publicaciones update:", errPub.message);
+  if (errProp) return { error: `Error al registrar el pago: ${errProp.message}` };
+  if (errPub)  console.error("[declararPago] publicaciones update:", errPub.message);
 
   revalidatePath("/mis-consultas");
+  return { ok: true };
 }
 
 export async function rechazarPropuesta(propuestaId: string) {

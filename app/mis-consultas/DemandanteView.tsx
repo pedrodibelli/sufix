@@ -52,8 +52,9 @@ type Tab = "abierto" | "cerrado";
 // ─── StatusPill ───────────────────────────────────────────────────────────────
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    abierto:    { label: "Activa",      cls: "bg-sv-primary/10 text-sv-olive" },
-    en_curso:   { label: "En curso",    cls: "bg-blue-100 text-blue-700" },
+    abierto:     { label: "Activa",            cls: "bg-sv-primary/10 text-sv-olive" },
+    en_revision: { label: "Pago en revisión",  cls: "bg-amber-100 text-amber-700" },
+    en_curso:    { label: "En curso",          cls: "bg-blue-100 text-blue-700" },
     en_disputa: { label: "En disputa",  cls: "bg-rose-100 text-rose-700" },
     cerrado:    { label: "Cerrada",     cls: "bg-ink-100 text-ink-500" },
     aceptada:   { label: "Aceptada",    cls: "bg-sv-primary/10 text-sv-olive" },
@@ -393,6 +394,19 @@ function MiConsultaCard({
         )}
       </div>
 
+      {/* Pago en revisión — contacto bloqueado hasta que el admin verifique */}
+      {pub.status === "en_revision" && (
+        <div className="border-t border-ink-100 bg-amber-50 px-5 py-4">
+          <p className="text-[10.5px] font-semibold uppercase tracking-wide text-amber-700">
+            ⏳ Pago en revisión
+          </p>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-amber-900">
+            Estamos verificando tu transferencia. El contacto del profesional se desbloquea apenas
+            confirmemos el pago. Si todavía no lo enviaste, mandanos el comprobante por WhatsApp.
+          </p>
+        </div>
+      )}
+
       {/* Código OTP — visible solo para el demandante cuando el trabajo está en curso */}
       {pub.status === "en_curso" && propuestaAceptada?.codigo_pago && (
         <CodigoOTPBlock codigo={propuestaAceptada.codigo_pago} />
@@ -477,20 +491,20 @@ export function DemandanteView({
   const totalPropuestas = publicaciones.reduce((s, p) => s + p.propuestas.length, 0);
 
   const stats = [
-    { value: publicaciones.filter((p) => p.status === "abierto" || p.status === "en_curso" || p.status === "en_disputa").length, label: "Consultas activas", accent: true },
+    { value: publicaciones.filter((p) => p.status === "abierto" || p.status === "en_revision" || p.status === "en_curso" || p.status === "en_disputa").length, label: "Consultas activas", accent: true },
     { value: publicaciones.filter((p) => p.status === "cerrado").length, label: "Resueltas", accent: false },
     { value: totalPropuestas, label: "Propuestas recibidas", accent: false },
     { value: publicaciones.filter((p) => p.propuestas.some((pr) => pr.estado === "aceptada" || pr.estado === "completada")).length, label: "Con profesional", accent: false },
   ];
 
   const tabs: { id: Tab; label: string; count: number }[] = [
-    { id: "abierto",  label: "Activas",  count: publicaciones.filter((p) => p.status === "abierto" || p.status === "en_curso" || p.status === "en_disputa").length },
+    { id: "abierto",  label: "Activas",  count: publicaciones.filter((p) => p.status === "abierto" || p.status === "en_revision" || p.status === "en_curso" || p.status === "en_disputa").length },
     { id: "cerrado",  label: "Cerradas", count: publicaciones.filter((p) => p.status === "cerrado").length },
   ];
 
   // "abierto" tab incluye tanto abierto como en_curso
   const filtered = tab === "abierto"
-    ? publicaciones.filter((p) => p.status === "abierto" || p.status === "en_curso" || p.status === "en_disputa")
+    ? publicaciones.filter((p) => p.status === "abierto" || p.status === "en_revision" || p.status === "en_curso" || p.status === "en_disputa")
     : publicaciones.filter((p) => p.status === "cerrado");
 
   if (publicaciones.length === 0) {
