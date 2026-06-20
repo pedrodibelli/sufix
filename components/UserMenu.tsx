@@ -107,11 +107,6 @@ export function UserMenu({
               <Link href="/mis-consultas" onClick={close} className={`rounded-xl px-3 py-2 text-sm font-medium transition ${itemCls}`}>
                 Mis consultas
               </Link>
-              {!esProfesional && (
-                <Link href="/mis-publicaciones" onClick={close} className={`rounded-xl px-3 py-2 text-sm font-medium transition ${itemCls}`}>
-                  Mis publicaciones
-                </Link>
-              )}
               {isAdmin && (
                 <Link href="/admin" onClick={close} className={`rounded-xl px-3 py-2 text-sm font-medium transition ${itemCls}`}>
                   Admin

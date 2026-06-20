@@ -115,8 +115,8 @@ async function enviarAvisoPublicacion(
               </table>
 
               <!-- CTA informativo -->
-              <a href="${appUrl}/mis-publicaciones" style="display:block;text-align:center;background:#3d9b5e;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 24px;border-radius:12px;margin-bottom:20px;">
-                Ver mis publicaciones →
+              <a href="${appUrl}/mis-consultas" style="display:block;text-align:center;background:#3d9b5e;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 24px;border-radius:12px;margin-bottom:20px;">
+                Ver mis consultas →
               </a>
 
               <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;line-height:1.6;">
