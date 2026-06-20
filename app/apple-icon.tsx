@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 // Ícono para "Agregar a inicio" en iOS (apple-touch-icon).
 // iOS exige cuadrado y sin transparencia, así que ponemos el logo centrado
-// sobre fondo blanco en un lienzo de 180x180.
+// sobre fondo verde oscuro (el del header) en un lienzo de 180x180.
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
@@ -21,7 +21,7 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#ffffff",
+          background: "#0e1a17",
         }}
       >
         {/* logo 225x239 escalado a 132x140 manteniendo proporción */}
