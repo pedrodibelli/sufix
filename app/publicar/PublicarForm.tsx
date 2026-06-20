@@ -98,21 +98,27 @@ function PublicarInner() {
     setSubmitError("");
     setSubmitting(true);
 
-    const result = await crearPublicacion({
-      title,
-      category_slug: cat,
-      zone,
-      urgency,
-      photos,
-    });
+    try {
+      const result = await crearPublicacion({
+        title,
+        category_slug: cat,
+        zone,
+        urgency,
+        photos,
+      });
 
-    if (result.error) {
-      setSubmitError(result.error);
+      if (result.error) {
+        setSubmitError(result.error);
+        setSubmitting(false);
+        return;
+      }
+
+      router.push("/publicar/exito");
+    } catch {
+      // Nunca dejar el botón colgado en "Publicando…": mostramos el error y reseteamos.
+      setSubmitError("No pudimos publicar. Revisá tu conexión e intentá de nuevo.");
       setSubmitting(false);
-      return;
     }
-
-    router.push("/publicar/exito");
   }
 
   const canContinue = (() => {
