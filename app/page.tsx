@@ -92,6 +92,21 @@ export default async function HomePage({
   const activeCount = (cat ? 1 : 0) + (zona ? 1 : 0);
   const supabaseJobIds = supabaseJobs.map((j) => j.id);
 
+  // Pedidos URGENTES (hoy) del rubro del técnico, abiertos y sin propuesta suya
+  const miCategoria = esProfesional ? (user?.user_metadata?.categoria as string | undefined) : undefined;
+  const esUrgenteDeMiRubro = (j: PostedJob) =>
+    j.urgency === "hoy" &&
+    j.categorySlug === miCategoria &&
+    j.status === "abierto" &&
+    !yaContactadoIds.includes(j.id);
+  const urgentesDeMiRubro = miCategoria ? allJobs.filter(esUrgenteDeMiRubro) : [];
+  const rubroNombre = CATEGORIES.find((c) => c.slug === miCategoria)?.name;
+
+  // Para el técnico, los urgentes de su rubro van primero en la grilla
+  const jobsParaGrid = esProfesional
+    ? [...filtered].sort((a, b) => Number(esUrgenteDeMiRubro(b)) - Number(esUrgenteDeMiRubro(a)))
+    : filtered;
+
   return (
     <>
       <Header />
@@ -146,6 +161,32 @@ export default async function HomePage({
               </p>
             </div>
 
+            {/* Cartel: pedidos urgentes del rubro del técnico */}
+            {esProfesional && urgentesDeMiRubro.length > 0 && (
+              <div className="mb-6 rounded-2xl border border-rose-400/30 bg-rose-500/10 p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">🔥</span>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-rose-200">
+                      {urgentesDeMiRubro.length} pedido{urgentesDeMiRubro.length !== 1 ? "s" : ""} urgente
+                      {urgentesDeMiRubro.length !== 1 ? "s" : ""}
+                      {rubroNombre ? ` de ${rubroNombre}` : ""} para hoy
+                    </p>
+                    <p className="mt-0.5 text-sm text-zap-300">
+                      Alguien necesita resolverlo hoy mismo. Mandá tu propuesta antes que otros técnicos.
+                    </p>
+                    <ul className="mt-2 space-y-1">
+                      {urgentesDeMiRubro.slice(0, 3).map((j) => (
+                        <li key={j.id} className="truncate text-sm text-zap-100">
+                          • {j.title} <span className="text-zap-500">· {j.zone}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="mb-6 flex items-center gap-4">
               <FilterDropdown
                 categories={CATEGORIES}
@@ -163,7 +204,7 @@ export default async function HomePage({
             </div>
 
             <MarketplaceGrid
-              jobs={filtered}
+              jobs={jobsParaGrid}
               supabaseJobIds={supabaseJobIds}
               esProfesional={esProfesional}
               sinSesion={sinSesion}
