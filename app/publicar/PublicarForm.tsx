@@ -181,7 +181,7 @@ function PublicarInner() {
             </div>
           </aside>
 
-          <div>
+          <div className="max-sm:pb-24">
             {/* Barra de progreso compacta — solo mobile (en desktop está la barra lateral) */}
             <div className="mb-4 flex gap-1.5 lg:hidden">
               {STEPS.map((s, i) => (
@@ -233,16 +233,16 @@ function PublicarInner() {
               </p>
             )}
 
-            <div className="mt-6 flex flex-col-reverse gap-3 border-t border-zap-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <button type="button" onClick={back} disabled={step === 0 || submitting} className="btn-ghost w-full sm:w-auto disabled:opacity-40">
+            <div className="flex gap-3 max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-40 max-sm:border-t max-sm:border-zap-100 max-sm:bg-white/95 max-sm:px-5 max-sm:py-3 max-sm:shadow-[0_-2px_12px_rgba(0,0,0,0.08)] max-sm:backdrop-blur sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:border-t sm:border-zap-100 sm:pt-6">
+              <button type="button" onClick={back} disabled={step === 0 || submitting} className="btn-ghost flex-1 sm:w-auto sm:flex-none disabled:opacity-40">
                 ← Volver
               </button>
               {step < STEPS.length - 1 ? (
-                <button type="button" onClick={next} disabled={!canContinue || uploadingPhotos} className="btn-primary w-full sm:w-auto disabled:opacity-50">
+                <button type="button" onClick={next} disabled={!canContinue || uploadingPhotos} className="btn-primary flex-1 sm:w-auto sm:flex-none disabled:opacity-50">
                   Continuar
                 </button>
               ) : (
-                <button type="button" onClick={submit} disabled={submitting} className="btn-zap w-full sm:w-auto disabled:opacity-50">
+                <button type="button" onClick={submit} disabled={submitting} className="btn-zap flex-1 sm:w-auto sm:flex-none disabled:opacity-50">
                   {submitting ? "Publicando…" : "Publicar problema"}
                 </button>
               )}
