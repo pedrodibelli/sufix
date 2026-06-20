@@ -382,6 +382,22 @@ function MiConsultaCard({
         )}
       </div>
 
+      {/* Nuevas propuestas recibidas — aviso destacado para el demandante */}
+      {pub.status === "abierto" && pendingCount > 0 && !expanded && (
+        <div className="border-t border-ink-100 bg-sv-primary/5 px-5 py-4">
+          <p className="text-[10.5px] font-semibold uppercase tracking-wide text-sv-olive">
+            📩 {pendingCount} propuesta{pendingCount !== 1 ? "s" : ""} nueva{pendingCount !== 1 ? "s" : ""}
+          </p>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-500">
+            Un técnico te envió una oferta para este problema. Tocá{" "}
+            <strong className="text-sv-dark">
+              &ldquo;Ver {pendingCount} propuesta{pendingCount !== 1 ? "s" : ""}&rdquo;
+            </strong>{" "}
+            para revisarla y aceptar la que más te convenga.
+          </p>
+        </div>
+      )}
+
       {/* Pago en revisión — contacto bloqueado hasta que el admin verifique */}
       {pub.status === "en_revision" && (
         <div className="border-t border-ink-100 bg-amber-50 px-5 py-4">
