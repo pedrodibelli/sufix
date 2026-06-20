@@ -140,7 +140,7 @@ function PublicarInner() {
         </div>
 
         <div className="grid gap-10 lg:grid-cols-[260px,1fr]">
-          <aside className="lg:sticky lg:top-24 lg:self-start">
+          <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
             <ol className="space-y-2">
               {STEPS.map((s, i) => {
                 const done = i < step;
@@ -182,6 +182,15 @@ function PublicarInner() {
           </aside>
 
           <div>
+            {/* Barra de progreso compacta — solo mobile (en desktop está la barra lateral) */}
+            <div className="mb-4 flex gap-1.5 lg:hidden">
+              {STEPS.map((s, i) => (
+                <div
+                  key={s}
+                  className={`h-1.5 flex-1 rounded-full transition-colors ${i <= step ? "bg-sv-primary" : "bg-ink-100"}`}
+                />
+              ))}
+            </div>
             <div className="text-xs uppercase tracking-wider text-ink-400">
               Paso {step + 1} de {STEPS.length}
             </div>
@@ -225,15 +234,15 @@ function PublicarInner() {
             )}
 
             <div className="mt-6 flex flex-col-reverse gap-3 border-t border-zap-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <button type="button" onClick={back} disabled={step === 0 || submitting} className="btn-ghost disabled:opacity-40">
+              <button type="button" onClick={back} disabled={step === 0 || submitting} className="btn-ghost w-full sm:w-auto disabled:opacity-40">
                 ← Volver
               </button>
               {step < STEPS.length - 1 ? (
-                <button type="button" onClick={next} disabled={!canContinue || uploadingPhotos} className="btn-primary disabled:opacity-50">
+                <button type="button" onClick={next} disabled={!canContinue || uploadingPhotos} className="btn-primary w-full sm:w-auto disabled:opacity-50">
                   Continuar
                 </button>
               ) : (
-                <button type="button" onClick={submit} disabled={submitting} className="btn-zap disabled:opacity-50">
+                <button type="button" onClick={submit} disabled={submitting} className="btn-zap w-full sm:w-auto disabled:opacity-50">
                   {submitting ? "Publicando…" : "Publicar problema"}
                 </button>
               )}

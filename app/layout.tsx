@@ -37,7 +37,7 @@ export default function RootLayout({
       className={`${inter.variable} ${sora.variable} ${jakarta.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen overflow-x-hidden antialiased">{children}</body>
     </html>
   );
 }
