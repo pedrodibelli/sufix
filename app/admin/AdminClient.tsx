@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { aprobarPago, rechazarPago } from "./actions";
+import { aprobarPago, rechazarPago, resolverDisputa } from "./actions";
 
 export type PagoEnRevision = {
   id: string;
@@ -106,6 +106,106 @@ export function AdminClient({ pagos }: { pagos: PagoEnRevision[] }) {
     <div className="mt-6 space-y-3">
       {pagos.map((p) => (
         <PagoRow key={p.id} pago={p} />
+      ))}
+    </div>
+  );
+}
+
+// ─── Disputas ───────────────────────────────────────────────────────────────
+
+export type Disputa = {
+  id: string;
+  motivo: string;
+  rol: string;
+  creado_at: string | null;
+  titulo: string | null;
+  demandante: string | null;
+  nombre_profesional: string | null;
+};
+
+function DisputaRow({ disputa }: { disputa: Disputa }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function handleResolver() {
+    setError(null);
+    startTransition(async () => {
+      const result = await resolverDisputa(disputa.id);
+      if ("error" in result) {
+        setError(result.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  return (
+    <div className="rounded-2xl border border-rose-200 bg-white p-5 shadow-[0_1px_2px_rgba(40,63,59,0.04)]">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-rose-100 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
+              Reporta el {disputa.rol === "oferente" ? "técnico" : "demandante"}
+            </span>
+            {disputa.creado_at && (
+              <span className="text-[11.5px] text-ink-400">
+                {new Date(disputa.creado_at).toLocaleString("es-AR")}
+              </span>
+            )}
+          </div>
+          <h3 className="display mt-1.5 text-[17px] leading-snug text-sv-dark">
+            {disputa.titulo ?? "Consulta"}
+          </h3>
+          <div className="mt-1 text-[12.5px] text-ink-500">
+            Demandante:{" "}
+            <span className="font-medium text-sv-dark">{disputa.demandante ?? "—"}</span>
+            <span className="mx-1.5">·</span>
+            Profesional:{" "}
+            <span className="font-medium text-sv-dark">{disputa.nombre_profesional ?? "—"}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-xl border border-ink-100 bg-ink-50 px-4 py-3">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-400">Motivo</p>
+        <p className="mt-1 text-[13px] leading-relaxed text-sv-dark">{disputa.motivo}</p>
+      </div>
+
+      <div className="mt-4">
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={handleResolver}
+          className="btn-primary w-full text-sm disabled:opacity-50"
+        >
+          {isPending ? "Procesando…" : "Marcar como resuelta"}
+        </button>
+      </div>
+      {error && (
+        <p className="mt-2 text-center text-xs font-medium text-rose-600">{error}</p>
+      )}
+    </div>
+  );
+}
+
+export function DisputasClient({ disputas }: { disputas: Disputa[] }) {
+  if (disputas.length === 0) {
+    return (
+      <div className="mt-6 rounded-2xl border border-dashed border-ink-200 p-12 text-center">
+        <div className="text-3xl opacity-60">🕊️</div>
+        <h4 className="display mt-2.5 text-base">No hay disputas abiertas</h4>
+        <p className="mt-1 text-sm text-ink-400">
+          Cuando alguien reporte un problema, va a aparecer acá.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6 space-y-3">
+      {disputas.map((d) => (
+        <DisputaRow key={d.id} disputa={d} />
       ))}
     </div>
   );

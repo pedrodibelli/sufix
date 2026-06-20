@@ -117,7 +117,9 @@ async function OferenteData({
 
   const { data: propuestas, error: propError } = await supabase
     .from("propuestas")
-    .select("*")
+    // Columnas mínimas para la vista del oferente. NO traer codigo_pago: el técnico
+    // debe pedírselo al demandante para cerrar el trabajo (no leerlo de los datos).
+    .select("id, publicacion_id, precio, titulo, zona, categoria, demandante, estado, created_at")
     .eq("profesional_id", userId)
     .order("created_at", { ascending: false });
 

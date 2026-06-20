@@ -6,6 +6,7 @@ import Image from "next/image";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "./CategoryArt";
 import { declararPago } from "@/app/mis-consultas/actions";
+import { COMISION_CONSULTA } from "@/lib/config";
 
 export type PropuestaParaPago = {
   id: string;
@@ -59,8 +60,6 @@ const DATOS_TRANSFERENCIA = [
 // Número de WhatsApp al que el demandante envía el comprobante.
 // TODO: cambiar por el número de SolvIT cuando exista.
 const WHATSAPP_COMPROBANTE = "541157980934";
-
-const COMISION = 4500;
 
 // ─── Step 0: Resumen ──────────────────────────────────────────────────────────
 function StepResumen({
@@ -156,7 +155,7 @@ function StepResumen({
         </div>
 
         <p className="mt-3 text-center text-[11px] text-ink-400">
-          🔒 Pago seguro — SolvIT retiene el monto hasta confirmar el servicio.
+          🔒 Verificamos tu transferencia antes de desbloquear el contacto del profesional.
         </p>
       </div>
 
@@ -357,7 +356,7 @@ export function AceptarModal({ propuesta, publicacion, onClose, onPagoExitoso }:
   const cat = CATEGORIES.find((c) => c.slug === publicacion.category_slug);
   const hue = cat?.hue ?? 180;
   const precio = Number(propuesta.precio);
-  const comision = COMISION;
+  const comision = COMISION_CONSULTA;
   const total = precio + comision;
   const [error, setError] = useState<string | null>(null);
 

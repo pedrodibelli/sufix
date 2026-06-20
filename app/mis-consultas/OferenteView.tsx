@@ -17,7 +17,6 @@ type Propuesta = {
   categoria: string | null;
   demandante: string | null;
   estado: string | null;
-  codigo_pago: string | null;
   created_at: string;
   photo: string | null;
 };

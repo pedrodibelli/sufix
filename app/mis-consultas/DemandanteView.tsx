@@ -275,28 +275,16 @@ function ProfesionalContacto({
         )}
       </div>
 
-      {/* Aviso importante */}
+      {/* Aviso: cómo cerrar el trabajo (consistente con el código de confirmación) */}
       <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-4">
         <p className="text-[11px] font-bold uppercase tracking-wide text-amber-800">
-          ⚠️ Importante
+          ⚠️ Cómo cerrar el trabajo
         </p>
         <p className="mt-1.5 text-[12.5px] leading-relaxed text-amber-900">
-          <strong>{nombre.split(" ")[0]}</strong> te enviará un código de 4 dígitos por WhatsApp. Es importante que ese código se lo envíes a este número para que el pago se efectúe con certeza:
+          Cuando <strong>{nombre.split(" ")[0]}</strong> termine el trabajo, entregale tu{" "}
+          <strong>código de 4 dígitos</strong>. El técnico lo ingresa en SolvIT para confirmar que
+          el servicio se completó. <strong>No lo compartas antes</strong> de que el trabajo esté listo.
         </p>
-        <a
-          href="https://wa.me/541157980934"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 flex items-center justify-between rounded-lg border border-amber-300 bg-white px-3 py-2.5"
-        >
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">WhatsApp SolvIT</p>
-            <p className="mt-0.5 font-semibold text-amber-900">+54 11 5798 0934</p>
-          </div>
-          <span className="rounded-lg bg-[#25D366] px-3 py-1 text-[11px] font-semibold text-white">
-            Abrir chat
-          </span>
-        </a>
       </div>
 
       {waLink && (

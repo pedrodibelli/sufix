@@ -75,10 +75,10 @@ export function ContactarModal({ job, onClose }: Props) {
             <div className="mt-5 w-full rounded-2xl bg-green-50 border border-green-200 px-6 py-5">
               <div className="text-3xl">💬</div>
               <p className="mt-3 text-lg font-bold leading-snug text-sv-dark">
-                Si el cliente acepta, nos comunicamos con vos por WhatsApp
+                Si el cliente acepta y paga, se desbloquea tu contacto
               </p>
               <p className="mt-2 text-sm text-ink-500 leading-relaxed">
-                Una persona del equipo de SolvIT va a escribirte para coordinar los próximos pasos.
+                Te va a escribir directamente para coordinar la primera visita. Podés seguir el estado en "Mis propuestas".
               </p>
             </div>
 
