@@ -194,9 +194,21 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
         )}
       </div>
 
-      {/* Input de confirmación — solo para propuestas aceptadas (el técnico ingresa el código del demandante) */}
+      {/* Aceptada y pagada: aviso destacado + input para cerrar con el código */}
       {estado === "aceptada" && (
-        <ConfirmarCodigoBlock propuestaId={p.id} dark={dark} />
+        <>
+          <div className={`mt-3 rounded-xl border p-4 ${dark ? "border-emerald-500/25 bg-emerald-500/10" : "border-emerald-200 bg-emerald-50"}`}>
+            <p className={`text-sm font-semibold ${dark ? "text-emerald-300" : "text-emerald-700"}`}>
+              🎉 ¡Te aceptaron y ya pagaron!
+            </p>
+            <p className={`mt-1 text-[12.5px] leading-relaxed ${dark ? "text-emerald-100/80" : "text-emerald-800"}`}>
+              <strong>{p.demandante ?? "El cliente"}</strong> abonó la consulta. Te va a contactar
+              por WhatsApp para coordinar la visita. Cuando termines el trabajo, pedile su{" "}
+              <strong>código de 4 dígitos</strong> e ingresalo abajo para cerrarlo y registrar el cobro.
+            </p>
+          </div>
+          <ConfirmarCodigoBlock propuestaId={p.id} dark={dark} />
+        </>
       )}
 
       {/* Trabajo completado */}
