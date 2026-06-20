@@ -27,8 +27,9 @@ BEGIN
     RAISE EXCEPTION 'Solo se pueden eliminar publicaciones abiertas';
   END IF;
 
-  DELETE FROM disputas    WHERE publicacion_id = p_id;
-  DELETE FROM propuestas  WHERE publicacion_id = p_id;
+  -- propuestas.publicacion_id es TEXT (no uuid), por eso el cast
+  DELETE FROM disputas      WHERE publicacion_id = p_id;
+  DELETE FROM propuestas    WHERE publicacion_id = p_id::text;
   DELETE FROM publicaciones WHERE id = p_id;
 END;
 $$;
