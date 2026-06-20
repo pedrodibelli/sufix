@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Sora, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -24,6 +24,16 @@ export const metadata: Metadata = {
   title: "SolvIT — Soluciones para tu hogar en Buenos Aires",
   description:
     "Marketplace de servicios para el hogar en CABA. Publicá tu problema, técnicos verificados compiten por tomarlo. Sin presupuestos al voleo, sin perder la mañana.",
+  // Nombre + modo standalone al agregar a inicio en iOS
+  appleWebApp: {
+    capable: true,
+    title: "SolvIT",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#3d9b5e",
 };
 
 export default function RootLayout({
