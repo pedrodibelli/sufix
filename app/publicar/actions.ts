@@ -3,8 +3,6 @@
 import { Resend } from "resend";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 interface PublicacionData {
   title: string;
   category_slug: string;
@@ -59,6 +57,10 @@ async function enviarAvisoPublicacion(
     !process.env.RESEND_API_KEY.startsWith("re_REEMPLAZAR");
 
   if (!resendConfigurado) return;
+
+  // Se construye recién acá (con key garantizada). El SDK de Resend lanza
+  // "Missing API key" si se instancia sin key, así que nunca a nivel de módulo.
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://solvit.homes";
 
