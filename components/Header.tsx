@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { createSupabaseServer } from "@/lib/supabase-server";
-import { LogoutButton } from "@/components/LogoutButton";
+import { UserMenu } from "@/components/UserMenu";
 import { MobileMenu } from "@/components/MobileMenu";
+import { isAdminEmail } from "@/lib/admin";
 
 export async function Header() {
   const supabase = await createSupabaseServer();
@@ -11,6 +12,7 @@ export async function Header() {
   const nombre = user?.user_metadata?.nombre as string | undefined;
   const apellido = user?.user_metadata?.apellido as string | undefined;
   const esProfesional = user?.user_metadata?.es_profesional === true;
+  const isAdmin = isAdminEmail(user?.email);
   const dk = esProfesional;
 
   const initials = nombre && apellido
@@ -53,30 +55,14 @@ export async function Header() {
         {/* Acciones */}
         <div className="flex flex-1 items-center justify-end gap-2">
           {user ? (
-            <>
-              <div className={`flex items-center gap-2.5 rounded-full border py-1 pl-1.5 pr-3 ${
-                dk ? "border-white/15 bg-white/10" : "border-ink-100 bg-ink-50/60"
-              }`}>
-                <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${
-                  dk ? "bg-zap-500" : "bg-sv-dark"
-                }`}>
-                  {initials}
-                </span>
-                <span className={`hidden text-sm font-medium sm:inline ${dk ? "text-zap-50" : "text-sv-dark"}`}>
-                  {displayName}
-                </span>
-                <span className={`hidden rounded-full px-1.5 py-px text-[10px] font-semibold sm:inline ${
-                  dk
-                    ? "bg-zap-500/20 text-zap-300"
-                    : esProfesional
-                    ? "bg-sv-primary/15 text-sv-olive"
-                    : "bg-amber-100 text-amber-700"
-                }`}>
-                  {esProfesional ? "Técnico" : "Cliente"}
-                </span>
-              </div>
-              <LogoutButton dark={dk} />
-            </>
+            <UserMenu
+              displayName={displayName}
+              email={user.email ?? ""}
+              initials={initials}
+              esProfesional={esProfesional}
+              isAdmin={isAdmin}
+              dark={dk}
+            />
           ) : (
             <>
               <Link href="/ingresar" className={navLink + " hidden sm:inline-flex"}>
