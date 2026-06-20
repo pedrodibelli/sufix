@@ -8,7 +8,12 @@ import { isAdminEmail } from "@/lib/admin";
 
 export async function Header() {
   const supabase = await createSupabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
+  // getSession() lee la cookie local (sin llamada de red), a diferencia de
+  // getUser() que valida contra el servidor de Supabase en cada navegación.
+  // Acá solo lo usamos para MOSTRAR datos; las verificaciones de seguridad
+  // (proxy de /publicar, panel admin, RLS) siguen validando de verdad.
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   const nombre = user?.user_metadata?.nombre as string | undefined;
   const apellido = user?.user_metadata?.apellido as string | undefined;
