@@ -150,16 +150,22 @@ function PropuestaRow({
           </span>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-semibold text-sv-dark">{nombre}</span>
+              <Link
+                href={`/tecnico/${propuesta.profesional_id}`}
+                className="text-sm font-semibold text-sv-dark transition hover:text-sv-primary hover:underline"
+              >
+                {nombre}
+              </Link>
               {(isAccepted || isRejected) && <StatusPill status={estado} />}
             </div>
-            <div className="mt-0.5">
+            <Link href={`/tecnico/${propuesta.profesional_id}`} className="mt-0.5 inline-flex items-center gap-1.5">
               {resumen ? (
                 <StarRating rating={resumen.promedio} reviews={resumen.total} />
               ) : (
                 <span className="text-[11.5px] text-ink-400">Sin reseñas aún</span>
               )}
-            </div>
+              <span className="text-[11px] font-medium text-sv-primary">Ver perfil →</span>
+            </Link>
             <div className="text-[11.5px] text-ink-400">
               Enviada el {new Date(propuesta.created_at).toLocaleDateString("es-AR")}
             </div>
