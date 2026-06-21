@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { PerfilForm } from "./PerfilForm";
+import { DatosCuentaForm } from "./DatosCuentaForm";
 
 export const revalidate = 0;
 
@@ -41,6 +42,23 @@ export default async function PerfilPage() {
     resenas = (rl ?? []) as Resena[];
   }
 
+  // Vista DEMANDANTE: opiniones que dio + nombres de los técnicos
+  let opiniones: { id: string; tecnico_id: string; estrellas: number; comentario: string | null; creado_at: string }[] = [];
+  const nombreTecnico: Record<string, string> = {};
+  if (!esTecnico) {
+    const { data: ops } = await supabase
+      .from("resenas")
+      .select("id, tecnico_id, estrellas, comentario, creado_at")
+      .eq("autor_id", user.id)
+      .order("creado_at", { ascending: false });
+    opiniones = (ops ?? []) as typeof opiniones;
+    const tIds = [...new Set(opiniones.map((o) => o.tecnico_id))];
+    if (tIds.length > 0) {
+      const { data: tp } = await supabase.from("perfiles_publicos").select("user_id, nombre").in("user_id", tIds);
+      for (const p of tp ?? []) nombreTecnico[p.user_id] = p.nombre ?? "Técnico";
+    }
+  }
+
   // Vista DEMANDANTE (clara)
   if (!esTecnico) {
     return (
@@ -51,6 +69,7 @@ export default async function PerfilPage() {
             <div className="mx-auto max-w-lg">
               <h1 className="display text-2xl">Mi perfil</h1>
 
+              {/* Cabecera */}
               <div className="mt-6 card p-6">
                 <div className="flex items-center gap-4">
                   <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sv-dark to-sv-primary font-display text-2xl font-semibold text-white">
@@ -66,12 +85,48 @@ export default async function PerfilPage() {
                     {user.email && <p className="mt-0.5 truncate text-sm text-ink-400">✉ {user.email}</p>}
                   </div>
                 </div>
-
-                <div className="mt-5 flex flex-col gap-2 border-t border-ink-100 pt-5">
-                  <Link href="/mis-consultas" className="btn-outline w-full">Ver mis consultas</Link>
-                  <Link href="/publicar" className="btn-primary w-full">Publicar un problema</Link>
-                </div>
               </div>
+
+              {/* Mis datos (editables) */}
+              <section className="mt-6">
+                <h2 className="display text-lg">Mis datos</h2>
+                <div className="mt-3">
+                  <DatosCuentaForm nombre={nombreMeta ?? ""} apellido={apellidoMeta ?? ""} />
+                </div>
+              </section>
+
+              {/* Mis opiniones */}
+              <section className="mt-8">
+                <h2 className="display text-lg">Mis opiniones</h2>
+                {opiniones.length === 0 ? (
+                  <div className="mt-3 rounded-2xl border border-dashed border-ink-200 p-8 text-center text-sm text-ink-400">
+                    Todavía no calificaste a ningún técnico. Cuando cierres un trabajo vas a poder dejar tu opinión.
+                  </div>
+                ) : (
+                  <div className="mt-3 space-y-3">
+                    {opiniones.map((o) => (
+                      <div key={o.id} className="card p-5">
+                        <div className="flex items-center justify-between gap-3">
+                          <Link
+                            href={`/tecnico/${o.tecnico_id}`}
+                            className="text-sm font-semibold text-sv-dark transition hover:text-sv-primary hover:underline"
+                          >
+                            {nombreTecnico[o.tecnico_id] ?? "Técnico"}
+                          </Link>
+                          <span className="text-amber-400">
+                            {"★".repeat(o.estrellas)}
+                            <span className="text-ink-200">{"★".repeat(5 - o.estrellas)}</span>
+                          </span>
+                        </div>
+                        {o.comentario && <p className="mt-2 text-sm text-ink-700">{o.comentario}</p>}
+                        <p className="mt-2 text-[11.5px] text-ink-400">
+                          {new Date(o.creado_at).toLocaleDateString("es-AR")}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
             </div>
           </div>
         </main>
