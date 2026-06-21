@@ -84,6 +84,11 @@
   }
 }
 
+/* Pantalla de carga: fondo oscuro cuando el usuario es técnico (tema pro) */
+.theme-pro .app-loading {
+  background-color: #0e1a17;
+}
+
 /* No-scrollbar utility */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
