@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -14,9 +15,15 @@ export default async function PerfilPage() {
   if (!user) redirect("/ingresar");
 
   const esTecnico = user.user_metadata?.es_profesional === true;
-  const displayName =
-    [user.user_metadata?.nombre, user.user_metadata?.apellido].filter(Boolean).join(" ") ||
-    user.email;
+  const nombreMeta = user.user_metadata?.nombre as string | undefined;
+  const apellidoMeta = user.user_metadata?.apellido as string | undefined;
+  const displayName = [nombreMeta, apellidoMeta].filter(Boolean).join(" ") || user.email;
+  const initials =
+    nombreMeta && apellidoMeta
+      ? `${nombreMeta[0]}${apellidoMeta[0]}`.toUpperCase()
+      : nombreMeta
+      ? nombreMeta.slice(0, 2).toUpperCase()
+      : (user.email?.[0]?.toUpperCase() ?? "U");
 
   let perfil: { telefono: string | null; zona: string | null; rubro: string | null } | null = null;
   let promedio = 0;
@@ -41,12 +48,30 @@ export default async function PerfilPage() {
         <Header />
         <main className="min-h-screen bg-[#f5fdf9]">
           <div className="container-pad py-10">
-            <h1 className="display text-2xl">Mi perfil</h1>
-            <p className="mt-1 text-sm text-ink-400">{displayName} · Cliente</p>
-            <div className="mt-6 card max-w-lg p-6">
-              <p className="text-sm text-ink-600">Tu información de cuenta:</p>
-              <p className="mt-2 text-sm"><strong>Nombre:</strong> {displayName}</p>
-              <p className="mt-1 text-sm"><strong>Email:</strong> {user.email}</p>
+            <div className="mx-auto max-w-lg">
+              <h1 className="display text-2xl">Mi perfil</h1>
+
+              <div className="mt-6 card p-6">
+                <div className="flex items-center gap-4">
+                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sv-dark to-sv-primary font-display text-2xl font-semibold text-white">
+                    {initials}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="display text-xl">{displayName}</h2>
+                      <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700">
+                        Cliente
+                      </span>
+                    </div>
+                    {user.email && <p className="mt-0.5 truncate text-sm text-ink-400">✉ {user.email}</p>}
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-col gap-2 border-t border-ink-100 pt-5">
+                  <Link href="/mis-consultas" className="btn-outline w-full">Ver mis consultas</Link>
+                  <Link href="/publicar" className="btn-primary w-full">Publicar un problema</Link>
+                </div>
+              </div>
             </div>
           </div>
         </main>
