@@ -200,7 +200,7 @@ export function ContactarModal({ job, onClose }: Props) {
                   />
                 </div>
                 <p className="mt-1 text-xs text-ink-400">
-                  El demandante ve este precio antes de aceptar. Lo cobrás <strong>directo al cliente</strong> cuando hagas la visita.
+                  El demandante ve este precio antes de aceptar. SolvIT te lo paga cuando se concreta el trabajo.
                 </p>
               </div>
 

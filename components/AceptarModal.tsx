@@ -133,21 +133,18 @@ function StepResumen({
           </p>
         </div>
 
-        {/* Price breakdown — modelo conexión: ahora solo se paga la tarifa */}
+        {/* Price breakdown */}
         <div className="mt-5 rounded-2xl border border-ink-100 p-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-ink-500">Consulta del técnico</span>
+            <span className="text-ink-500">Primera consulta</span>
             <span className="font-medium text-sv-dark">${precio.toLocaleString("es-AR")}</span>
           </div>
-          <p className="mt-1 text-[11px] text-ink-400">
-            Se la pagás <strong className="text-ink-500">directo al técnico</strong> cuando realice la visita.
-          </p>
-          <div className="mt-3 flex items-center justify-between text-sm">
-            <span className="text-ink-500">Tarifa de conexión SolvIT</span>
+          <div className="mt-2 flex items-center justify-between text-sm">
+            <span className="text-ink-500">Tarifa de conexión</span>
             <span className="font-medium text-sv-dark">${comision.toLocaleString("es-AR")}</span>
           </div>
           <div className="mt-3 flex items-center justify-between border-t border-ink-100 pt-3">
-            <span className="font-semibold text-sv-dark">A pagar ahora</span>
+            <span className="font-semibold text-sv-dark">Total a pagar</span>
             <span className="font-display text-2xl font-semibold tracking-tight text-sv-dark">
               ${total.toLocaleString("es-AR")}
             </span>
@@ -155,7 +152,7 @@ function StepResumen({
         </div>
 
         <p className="mt-3 text-center text-[11px] text-ink-400">
-          🔒 Solo pagás la tarifa de conexión para desbloquear el contacto. La consulta se la abonás al técnico directamente.
+          🔒 SolvIT retiene el pago y se lo libera al técnico cuando confirmás el trabajo.
         </p>
       </div>
 
@@ -357,9 +354,9 @@ export function AceptarModal({ propuesta, publicacion, onClose, onPagoExitoso }:
   const hue = cat?.hue ?? 180;
   const precio = Number(propuesta.precio);
   const comision = COMISION_CONSULTA;
-  // Modelo conexión: el cliente solo paga la tarifa de conexión a la plataforma.
-  // La consulta del técnico (precio) se la abona directamente a él.
-  const total = comision;
+  // El cliente paga la consulta + la tarifa de conexión a la plataforma. SolvIT le
+  // paga la consulta al técnico cuando el trabajo se concreta (payout manual de Mateo).
+  const total = precio + comision;
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

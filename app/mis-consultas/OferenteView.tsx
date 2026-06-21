@@ -199,11 +199,11 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
         <>
           <div className={`mt-3 rounded-xl border p-4 ${dark ? "border-emerald-500/25 bg-emerald-500/10" : "border-emerald-200 bg-emerald-50"}`}>
             <p className={`text-sm font-semibold ${dark ? "text-emerald-300" : "text-emerald-700"}`}>
-              🎉 ¡Te aceptaron!
+              🎉 ¡Te aceptaron y ya pagaron!
             </p>
             <p className={`mt-1 text-[12.5px] leading-relaxed ${dark ? "text-emerald-100/80" : "text-emerald-800"}`}>
-              <strong>{p.demandante ?? "El cliente"}</strong> pagó la conexión y te va a contactar
-              por WhatsApp. Coordiná la visita y <strong>cobrale tu consulta directamente</strong>.
+              <strong>{p.demandante ?? "El cliente"}</strong> abonó la consulta. Coordiná la visita
+              por WhatsApp. <strong>SolvIT te paga tu consulta</strong> cuando se cierre el trabajo.
             </p>
           </div>
           <ConfirmarCodigoBlock propuestaId={p.id} dark={dark} />

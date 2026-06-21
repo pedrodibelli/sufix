@@ -169,14 +169,20 @@ Vercel. El código usa:
 
 ## 9. Modelo de negocio y pagos ⚠️ (importante)
 
-**Modelo CONEXIÓN (no escrow):**
-- El cliente paga **solo la tarifa de conexión** (`COMISION_CONSULTA = 4500`, en `lib/config.ts`) **a la plataforma**.
-- La **consulta del técnico** (su precio) se la paga el cliente **directo al técnico** cuando va. La plataforma NO la toca.
-- Así la plataforma gana los $4.500 sin tener que hacer payouts al técnico.
-- **Pago manual**: transferencia → comprobante por WhatsApp → admin aprueba en `/admin`.
+**Modelo actual: el cliente paga TODO a la plataforma (escrow manual).**
+- El cliente paga **consulta del técnico + tarifa de conexión** (`COMISION_CONSULTA = 4500`, en
+  `lib/config.ts`). Ej: $15.000 + $4.500 = **$19.500**. Todo entra a la plataforma.
+- La plataforma **retiene el pago** y **Mateo le paga la consulta ($15.000) al técnico cuando el
+  trabajo se concreta** (se cierra con el código). Es un **payout MANUAL** — la app NO lo automatiza.
+- **Pago del cliente (manual)**: transferencia → comprobante por WhatsApp → admin aprueba en `/admin`
+  → desbloquea el contacto.
 - ⚠️ **Los datos de transferencia y el WhatsApp son los de MATEO** (hardcodeados en
-  `components/AceptarModal.tsx`, ver `// TODO`). Hay que cambiarlos por los propios + Mercado Pago.
-- **Fase 2 (futuro):** Mercado Pago con pagos divididos → ahí sí se puede hacer escrow/garantía.
+  `components/AceptarModal.tsx`, ver `// TODO`).
+- **Fase 2 (futuro, a charlar):** Mercado Pago con pagos divididos → automatizar el cobro y el
+  payout de la consulta al técnico.
+
+> 📌 Hubo un intento de "modelo conexión" (cobrar solo los $4.500 y que el técnico cobre directo al
+> cliente). Se **descartó**: la plataforma cobra todo y Mateo le paga al técnico al concretarse.
 
 ## 10. Base de datos (Supabase) y migraciones
 
@@ -203,7 +209,8 @@ El registro deja al usuario logueado directo.
 ## 12. Decisiones tomadas (y por qué)
 - **Reusar la base de Supabase de Mateo** (soy owner). El deploy viejo de Mateo (`solvit.homes`)
   **sigue vivo y comparte la misma base** — todavía NO lo corté (pendiente: sacarlo del team + rotar keys).
-- **Modelo conexión** (no escrow) por ahora — ver §9.
+- **Modelo: el cliente paga todo** (consulta + tarifa); Mateo le paga la consulta al técnico al
+  concretarse (payout manual) — ver §9. Mercado Pago = fase 2.
 - **Emails apagados** (sin `RESEND_API_KEY`): Resend necesita un **dominio propio verificado**, que
   no tengo. Todo lo de emails (aviso de publicación, confirmación de cuenta, alerta de urgentes)
   está **bloqueado hasta tener dominio**.
