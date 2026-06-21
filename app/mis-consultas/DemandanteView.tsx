@@ -586,6 +586,19 @@ function MiConsultaCard({
         </div>
       )}
 
+      {/* En disputa — info para el demandante */}
+      {pub.status === "en_disputa" && (
+        <div className="border-t border-ink-100 bg-rose-50 px-5 py-4">
+          <p className="text-[10.5px] font-semibold uppercase tracking-wide text-rose-700">
+            ⚠️ Consulta en disputa
+          </p>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-rose-900">
+            Se reportó un problema con este trabajo. El equipo de SolvIT está revisando el caso y te
+            va a contactar para resolverlo. <strong>No entregues el código</strong> hasta que se resuelva.
+          </p>
+        </div>
+      )}
+
       {/* Código OTP — visible solo para el demandante cuando el trabajo está en curso */}
       {pub.status === "en_curso" && propuestaAceptada?.codigo_pago && (
         <CodigoOTPBlock codigo={propuestaAceptada.codigo_pago} />
