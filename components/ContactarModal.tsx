@@ -16,6 +16,7 @@ export function ContactarModal({ job, onClose }: Props) {
   const [descuenta, setDescuenta] = useState(false);
   const [loading, setLoading] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  const [error, setError] = useState("");
   const [fotoIdx, setFotoIdx] = useState(0);
 
   const cat = CATEGORIES.find((c) => c.slug === job.categorySlug);
@@ -29,17 +30,23 @@ export function ContactarModal({ job, onClose }: Props) {
 
   async function handleEnviar() {
     if (!precio) return;
+    setError("");
     setLoading(true);
 
     const { data: { user } } = await supabase.auth.getUser();
-    const meta = user?.user_metadata;
+    if (!user) {
+      setLoading(false);
+      setError("Necesitás iniciar sesión para enviar una propuesta.");
+      return;
+    }
+    const meta = user.user_metadata;
     const nombrePro = [meta?.nombre, meta?.apellido].filter(Boolean).join(" ") || null;
 
-    await supabase.from("propuestas").insert({
+    const { error: insertError } = await supabase.from("propuestas").insert({
       publicacion_id: job.id,
       precio: Number(precio),
       descuenta_de_presupuesto: descuenta,
-      profesional_id: user?.id ?? null,
+      profesional_id: user.id,
       nombre_profesional: nombrePro,
       titulo: job.title,
       descripcion: job.description,
@@ -50,6 +57,10 @@ export function ContactarModal({ job, onClose }: Props) {
     });
 
     setLoading(false);
+    if (insertError) {
+      setError(`No pudimos enviar la propuesta: ${insertError.message}`);
+      return;
+    }
     setEnviado(true);
   }
 
@@ -216,6 +227,12 @@ export function ContactarModal({ job, onClose }: Props) {
                   <span className="slider" />
                 </span>
               </label>
+
+              {error && (
+                <p className="mt-4 rounded-xl bg-rose-50 px-4 py-2 text-sm font-medium text-rose-600">
+                  {error}
+                </p>
+              )}
 
               <div className="mt-6 flex gap-3">
                 <button type="button" onClick={onClose} className="btn-ghost flex-1">
