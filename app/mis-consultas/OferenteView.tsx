@@ -199,11 +199,11 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
         <>
           <div className={`mt-3 rounded-xl border p-4 ${dark ? "border-emerald-500/25 bg-emerald-500/10" : "border-emerald-200 bg-emerald-50"}`}>
             <p className={`text-sm font-semibold ${dark ? "text-emerald-300" : "text-emerald-700"}`}>
-              🎉 ¡Te aceptaron y ya pagaron!
+              🎉 ¡Te aceptaron!
             </p>
             <p className={`mt-1 text-[12.5px] leading-relaxed ${dark ? "text-emerald-100/80" : "text-emerald-800"}`}>
-              <strong>{p.demandante ?? "El cliente"}</strong> abonó la consulta. Te va a contactar
-              por WhatsApp para coordinar la visita.
+              <strong>{p.demandante ?? "El cliente"}</strong> pagó la conexión y te va a contactar
+              por WhatsApp. Coordiná la visita y <strong>cobrale tu consulta directamente</strong>.
             </p>
           </div>
           <ConfirmarCodigoBlock propuestaId={p.id} dark={dark} />
