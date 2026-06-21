@@ -107,9 +107,6 @@ export function UserMenu({
 
             {/* Accesos */}
             <nav className="flex flex-col p-1.5">
-              <Link href="/mis-consultas" onClick={close} className={`rounded-xl px-3 py-2 text-sm font-medium transition ${itemCls}`}>
-                Mis consultas
-              </Link>
               <Link href="/perfil" onClick={close} className={`rounded-xl px-3 py-2 text-sm font-medium transition ${itemCls}`}>
                 Mi perfil
               </Link>
