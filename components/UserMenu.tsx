@@ -35,9 +35,6 @@ export function UserMenu({
 
   const roleLabel = esProfesional ? "Técnico" : "Cliente";
 
-  const pillCls = dark
-    ? "border-white/15 bg-white/10 hover:bg-white/15"
-    : "border-ink-100 bg-ink-50/60 hover:bg-ink-100";
   const avatarCls = dark ? "bg-zap-500" : "bg-sv-dark";
   const nameCls = dark ? "text-zap-50" : "text-sv-dark";
   const roleBadgeCls = dark
@@ -60,7 +57,11 @@ export function UserMenu({
         onClick={() => setOpen((v) => !v)}
         aria-label="Menú de usuario"
         aria-expanded={open}
-        className={`flex items-center gap-2.5 rounded-full border py-1 pl-1.5 pr-2.5 transition ${pillCls}`}
+        className={`flex items-center gap-2.5 rounded-full transition sm:border sm:py-1 sm:pl-1.5 sm:pr-2.5 ${
+          dark
+            ? "sm:border-white/15 sm:bg-white/10 sm:hover:bg-white/15"
+            : "sm:border-ink-100 sm:bg-ink-50/60 sm:hover:bg-ink-100"
+        }`}
       >
         <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${avatarCls}`}>
           {initials}
@@ -70,7 +71,7 @@ export function UserMenu({
           {roleLabel}
         </span>
         <svg
-          className={`h-3.5 w-3.5 transition-transform ${subtleCls} ${open ? "rotate-180" : ""}`}
+          className={`hidden h-3.5 w-3.5 transition-transform sm:block ${subtleCls} ${open ? "rotate-180" : ""}`}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2.5}

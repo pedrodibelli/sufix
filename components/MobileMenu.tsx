@@ -32,9 +32,7 @@ export function MobileMenu({ hasUser, dark = false }: { hasUser: boolean; dark?:
           <div className="fixed inset-0 top-14 z-30 sm:hidden" onClick={close} />
           <div className={`absolute left-0 right-0 top-14 z-40 border-b px-4 py-2 shadow-lg sm:hidden ${dropBg}`}>
             <nav className="flex flex-col">
-              <Link href="/" onClick={close} className={linkClass}>Marketplace</Link>
               <Link href="/como-funciona" onClick={close} className={linkClass}>Cómo funciona</Link>
-              {hasUser && <Link href="/mis-consultas" onClick={close} className={linkClass}>Mis consultas</Link>}
               {!hasUser && <Link href="/ingresar" onClick={close} className={linkClass}>Ingresar</Link>}
             </nav>
           </div>
