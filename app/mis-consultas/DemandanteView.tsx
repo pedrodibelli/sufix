@@ -101,8 +101,8 @@ function CodigoOTPBlock({ codigo }: { codigo: string }) {
         🔑 Tu código de confirmación
       </p>
       <p className="mt-1.5 text-[12.5px] leading-relaxed text-amber-900">
-        Entregáselo al técnico <strong>únicamente cuando el servicio esté completo</strong>.
-        Es lo que le permite confirmar el cobro. No lo compartás antes.
+        Entregáselo al técnico <strong>solo cuando el trabajo esté completo</strong>, para que pueda
+        cerrarlo en SolvIT. No lo compartas antes.
       </p>
       <div className="mt-3 flex items-center justify-center rounded-xl border border-amber-300 bg-white py-4">
         <span className="font-display text-4xl font-bold tracking-[0.35em] text-amber-800">
@@ -292,20 +292,6 @@ function ProfesionalContacto({
           </div>
         )}
       </div>
-
-      {/* Aviso: cómo cerrar el trabajo — solo mientras está EN CURSO */}
-      {pubStatus === "en_curso" && (
-        <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-4">
-          <p className="text-[11px] font-bold uppercase tracking-wide text-amber-800">
-            ⚠️ Cómo cerrar el trabajo
-          </p>
-          <p className="mt-1.5 text-[12.5px] leading-relaxed text-amber-900">
-            Cuando <strong>{nombre.split(" ")[0]}</strong> termine el trabajo, entregale tu{" "}
-            <strong>código de 4 dígitos</strong>. El técnico lo ingresa en SolvIT para confirmar que
-            el servicio se completó. <strong>No lo compartas antes</strong> de que el trabajo esté listo.
-          </p>
-        </div>
-      )}
 
       {/* Trabajo ya cerrado */}
       {pubStatus === "cerrado" && (

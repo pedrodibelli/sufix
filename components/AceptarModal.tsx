@@ -119,9 +119,6 @@ function StepResumen({
               Su contacto se desbloquea al completar el pago
             </div>
           </div>
-          <div className="font-display text-xl font-semibold text-sv-dark shrink-0">
-            ${precio.toLocaleString("es-AR")}
-          </div>
         </div>
 
         {/* Job */}
