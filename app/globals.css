@@ -24,31 +24,41 @@
   button, label {
     @apply select-none;
   }
+  /* Feedback táctil universal: cualquier botón "se hunde" al tocarlo */
+  button:not(:disabled) {
+    transition: transform 150ms ease-out;
+  }
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex select-none items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-sv-primary;
+    @apply inline-flex select-none items-center justify-center gap-2 rounded-full border border-transparent px-5 py-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-sv-primary;
     transition: background-color 150ms ease-out, color 150ms ease-out,
       box-shadow 150ms ease-out, transform 160ms ease-out,
       border-color 150ms ease-out;
+  }
+  .btn:hover {
+    transform: scale(1.02);
   }
   .btn:active {
     transform: scale(0.97);
   }
   /* Botón principal: Primary Green */
   .btn-primary {
-    @apply btn bg-sv-primary text-white hover:bg-sv-olive;
+    @apply btn border-sv-olive bg-sv-primary text-white hover:bg-sv-olive;
   }
   /* Botón CTA destacado: Dark Green */
   .btn-zap {
-    @apply btn bg-sv-dark text-white hover:bg-brand-950;
+    @apply btn border-white/15 bg-sv-dark text-white hover:bg-brand-950;
   }
   .btn-ghost {
-    @apply btn text-sv-dark hover:bg-zap-100;
+    @apply btn border-ink-200 text-sv-dark hover:bg-zap-100;
   }
   .btn-outline {
-    @apply btn border border-sv-primary bg-white text-sv-dark hover:bg-zap-50;
+    @apply btn border-sv-primary bg-white text-sv-dark hover:bg-zap-50;
   }
   .chip {
     @apply inline-flex items-center gap-1.5 rounded-full border border-zap-200 bg-zap-50 px-3 py-1 text-xs font-medium text-sv-dark;
@@ -170,6 +180,11 @@
     opacity: 1;
     transform: none;
     transition: none;
+  }
+  .btn:hover,
+  .btn:active,
+  button:not(:disabled):active {
+    transform: none;
   }
 }
 

@@ -117,7 +117,8 @@ export async function Header() {
               </Link>
             </>
           )}
-          <MobileMenu hasUser={!!user} dark={dk} />
+          {/* Hamburguesa solo para visitantes; logueado alcanza con el menú del perfil */}
+          {!user && <MobileMenu hasUser={false} dark={dk} />}
         </div>
 
       </div>
