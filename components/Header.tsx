@@ -4,6 +4,7 @@ import { createSupabaseServer } from "@/lib/supabase-server";
 import { UserMenu } from "@/components/UserMenu";
 import { MobileMenu } from "@/components/MobileMenu";
 import { BottomNav } from "@/components/BottomNav";
+import { RealtimeRefresh } from "@/components/RealtimeRefresh";
 import { isAdminEmail } from "@/lib/admin";
 
 export async function Header() {
@@ -124,6 +125,7 @@ export async function Header() {
       </div>
     </header>
     {user && <BottomNav dark={dk} novedades={novedades} />}
+    {user && <RealtimeRefresh />}
     </>
   );
 }
