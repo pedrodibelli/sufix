@@ -63,7 +63,9 @@ export function UserMenu({
             : "sm:border-ink-100 sm:bg-ink-50/60 sm:hover:bg-ink-100"
         }`}
       >
-        <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${avatarCls}`}>
+        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-offset-1 sm:h-6 sm:w-6 sm:ring-0 ${
+          dark ? "ring-zap-400/60 ring-offset-[#0e1a17]" : "ring-sv-primary/50 ring-offset-white"
+        } ${avatarCls}`}>
           {initials}
         </span>
         <span className={`hidden text-sm font-medium sm:inline ${nameCls}`}>{displayName}</span>
