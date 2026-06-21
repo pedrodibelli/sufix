@@ -101,9 +101,12 @@ export default async function TecnicoPage({
               Todavía no tiene reseñas. ¡Sé el primero en calificarlo después de un trabajo!
             </div>
           ) : (
-            <div className="mt-5 space-y-3">
+            <div className={`mt-5 ${lista.length > 3 ? "flex gap-3 overflow-x-auto pb-2 no-scrollbar" : "space-y-3"}`}>
               {lista.map((r) => (
-                <div key={r.id} className="card p-5">
+                <div
+                  key={r.id}
+                  className={`card p-5 ${lista.length > 3 ? "min-w-[260px] max-w-[300px] shrink-0" : ""}`}
+                >
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm font-semibold text-sv-dark">{r.autor_nombre ?? "Cliente"}</span>
                     <StarRating rating={r.estrellas} />

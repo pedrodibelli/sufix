@@ -82,9 +82,12 @@ export default async function PerfilPage() {
             </div>
 
             {resenas.length > 0 && (
-              <div className="mt-3 space-y-3">
+              <div className={`mt-3 ${resenas.length > 3 ? "flex gap-3 overflow-x-auto pb-2 no-scrollbar" : "space-y-3"}`}>
                 {resenas.map((r) => (
-                  <div key={r.id} className="rounded-2xl border border-white/10 bg-[#162420] p-5">
+                  <div
+                    key={r.id}
+                    className={`rounded-2xl border border-white/10 bg-[#162420] p-5 ${resenas.length > 3 ? "min-w-[260px] max-w-[280px] shrink-0" : ""}`}
+                  >
                     <div className="flex items-center justify-between">
                       <span className="text-base text-amber-400">
                         {"★".repeat(r.estrellas)}
