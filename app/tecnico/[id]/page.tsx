@@ -12,6 +12,7 @@ type Resena = {
   estrellas: number;
   comentario: string | null;
   creado_at: string;
+  autor_nombre: string | null;
 };
 
 export default async function TecnicoPage({
@@ -32,7 +33,7 @@ export default async function TecnicoPage({
 
   const [{ data: resumen }, { data: resenas }, { count: completados }] = await Promise.all([
     supabase.from("resenas_resumen").select("promedio, total").eq("tecnico_id", id).maybeSingle(),
-    supabase.from("resenas").select("id, estrellas, comentario, creado_at").eq("tecnico_id", id).order("creado_at", { ascending: false }),
+    supabase.from("resenas").select("id, estrellas, comentario, creado_at, autor_nombre").eq("tecnico_id", id).order("creado_at", { ascending: false }),
     supabase.from("propuestas").select("id", { count: "exact", head: true }).eq("profesional_id", id).eq("estado", "completada"),
   ]);
 
@@ -104,7 +105,7 @@ export default async function TecnicoPage({
               {lista.map((r) => (
                 <div key={r.id} className="card p-5">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-semibold text-sv-dark">Cliente verificado</span>
+                    <span className="text-sm font-semibold text-sv-dark">{r.autor_nombre ?? "Cliente"}</span>
                     <StarRating rating={r.estrellas} />
                   </div>
                   {r.comentario && <p className="mt-2 text-sm text-ink-700">{r.comentario}</p>}

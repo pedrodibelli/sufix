@@ -6,7 +6,7 @@ import { PerfilForm } from "./PerfilForm";
 
 export const revalidate = 0;
 
-type Resena = { id: string; estrellas: number; comentario: string | null; creado_at: string };
+type Resena = { id: string; estrellas: number; comentario: string | null; creado_at: string; autor_nombre: string | null };
 
 export default async function PerfilPage() {
   const supabase = await createSupabaseServer();
@@ -27,7 +27,7 @@ export default async function PerfilPage() {
     const [{ data: p }, { data: rs }, { data: rl }] = await Promise.all([
       supabase.from("perfiles_profesionales").select("telefono, zona, rubro").eq("user_id", user.id).maybeSingle(),
       supabase.from("resenas_resumen").select("promedio, total").eq("tecnico_id", user.id).maybeSingle(),
-      supabase.from("resenas").select("id, estrellas, comentario, creado_at").eq("tecnico_id", user.id).order("creado_at", { ascending: false }),
+      supabase.from("resenas").select("id, estrellas, comentario, creado_at, autor_nombre").eq("tecnico_id", user.id).order("creado_at", { ascending: false }),
     ]);
     perfil = p;
     if (rs) { promedio = Number(rs.promedio); total = Number(rs.total); }
@@ -94,6 +94,7 @@ export default async function PerfilPage() {
                         {new Date(r.creado_at).toLocaleDateString("es-AR")}
                       </span>
                     </div>
+                    <p className="mt-1 text-xs font-medium text-zap-300">{r.autor_nombre ?? "Cliente"}</p>
                     {r.comentario && <p className="mt-2 text-sm text-zap-100">{r.comentario}</p>}
                   </div>
                 ))}
