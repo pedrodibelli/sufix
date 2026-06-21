@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const PASOS_CLIENTE = [
@@ -62,7 +63,15 @@ const FAQ = [
 const FAQ_DELAYS = ["delay-0", "delay-100", "delay-200", "delay-300"];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
-export default function ComoFuncionaPage() {
+export default async function ComoFuncionaPage() {
+  const supabase = await createSupabaseServer();
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
+  const esTecnico = user?.user_metadata?.es_profesional === true;
+  const esDemandante = !!user && !esTecnico;
+  const mostrarCliente = !esTecnico;    // visitante o demandante
+  const mostrarTecnico = !esDemandante; // visitante o técnico
+
   return (
     <>
       <Header />
@@ -79,19 +88,30 @@ export default function ComoFuncionaPage() {
             <em className="not-italic text-sv-primary">sin ruleta.</em>
           </h1>
           <p className="reveal delay-200 mt-5 max-w-sm text-[15px] leading-relaxed text-ink-500">
-            Publicás el problema. Técnicos verificados te mandan propuesta. Elegís solo si te convence — y pagás solo si aceptás.
+            {esTecnico
+              ? "Recibís trabajos ya descriptos, con foto. Cotizás solo los que te interesan y cobrás íntegro al cierre."
+              : "Publicás el problema. Técnicos verificados te mandan propuesta. Elegís solo si te convence — y pagás solo si aceptás."}
           </p>
           <div className="reveal delay-300 mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/publicar" className="btn-primary text-center">
-              Publicar mi problema
-            </Link>
-            <Link href="/registrar" className="btn-ghost text-center text-ink-500">
-              Soy técnico →
-            </Link>
+            {esTecnico ? (
+              <Link href="/" className="btn-primary text-center">
+                Ver consultas disponibles
+              </Link>
+            ) : (
+              <Link href="/publicar" className="btn-primary text-center">
+                Publicar mi problema
+              </Link>
+            )}
+            {!user && (
+              <Link href="/registrar" className="btn-ghost text-center text-ink-500">
+                Soy técnico →
+              </Link>
+            )}
           </div>
         </section>
 
         {/* ── Flujo cliente ── */}
+        {mostrarCliente && (
         <section className="bg-white">
           <div className="container-pad py-14">
             <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-400">
@@ -108,8 +128,10 @@ export default function ComoFuncionaPage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* ── Flujo técnico ── */}
+        {mostrarTecnico && (
         <section className="bg-sv-dark">
           <div className="container-pad py-14">
             <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary/70">
@@ -129,6 +151,7 @@ export default function ComoFuncionaPage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* ── Precios ── */}
         <section className="container-pad py-14">
@@ -139,8 +162,9 @@ export default function ComoFuncionaPage() {
             Sin sorpresas
           </h2>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className={`mt-8 grid gap-4 ${mostrarCliente && mostrarTecnico ? "sm:grid-cols-2" : "max-w-md"}`}>
             {/* Cliente */}
+            {mostrarCliente && (
             <div className="reveal delay-0 rounded-2xl border border-ink-100 bg-white p-6">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">
                 Para clientes
@@ -162,8 +186,10 @@ export default function ComoFuncionaPage() {
                 </li>
               </ul>
             </div>
+            )}
 
             {/* Técnico */}
+            {mostrarTecnico && (
             <div className="reveal delay-150 rounded-2xl border border-sv-primary/25 bg-sv-primary/5 p-6">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-sv-olive">
                 Para técnicos
@@ -185,6 +211,7 @@ export default function ComoFuncionaPage() {
                 </li>
               </ul>
             </div>
+            )}
           </div>
         </section>
 
@@ -213,18 +240,37 @@ export default function ComoFuncionaPage() {
         {/* ── CTA final ── */}
         <section className="container-pad py-14">
           <div className="reveal rounded-2xl bg-sv-dark px-7 py-10 text-center sm:px-12">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary">
-              Sin riesgo
-            </p>
-            <h3 className="display mt-2 text-2xl text-white sm:text-3xl">
-              Publicá y esperá propuestas.
-            </h3>
-            <p className="mt-2 text-sm text-white/50">
-              Si nadie te convence, no pagás. Nada.
-            </p>
-            <Link href="/publicar" className="btn-primary mt-7 inline-block px-10">
-              Publicar mi problema
-            </Link>
+            {esTecnico ? (
+              <>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary">
+                  Tu próximo trabajo
+                </p>
+                <h3 className="display mt-2 text-2xl text-white sm:text-3xl">
+                  Encontrá trabajos en tu zona.
+                </h3>
+                <p className="mt-2 text-sm text-white/50">
+                  Cotizás solo los que te convienen. Cero comisiones.
+                </p>
+                <Link href="/" className="btn-primary mt-7 inline-block px-10">
+                  Ver consultas disponibles
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary">
+                  Sin riesgo
+                </p>
+                <h3 className="display mt-2 text-2xl text-white sm:text-3xl">
+                  Publicá y esperá propuestas.
+                </h3>
+                <p className="mt-2 text-sm text-white/50">
+                  Si nadie te convence, no pagás. Nada.
+                </p>
+                <Link href="/publicar" className="btn-primary mt-7 inline-block px-10">
+                  Publicar mi problema
+                </Link>
+              </>
+            )}
           </div>
         </section>
 
