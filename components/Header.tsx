@@ -21,6 +21,36 @@ export async function Header() {
   const isAdmin = isAdminEmail(user?.email);
   const dk = esProfesional;
 
+  // Punto rojo de novedades en "Mis consultas":
+  //  - Demandante: propuestas/presupuestos nuevos (sin responder) en sus publicaciones abiertas.
+  //  - Oferente: propuestas suyas ya aceptadas+pagadas (tiene que coordinar/cerrar).
+  let novedades = 0;
+  if (user) {
+    if (esProfesional) {
+      const { count } = await supabase
+        .from("propuestas")
+        .select("id", { count: "exact", head: true })
+        .eq("profesional_id", user.id)
+        .eq("estado", "aceptada");
+      novedades = count ?? 0;
+    } else {
+      const { data: pubs } = await supabase
+        .from("publicaciones")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "abierto");
+      const ids = (pubs ?? []).map((p) => String(p.id));
+      if (ids.length > 0) {
+        const { count } = await supabase
+          .from("propuestas")
+          .select("id", { count: "exact", head: true })
+          .in("publicacion_id", ids)
+          .or("estado.is.null,estado.eq.pendiente");
+        novedades = count ?? 0;
+      }
+    }
+  }
+
   const initials = nombre && apellido
     ? `${nombre[0]}${apellido[0]}`.toUpperCase()
     : nombre
@@ -56,7 +86,14 @@ export async function Header() {
         <nav className="hidden items-center gap-0.5 sm:flex">
           <Link href="/" className={navLink}>Marketplace</Link>
           <Link href="/como-funciona" className={navLink}>Cómo funciona</Link>
-          {user && <Link href="/mis-consultas" className={navLink}>Mis consultas</Link>}
+          {user && (
+            <Link href="/mis-consultas" className={`relative ${navLink}`}>
+              Mis consultas
+              {novedades > 0 && (
+                <span className="absolute right-1.5 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              )}
+            </Link>
+          )}
         </nav>
 
         {/* Acciones */}
@@ -85,7 +122,7 @@ export async function Header() {
 
       </div>
     </header>
-    {user && <BottomNav dark={dk} />}
+    {user && <BottomNav dark={dk} novedades={novedades} />}
     </>
   );
 }

@@ -15,7 +15,7 @@ const ListIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export function BottomNav({ dark = false }: { dark?: boolean }) {
+export function BottomNav({ dark = false, novedades = 0 }: { dark?: boolean; novedades?: number }) {
   const pathname = usePathname();
 
   // Se oculta donde estorbaría o no aplica
@@ -51,7 +51,12 @@ export function BottomNav({ dark = false }: { dark?: boolean }) {
             href={href}
             className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium ${cls}`}
           >
-            <Icon className="h-5 w-5" />
+            <span className="relative">
+              <Icon className="h-5 w-5" />
+              {href === "/mis-consultas" && novedades > 0 && (
+                <span className={`absolute -right-1.5 -top-1 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ${dark ? "ring-[#0e1a17]" : "ring-white"}`} />
+              )}
+            </span>
             {label}
           </Link>
         );
