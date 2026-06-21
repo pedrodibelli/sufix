@@ -6,9 +6,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "@/components/CategoryArt";
-import { rechazarPropuesta, eliminarPublicacion } from "./actions";
+import { rechazarPropuesta, eliminarPublicacion, crearResena } from "./actions";
 import { AceptarModal, type PropuestaParaPago, type PublicacionParaPago } from "@/components/AceptarModal";
 import { ReportarProblemaModal } from "./ReportarProblemaModal";
+import { StarRating } from "@/components/StarRating";
+
+type Resumen = { promedio: number; total: number };
 
 type Propuesta = {
   id: string;
@@ -114,10 +117,12 @@ function CodigoOTPBlock({ codigo }: { codigo: string }) {
 function PropuestaRow({
   propuesta,
   publicacion,
+  resumen,
   onAceptar,
 }: {
   propuesta: Propuesta;
   publicacion: Publicacion;
+  resumen?: Resumen;
   onAceptar: (p: Propuesta, pub: Publicacion) => void;
 }) {
   const [pending, startTransition] = useTransition();
@@ -147,6 +152,13 @@ function PropuestaRow({
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm font-semibold text-sv-dark">{nombre}</span>
               {(isAccepted || isRejected) && <StatusPill status={estado} />}
+            </div>
+            <div className="mt-0.5">
+              {resumen ? (
+                <StarRating rating={resumen.promedio} reviews={resumen.total} />
+              ) : (
+                <span className="text-[11.5px] text-ink-400">Sin reseñas aún</span>
+              )}
             </div>
             <div className="text-[11.5px] text-ink-400">
               Enviada el {new Date(propuesta.created_at).toLocaleDateString("es-AR")}
@@ -328,18 +340,108 @@ function ProfesionalContacto({
 }
 
 // ─── MiConsultaCard ───────────────────────────────────────────────────────────
+// ─── CalificarBlock ───────────────────────────────────────────────────────────
+function CalificarBlock({
+  publicacionId,
+  yaResenada,
+}: {
+  publicacionId: string;
+  yaResenada: boolean;
+}) {
+  const router = useRouter();
+  const [estrellas, setEstrellas] = useState(0);
+  const [hover, setHover] = useState(0);
+  const [comentario, setComentario] = useState("");
+  const [pending, startT] = useTransition();
+  const [error, setError] = useState("");
+  const [listo, setListo] = useState(false);
+
+  if (yaResenada || listo) {
+    return (
+      <div className="border-t border-ink-100 bg-emerald-50 px-5 py-4">
+        <p className="text-[12.5px] font-semibold text-emerald-700">
+          ⭐ ¡Gracias por calificar al técnico!
+        </p>
+      </div>
+    );
+  }
+
+  function enviar() {
+    if (estrellas < 1) {
+      setError("Elegí cuántas estrellas.");
+      return;
+    }
+    setError("");
+    startT(async () => {
+      const r = await crearResena(publicacionId, estrellas, comentario);
+      if ("error" in r) {
+        setError(r.error);
+        return;
+      }
+      setListo(true);
+      router.refresh();
+    });
+  }
+
+  return (
+    <div className="border-t border-ink-100 bg-amber-50/60 px-5 py-4">
+      <p className="text-[10.5px] font-semibold uppercase tracking-wide text-amber-700">
+        ⭐ Calificá al técnico
+      </p>
+      <p className="mt-1 text-[12.5px] text-ink-500">
+        ¿Cómo fue tu experiencia? Tu reseña ayuda a otros.
+      </p>
+      <div className="mt-2 flex gap-1">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            onMouseEnter={() => setHover(n)}
+            onMouseLeave={() => setHover(0)}
+            onClick={() => setEstrellas(n)}
+            aria-label={`${n} estrella${n !== 1 ? "s" : ""}`}
+            className={`text-2xl leading-none ${(hover || estrellas) >= n ? "text-amber-400" : "text-ink-300"}`}
+          >
+            ★
+          </button>
+        ))}
+      </div>
+      <textarea
+        value={comentario}
+        onChange={(e) => setComentario(e.target.value)}
+        placeholder="Contá cómo fue (opcional)"
+        rows={2}
+        className="field mt-2 resize-none text-sm"
+      />
+      {error && <p className="mt-1 text-xs font-medium text-rose-600">{error}</p>}
+      <button
+        type="button"
+        disabled={pending}
+        onClick={enviar}
+        className="btn-primary mt-2 text-sm disabled:opacity-50"
+      >
+        {pending ? "Enviando…" : "Enviar calificación"}
+      </button>
+    </div>
+  );
+}
+
 function MiConsultaCard({
   pub,
   expanded,
   onToggle,
   onAceptar,
   perfilMap,
+  resumenMap,
+  yaResenada,
 }: {
   pub: Publicacion;
   expanded: boolean;
   onToggle: () => void;
   onAceptar: (p: Propuesta, pub: Publicacion) => void;
   perfilMap: Record<string, PerfilProfesional>;
+  resumenMap: Record<string, Resumen>;
+  yaResenada: boolean;
 }) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -502,6 +604,11 @@ function MiConsultaCard({
         <ProfesionalContacto propuesta={propuestaAceptada} pubTitle={pub.title} pubStatus={pub.status} perfil={perfil} />
       )}
 
+      {/* Calificar al técnico cuando el trabajo está cerrado */}
+      {pub.status === "cerrado" && propuestaAceptada && (
+        <CalificarBlock publicacionId={pub.id} yaResenada={yaResenada} />
+      )}
+
       {expanded && pub.status === "abierto" && (
         <div className="border-t border-ink-100 px-5 pb-5 pt-4">
           <div className="mb-3 flex items-center justify-between">
@@ -518,6 +625,7 @@ function MiConsultaCard({
                   key={prop.id}
                   propuesta={prop}
                   publicacion={pub}
+                  resumen={resumenMap[prop.profesional_id]}
                   onAceptar={onAceptar}
                 />
               ))}
@@ -541,12 +649,16 @@ function statBorder(i: number) {
 export function DemandanteView({
   publicaciones,
   perfilMap,
+  resumenMap,
+  resenadasIds,
   nombre,
   apellido,
   email,
 }: {
   publicaciones: Publicacion[];
   perfilMap: Record<string, PerfilProfesional>;
+  resumenMap: Record<string, Resumen>;
+  resenadasIds: string[];
   nombre?: string;
   apellido?: string;
   email?: string;
@@ -689,6 +801,8 @@ export function DemandanteView({
                 }
                 onAceptar={handleAceptar}
                 perfilMap={perfilMap}
+                resumenMap={resumenMap}
+                yaResenada={resenadasIds.includes(pub.id)}
               />
             ))
           )}

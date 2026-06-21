@@ -91,10 +91,27 @@ async function DemandanteData({
   const perfilMap: Record<string, { user_id: string; nombre: string | null; telefono: string | null; email: string | null; zona: string | null }> =
     Object.fromEntries((perfiles ?? []).map((p) => [p.user_id, p]));
 
+  // Reputación de los técnicos que ofertaron + qué trabajos ya calificó el usuario
+  const proIds = [...new Set((propuestas ?? []).map((p) => p.profesional_id).filter(Boolean))];
+  const { data: resumenRows } =
+    proIds.length > 0
+      ? await supabase.from("resenas_resumen").select("tecnico_id, promedio, total").in("tecnico_id", proIds)
+      : { data: [] as { tecnico_id: string; promedio: number; total: number }[] };
+  const resumenMap: Record<string, { promedio: number; total: number }> = Object.fromEntries(
+    (resumenRows ?? []).map((r) => [r.tecnico_id, { promedio: Number(r.promedio), total: Number(r.total) }])
+  );
+  const { data: misResenas } = await supabase
+    .from("resenas")
+    .select("publicacion_id")
+    .eq("autor_id", userId);
+  const resenadasIds = [...new Set((misResenas ?? []).map((r) => r.publicacion_id as string))];
+
   return (
     <DemandanteView
       publicaciones={publicacionesConPropuestas}
       perfilMap={perfilMap}
+      resumenMap={resumenMap}
+      resenadasIds={resenadasIds}
       nombre={nombre}
       apellido={apellido}
       email={email}

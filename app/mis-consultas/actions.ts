@@ -47,6 +47,27 @@ export async function rechazarPropuesta(propuestaId: string) {
   revalidatePath("/mis-consultas");
 }
 
+// El demandante califica al técnico de un trabajo cerrado.
+export async function crearResena(
+  publicacionId: string,
+  estrellas: number,
+  comentario: string
+): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autenticado" };
+
+  const { error } = await supabase.rpc("crear_resena", {
+    p_publicacion_id: publicacionId,
+    p_estrellas: estrellas,
+    p_comentario: comentario,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath("/mis-consultas");
+  return { ok: true };
+}
+
 // Elimina una publicación propia que esté ABIERTA (sin trato en curso).
 export async function eliminarPublicacion(
   publicacionId: string
