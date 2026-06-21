@@ -104,20 +104,15 @@ Vercel. El código usa:
 
 ## 6. Checklist para dejar el deploy andando
 
-### ✅ Estado: DEPLOYADO (2026-06-19)
-- **Proyecto Vercel:** `sope/solvit` (vinculado vía `vercel link`).
-- **URL de producción (estable):** https://solvit-navy.vercel.app
-- **Repo GitHub conectado** → auto-deploy activo (push a `main` = producción).
-- **Env vars cargadas:** `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  (Production + Development) y `NEXT_PUBLIC_APP_URL` (Production). Smoke test OK
-  (home 200, `/publicar` redirige a `/ingresar` → Supabase Auth responde).
-- **Pendientes menores:**
-  - Agregar `https://solvit-navy.vercel.app` a **Supabase → Auth → Redirect URLs**
-    (si no, el login/confirmación por email puede fallar).
-  - Env vars de Supabase en **Preview** (quirk del CLI; cargar desde el dashboard si se
-    usan branch previews).
-  - `NEXT_PUBLIC_APP_URL` se aplica en el **próximo** deploy (sin impacto ahora: emails
-    apagados). `CRON_SECRET` opcional.
+### ✅ Estado: DEPLOYADO y EN PRODUCCIÓN
+- **Proyecto Vercel:** `sope/solvit` (CLI autenticado como `pedrodibelli`).
+- **URL de producción:** **https://solvitweb.vercel.app** (la vieja `solvit-navy.vercel.app`
+  redirige acá).
+- **Repo GitHub conectado** → auto-deploy: push a `main` = producción.
+- **Env vars (Production):** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `NEXT_PUBLIC_APP_URL` (= `https://solvitweb.vercel.app`), `CRON_SECRET` (seteado).
+  `RESEND_API_KEY` **sin setear a propósito** (emails apagados — ver §7).
+- **Pendiente:** agregar `https://solvitweb.vercel.app/**` a **Supabase → Auth → Redirect URLs**.
 
 ### Pasos (referencia)
 1. Crear proyecto en mi Vercel apuntando a `pedrodibelli/solvit` (uso el dominio
@@ -140,3 +135,99 @@ Vercel. El código usa:
   la app sigue andando (no rompe).
 - Setear `NEXT_PUBLIC_APP_URL` a la URL nueva de Vercel para que los links de confirmación
   apunten bien (overridea el default `solvit.homes`).
+- **URL de producción actual: `https://solvitweb.vercel.app`** (no `solvit.homes`).
+
+---
+
+# 📍 ESTADO ACTUAL DEL PRODUCTO (leer esto primero)
+
+> Sección agregada para que una sesión nueva sepa **en qué punto estamos y cómo funciona
+> todo**, sin tener que explorar el código. Última actualización: **2026-06-21**.
+
+## 8. Cómo funciona la app hoy (features que YA están)
+
+**Roles** (según `user_metadata.es_profesional`):
+- **Demandante / cliente** (tema claro) — publica problemas, recibe propuestas, paga la conexión, califica.
+- **Oferente / técnico** (tema oscuro) — ve trabajos, manda propuestas, cobra su consulta directo, recibe reseñas.
+
+**Flujos principales:**
+1. **Publicar** (`/publicar`, demandante): wizard de pasos → la publicación queda **visible al instante** (`status='abierto'`). Ya **NO** hay confirmación por email.
+2. **Marketplace** (home `/`): el técnico ve trabajos disponibles; arriba un **cartel de urgentes de su rubro**. El demandante ve sus consultas.
+3. **Proponer** (técnico): `ContactarModal` → fija el precio de su consulta + toggle "descontar del presupuesto final".
+4. **Aceptar + pagar** (demandante, `AceptarModal`): ver §9. Paga **solo la tarifa de conexión**. Estado → `pago_en_revision`.
+5. **Verificación manual** (admin en `/admin`): aprueba el pago → se desbloquea el contacto del técnico, se genera un **código de 4 dígitos**, estado → `en_curso`.
+6. **Cierre**: el técnico hace el trabajo y cobra su consulta directo; el cliente le da el **código**; el técnico lo ingresa → estado → `cerrado`. Habilita la **reseña**.
+7. **Reseñas**: el demandante califica al técnico (★ + comentario). Se ve en cada propuesta (★ + cantidad) y en el **perfil del técnico** (`/tecnico/[id]`).
+8. **Perfiles** (`/perfil`): el técnico edita teléfono/zona/rubro y ve su reputación; el demandante edita nombre/apellido y ve las opiniones que dejó. Datos con candado/lápiz para editar.
+9. **Disputas**: cualquiera "reporta un problema" → `status='en_disputa'` → el admin lo resuelve en `/admin`.
+10. **Avisos in-app**: punto rojo 🔴 en "Mis consultas" (demandante: propuestas nuevas; técnico: propuestas aceptadas). **Tiempo real** vía Supabase Realtime (se actualiza solo).
+11. **PWA + Mobile**: ícono iOS (`apple-icon`, fondo verde oscuro), manifest, standalone. Barra de navegación inferior (Inicio / Mis consultas) solo en mobile. Menú del perfil (avatar arriba a la derecha).
+
+**Estados:**
+- `publicaciones.status`: `abierto` → `en_revision` (pago declarado) → `en_curso` (admin aprobó) → `cerrado` (código) / `en_disputa`.
+- `propuestas.estado`: `pendiente` → `pago_en_revision` → `aceptada` → `completada` / `rechazada`.
+
+## 9. Modelo de negocio y pagos ⚠️ (importante)
+
+**Modelo CONEXIÓN (no escrow):**
+- El cliente paga **solo la tarifa de conexión** (`COMISION_CONSULTA = 4500`, en `lib/config.ts`) **a la plataforma**.
+- La **consulta del técnico** (su precio) se la paga el cliente **directo al técnico** cuando va. La plataforma NO la toca.
+- Así la plataforma gana los $4.500 sin tener que hacer payouts al técnico.
+- **Pago manual**: transferencia → comprobante por WhatsApp → admin aprueba en `/admin`.
+- ⚠️ **Los datos de transferencia y el WhatsApp son los de MATEO** (hardcodeados en
+  `components/AceptarModal.tsx`, ver `// TODO`). Hay que cambiarlos por los propios + Mercado Pago.
+- **Fase 2 (futuro):** Mercado Pago con pagos divididos → ahí sí se puede hacer escrow/garantía.
+
+## 10. Base de datos (Supabase) y migraciones
+
+**Tablas:** `publicaciones`, `propuestas`, `perfiles_profesionales`, `verificaciones`, `disputas`, `resenas`.
+**Vistas:** `propuestas_count_por_publicacion`, `resenas_resumen`, `perfiles_publicos` (solo datos no sensibles del técnico).
+**Funciones (RPC, SECURITY DEFINER):** `aprobar_pago`, `rechazar_pago`, `listar_pagos_en_revision`,
+`listar_disputas`, `resolver_disputa`, `eliminar_publicacion`, `crear_resena`.
+
+> ⚠️ **GOTCHA: `propuestas.publicacion_id` es de tipo `text`** (no uuid). Al cruzarlo con
+> `publicaciones.id` (uuid) hay que castear: `publicacion_id = p_id::text`.
+
+> ⚠️ **Las migraciones NO se aplican solas.** Están en `supabase/migrations/*.sql` como
+> documentación, pero hay que **correr el SQL a mano en el SQL Editor de Supabase**. Si una
+> sesión crea una migración nueva, **darle el SQL al usuario para que lo pegue y ejecute**.
+
+**Auth:** "Confirm email" está **APAGADO** en Supabase (no hay SMTP, los mails no llegarían).
+El registro deja al usuario logueado directo.
+
+## 11. Panel de administración (`/admin`)
+- Accesible **solo** para `solvithomes@gmail.com` (ver `lib/admin.ts` — mantener sincronizado
+  con el chequeo de email dentro de las funciones SQL de admin).
+- Dos secciones: **Pagos en revisión** (aprobar/rechazar) y **Disputas abiertas** (resolver).
+
+## 12. Decisiones tomadas (y por qué)
+- **Reusar la base de Supabase de Mateo** (soy owner). El deploy viejo de Mateo (`solvit.homes`)
+  **sigue vivo y comparte la misma base** — todavía NO lo corté (pendiente: sacarlo del team + rotar keys).
+- **Modelo conexión** (no escrow) por ahora — ver §9.
+- **Emails apagados** (sin `RESEND_API_KEY`): Resend necesita un **dominio propio verificado**, que
+  no tengo. Todo lo de emails (aviso de publicación, confirmación de cuenta, alerta de urgentes)
+  está **bloqueado hasta tener dominio**.
+- **Admin = `solvithomes@gmail.com`**.
+- Realtime requiere conexión **autenticada** (`supabase.realtime.setAuth(token)` antes de suscribir).
+
+## 13. Roadmap / pendientes
+**Bloqueado por "dominio propio":**
+- Comprar dominio → habilita Resend (emails de la app) + SMTP en Supabase (confirmación de cuenta) + Mercado Pago.
+
+**Negocio:**
+- Cambiar datos de pago (transferencia + WhatsApp) de Mateo por los propios → Mercado Pago.
+- Cortar a Mateo: sacarlo del team de Supabase + **rotar las API keys** (su deploy deja de leer la base; desloguea a todos una vez).
+
+**Mejoras (se pueden hacer ya):**
+- Editar publicación (ya existe eliminar).
+- Match por **zona** además del rubro en el aviso de urgentes.
+- `/profesional/[slug]` es una página **mock vieja** (datos inventados) — retirar o reemplazar por el perfil real (`/tecnico/[id]`).
+- Notificaciones push (web push) — build grande.
+- Indicador de disputa también del lado del técnico.
+
+## 14. Cómo trabajar en este repo (workflow para Claude)
+1. **Cambio de código** → `npm run build` (verificar que compila) → `git add -A` → commit → `git push origin main` → Vercel auto-deploya. (Co-author trailer: `Claude Opus 4.8 <noreply@anthropic.com>`.)
+2. **Cambio de base de datos** → crear el `.sql` en `supabase/migrations/` Y **darle el SQL al usuario para correr en el SQL Editor** (no se aplica solo).
+3. **Verificar deploy**: `vercel ls solvit` (esperar `● Ready`). Smoke test con `curl`.
+4. **Env vars**: `vercel env add/rm <VAR> production` (CLI autenticado). Para Preview, el CLI pide branch (usar `--value ... --yes` o el dashboard).
+5. Plataforma: **Windows / PowerShell + Git Bash**. Editor del usuario: VSCode.
