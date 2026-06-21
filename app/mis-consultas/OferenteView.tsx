@@ -203,8 +203,7 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
             </p>
             <p className={`mt-1 text-[12.5px] leading-relaxed ${dark ? "text-emerald-100/80" : "text-emerald-800"}`}>
               <strong>{p.demandante ?? "El cliente"}</strong> abonó la consulta. Te va a contactar
-              por WhatsApp para coordinar la visita. Cuando termines el trabajo, pedile su{" "}
-              <strong>código de 4 dígitos</strong> e ingresalo abajo para cerrarlo y registrar el cobro.
+              por WhatsApp para coordinar la visita.
             </p>
           </div>
           <ConfirmarCodigoBlock propuestaId={p.id} dark={dark} />
