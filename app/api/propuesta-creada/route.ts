@@ -1,0 +1,97 @@
+import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+import { createClient } from "@supabase/supabase-js";
+
+export const runtime = "nodejs";
+
+// Webhook de Supabase: se dispara al INSERTAR una fila en `propuestas`.
+// Manda un mail al demandante (vía Gmail SMTP) avisándole que recibió una propuesta.
+// Configurar en Supabase → Database → Webhooks: INSERT en public.propuestas →
+// POST a {APP_URL}/api/propuesta-creada con header Authorization: Bearer <WEBHOOK_SECRET>.
+export async function POST(req: NextRequest) {
+  // 1) Solo Supabase (con el secreto) puede disparar esto
+  const auth = req.headers.get("authorization");
+  if (!process.env.WEBHOOK_SECRET || auth !== `Bearer ${process.env.WEBHOOK_SECRET}`) {
+    return NextResponse.json({ error: "no autorizado" }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    if (body?.type && body.type !== "INSERT") return NextResponse.json({ ok: true });
+
+    const propuesta = body?.record;
+    if (!propuesta?.publicacion_id) return NextResponse.json({ ok: true });
+
+    // 2) Buscar el email del demandante (dueño de la publicación) con service role
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !serviceKey) {
+      console.error("[propuesta-creada] faltan env vars de Supabase service role");
+      return NextResponse.json({ ok: true });
+    }
+    const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
+
+    const { data: pub } = await admin
+      .from("publicaciones")
+      .select("user_id, title")
+      .eq("id", propuesta.publicacion_id)
+      .single();
+    if (!pub?.user_id) return NextResponse.json({ ok: true });
+
+    const { data: userRes } = await admin.auth.admin.getUserById(pub.user_id);
+    const email = userRes?.user?.email;
+    if (!email) return NextResponse.json({ ok: true });
+
+    // 3) Mandar el mail por Gmail SMTP
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+      console.error("[propuesta-creada] faltan credenciales de Gmail");
+      return NextResponse.json({ ok: true });
+    }
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+    });
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://solvitweb.vercel.app";
+    const titulo = (propuesta.titulo as string) || (pub.title as string) || "tu problema";
+    const tecnico = (propuesta.nombre_profesional as string) || "Un técnico";
+    const precio = propuesta.precio ? `$${Number(propuesta.precio).toLocaleString("es-AR")}` : null;
+
+    await transporter.sendMail({
+      from: `SolvIT <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: "Recibiste una propuesta en SolvIT",
+      html: `
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+<body style="margin:0;padding:0;background:#f5fdf9;font-family:system-ui,-apple-system,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;padding:40px 16px;"><tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+      <tr><td align="center" style="padding-bottom:32px;">
+        <span style="font-size:22px;font-weight:700;color:#1a2e1e;">Solv<span style="color:#3d9b5e;">IT</span></span>
+      </td></tr>
+      <tr><td style="background:#ffffff;border-radius:20px;padding:40px 32px;border:1px solid #e4ede7;">
+        <p style="margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#3d9b5e;">Nueva propuesta</p>
+        <h1 style="margin:0 0 16px;font-size:26px;font-weight:700;color:#1a2e1e;line-height:1.2;">¡Te llegó una propuesta!</h1>
+        <p style="margin:0 0 24px;font-size:15px;color:#64748b;line-height:1.6;">
+          <strong>${tecnico}</strong> te envió una propuesta para tu problema: <strong>${titulo}</strong>${precio ? ` · ${precio}` : ""}.
+          Entrá a tus consultas para verla y decidir.
+        </p>
+        <a href="${appUrl}/mis-consultas" style="display:block;text-align:center;background:#3d9b5e;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 24px;border-radius:12px;margin-bottom:20px;">
+          Ver la propuesta →
+        </a>
+        <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">No te cobramos nada hasta que aceptes una propuesta.</p>
+      </td></tr>
+      <tr><td align="center" style="padding-top:24px;"><p style="margin:0;font-size:12px;color:#94a3b8;">SolvIT</p></td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`,
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[propuesta-creada] error:", err);
+    // Devolvemos 200 para que Supabase no reintente en loop; el error queda en logs.
+    return NextResponse.json({ ok: true });
+  }
+}
