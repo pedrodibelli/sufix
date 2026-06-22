@@ -16,13 +16,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const propuesta = body?.record;
 
-    if (body?.type && body.type !== "INSERT") return NextResponse.json({ ok: true, step: "skip_no_insert" });
-    if (!propuesta?.publicacion_id) return NextResponse.json({ ok: true, step: "skip_no_pubid" });
+    if (body?.type && body.type !== "INSERT") return NextResponse.json({ ok: true });
+    if (!propuesta?.publicacion_id) return NextResponse.json({ ok: true });
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !serviceKey) {
-      return NextResponse.json({ ok: true, step: "missing_supabase_env", hasUrl: !!url, hasKey: !!serviceKey });
+      console.error("[propuesta-creada] faltan env de Supabase service role");
+      return NextResponse.json({ ok: true });
     }
     const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
 
@@ -32,23 +33,20 @@ export async function POST(req: NextRequest) {
       .eq("id", propuesta.publicacion_id)
       .single();
     if (!pub?.user_id) {
-      return NextResponse.json({ ok: true, step: "pub_not_found", error: pubErr?.message ?? null });
+      console.error("[propuesta-creada] publicación no encontrada:", pubErr?.message);
+      return NextResponse.json({ ok: true });
     }
 
-    const { data: userRes, error: userErr } = await admin.auth.admin.getUserById(pub.user_id);
+    const { data: userRes } = await admin.auth.admin.getUserById(pub.user_id);
     const email = userRes?.user?.email;
     if (!email) {
-      return NextResponse.json({ ok: true, step: "no_email", error: userErr?.message ?? null });
+      console.error("[propuesta-creada] el demandante no tiene email");
+      return NextResponse.json({ ok: true });
     }
-    const masked = email.replace(/(.{2}).*(@.*)/, "$1***$2");
 
     if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-      return NextResponse.json({
-        ok: true,
-        step: "missing_gmail_env",
-        hasUser: !!process.env.GMAIL_USER,
-        hasPass: !!process.env.GMAIL_APP_PASSWORD,
-      });
+      console.error("[propuesta-creada] faltan credenciales de Gmail");
+      return NextResponse.json({ ok: true });
     }
 
     const transporter = nodemailer.createTransport({
@@ -62,7 +60,7 @@ export async function POST(req: NextRequest) {
     const precio = propuesta.precio ? `$${Number(propuesta.precio).toLocaleString("es-AR")}` : null;
 
     try {
-      const info = await transporter.sendMail({
+      await transporter.sendMail({
         from: `SolvIT <${process.env.GMAIL_USER}>`,
         to: email,
         subject: "Recibiste una propuesta en SolvIT",
@@ -92,16 +90,13 @@ export async function POST(req: NextRequest) {
   </td></tr></table>
 </body></html>`,
       });
-      return NextResponse.json({ ok: true, step: "sent", to: masked, accepted: info.accepted });
+      return NextResponse.json({ ok: true });
     } catch (mailErr) {
-      return NextResponse.json({
-        ok: false,
-        step: "smtp_error",
-        to: masked,
-        error: mailErr instanceof Error ? mailErr.message : String(mailErr),
-      });
+      console.error("[propuesta-creada] error SMTP:", mailErr instanceof Error ? mailErr.message : mailErr);
+      return NextResponse.json({ ok: false });
     }
   } catch (err) {
-    return NextResponse.json({ ok: false, step: "exception", error: err instanceof Error ? err.message : String(err) });
+    console.error("[propuesta-creada] excepción:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ ok: false });
   }
 }
