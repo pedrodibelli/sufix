@@ -69,6 +69,10 @@ Vercel. El código usa:
 | `RESEND_API_KEY` | No | Si falta, el envío de email se saltea y la app sigue andando |
 | `NEXT_PUBLIC_APP_URL` | Recomendada | Si falta, los links de confirmación apuntan a `https://solvit.homes`. Setear a la URL real del deploy. |
 | `CRON_SECRET` | Recomendada | Sin esto, el cron diario de keepalive devuelve 401 (inofensivo) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Para el mail | **Secreta, solo servidor.** La usa `/api/propuesta-creada` para leer el email del demandante. NUNCA `NEXT_PUBLIC`. |
+| `GMAIL_USER` | Para el mail | `solvithomes@gmail.com` — remitente del aviso de propuesta |
+| `GMAIL_APP_PASSWORD` | Para el mail | Contraseña de aplicación de Google (16 letras). Ver §15. |
+| `WEBHOOK_SECRET` | Para el mail | Protege `/api/propuesta-creada`. Va en el header `Authorization: Bearer <secret>` del webhook de Supabase. |
 
 ### ⚠️ Cuál clave de Supabase usar
 - Hay que usar la **anon key** (pública / "publishable" → `sb_publishable_...`).
@@ -162,6 +166,7 @@ Vercel. El código usa:
 9. **Disputas**: cualquiera "reporta un problema" → `status='en_disputa'` → el admin lo resuelve en `/admin`.
 10. **Avisos in-app**: punto rojo 🔴 en "Mis consultas" (demandante: propuestas nuevas; técnico: propuestas aceptadas). **Tiempo real** vía Supabase Realtime (se actualiza solo).
 11. **PWA + Mobile**: ícono iOS (`apple-icon`, fondo verde oscuro), manifest, standalone. Barra de navegación inferior (Inicio / Mis consultas) solo en mobile. Menú del perfil (avatar arriba a la derecha).
+12. **Aviso por email al recibir propuesta** ✅ (sin dominio, vía Gmail SMTP): al insertarse una fila en `propuestas`, un **Database Webhook de Supabase** (INSERT) pega a **`/api/propuesta-creada`** (header `Authorization: Bearer WEBHOOK_SECRET`), que busca el email del demandante (service role) y le manda el aviso con **nodemailer + Gmail** (`solvithomes@gmail.com`). Los **otros** mails (confirmación de cuenta, alerta de urgentes) siguen pendientes de dominio + Resend.
 
 **Estados:**
 - `publicaciones.status`: `abierto` → `en_revision` (pago declarado) → `en_curso` (admin aprobó) → `cerrado` (código) / `en_disputa`.
@@ -233,8 +238,23 @@ El registro deja al usuario logueado directo.
 - Indicador de disputa también del lado del técnico.
 
 ## 14. Cómo trabajar en este repo (workflow para Claude)
-1. **Cambio de código** → `npm run build` (verificar que compila) → `git add -A` → commit → `git push origin main` → Vercel auto-deploya. (Co-author trailer: `Claude Opus 4.8 <noreply@anthropic.com>`.)
+1. **Cambio de código** → `npm run build` (verificar que compila) → `git add -A` → commit → `git push origin main`. ⚠️ **El push NO siempre re-apunta el dominio `solvitweb.vercel.app` al último deploy** (puede quedar sirviendo código viejo). Correr **`vercel --prod`** después para forzar el alias. (Co-author trailer: `Claude Opus 4.8 <noreply@anthropic.com>`.)
 2. **Cambio de base de datos** → crear el `.sql` en `supabase/migrations/` Y **darle el SQL al usuario para correr en el SQL Editor** (no se aplica solo).
 3. **Verificar deploy**: `vercel ls solvit` (esperar `● Ready`). Smoke test con `curl`.
 4. **Env vars**: `vercel env add/rm <VAR> production` (CLI autenticado). Para Preview, el CLI pide branch (usar `--value ... --yes` o el dashboard).
 5. Plataforma: **Windows / PowerShell + Git Bash**. Editor del usuario: VSCode.
+
+---
+
+## 15. Aviso por email de propuesta — referencia de setup
+
+- **Gmail App Password**: cuenta `solvithomes@gmail.com` con verificación en 2 pasos activada →
+  https://myaccount.google.com/apppasswords (está **oculto** del menú, entrar por link directo) →
+  crear → código de 16 letras → va en `GMAIL_APP_PASSWORD` (**sin espacios**).
+- **Service role key**: Supabase → Settings → API → `service_role` → va en `SUPABASE_SERVICE_ROLE_KEY`
+  (Vercel, **solo Production/servidor**).
+- **Webhook**: Supabase → Database → Database Webhooks → tabla `public.propuestas`, evento **INSERT**,
+  HTTP POST a `https://solvitweb.vercel.app/api/propuesta-creada`, header
+  `Authorization: Bearer <WEBHOOK_SECRET>`.
+- **Endpoint**: `app/api/propuesta-creada/route.ts` (nodemailer + Gmail SMTP). Límite Gmail ~500/día.
+- A futuro (con dominio): migrar a **Resend** para mejor entregabilidad y remitente `@dominio`.
