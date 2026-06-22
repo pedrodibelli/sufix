@@ -6,47 +6,59 @@ export const runtime = "nodejs";
 
 // Webhook de Supabase: se dispara al INSERTAR una fila en `propuestas`.
 // Manda un mail al demandante (vía Gmail SMTP) avisándole que recibió una propuesta.
-// Configurar en Supabase → Database → Webhooks: INSERT en public.propuestas →
-// POST a {APP_URL}/api/propuesta-creada con header Authorization: Bearer <WEBHOOK_SECRET>.
 export async function POST(req: NextRequest) {
-  // 1) Solo Supabase (con el secreto) puede disparar esto
   const auth = req.headers.get("authorization");
   if (!process.env.WEBHOOK_SECRET || auth !== `Bearer ${process.env.WEBHOOK_SECRET}`) {
+    console.error("[propuesta-creada] 401 — secreto inválido. recibido:", auth?.slice(0, 12));
     return NextResponse.json({ error: "no autorizado" }, { status: 401 });
   }
 
   try {
     const body = await req.json();
-    if (body?.type && body.type !== "INSERT") return NextResponse.json({ ok: true });
-
     const propuesta = body?.record;
-    if (!propuesta?.publicacion_id) return NextResponse.json({ ok: true });
+    console.log("[propuesta-creada] type:", body?.type, "pub_id:", propuesta?.publicacion_id);
 
-    // 2) Buscar el email del demandante (dueño de la publicación) con service role
+    if (body?.type && body.type !== "INSERT") {
+      console.log("[propuesta-creada] skip: no es INSERT");
+      return NextResponse.json({ ok: true });
+    }
+    if (!propuesta?.publicacion_id) {
+      console.log("[propuesta-creada] skip: sin publicacion_id");
+      return NextResponse.json({ ok: true });
+    }
+
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !serviceKey) {
-      console.error("[propuesta-creada] faltan env vars de Supabase service role");
+      console.error("[propuesta-creada] FALTA env: url?", !!url, "serviceKey?", !!serviceKey);
       return NextResponse.json({ ok: true });
     }
     const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
 
-    const { data: pub } = await admin
+    const { data: pub, error: pubErr } = await admin
       .from("publicaciones")
       .select("user_id, title")
       .eq("id", propuesta.publicacion_id)
       .single();
-    if (!pub?.user_id) return NextResponse.json({ ok: true });
-
-    const { data: userRes } = await admin.auth.admin.getUserById(pub.user_id);
-    const email = userRes?.user?.email;
-    if (!email) return NextResponse.json({ ok: true });
-
-    // 3) Mandar el mail por Gmail SMTP
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-      console.error("[propuesta-creada] faltan credenciales de Gmail");
+    if (pubErr) console.error("[propuesta-creada] error buscando publicacion:", pubErr.message);
+    if (!pub?.user_id) {
+      console.log("[propuesta-creada] skip: no se encontró la publicación / user_id");
       return NextResponse.json({ ok: true });
     }
+
+    const { data: userRes, error: userErr } = await admin.auth.admin.getUserById(pub.user_id);
+    if (userErr) console.error("[propuesta-creada] error getUserById:", userErr.message);
+    const email = userRes?.user?.email;
+    if (!email) {
+      console.log("[propuesta-creada] skip: el demandante no tiene email");
+      return NextResponse.json({ ok: true });
+    }
+
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+      console.error("[propuesta-creada] FALTA env Gmail: user?", !!process.env.GMAIL_USER, "pass?", !!process.env.GMAIL_APP_PASSWORD);
+      return NextResponse.json({ ok: true });
+    }
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
@@ -57,7 +69,8 @@ export async function POST(req: NextRequest) {
     const tecnico = (propuesta.nombre_profesional as string) || "Un técnico";
     const precio = propuesta.precio ? `$${Number(propuesta.precio).toLocaleString("es-AR")}` : null;
 
-    await transporter.sendMail({
+    console.log("[propuesta-creada] enviando mail a:", email);
+    const info = await transporter.sendMail({
       from: `SolvIT <${process.env.GMAIL_USER}>`,
       to: email,
       subject: "Recibiste una propuesta en SolvIT",
@@ -87,11 +100,11 @@ export async function POST(req: NextRequest) {
   </td></tr></table>
 </body></html>`,
     });
+    console.log("[propuesta-creada] enviado OK:", info.messageId, "accepted:", info.accepted);
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("[propuesta-creada] error:", err);
-    // Devolvemos 200 para que Supabase no reintente en loop; el error queda en logs.
+    console.error("[propuesta-creada] EXCEPCIÓN:", err instanceof Error ? err.message : err);
     return NextResponse.json({ ok: true });
   }
 }
