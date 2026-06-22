@@ -166,7 +166,10 @@ Vercel. El código usa:
 9. **Disputas**: cualquiera "reporta un problema" → `status='en_disputa'` → el admin lo resuelve en `/admin`.
 10. **Avisos in-app**: punto rojo 🔴 en "Mis consultas" (demandante: propuestas nuevas; técnico: propuestas aceptadas). **Tiempo real** vía Supabase Realtime (se actualiza solo).
 11. **PWA + Mobile**: ícono iOS (`apple-icon`, fondo verde oscuro), manifest, standalone. Barra de navegación inferior (Inicio / Mis consultas) solo en mobile. Menú del perfil (avatar arriba a la derecha).
-12. **Aviso por email al recibir propuesta** ✅ (sin dominio, vía Gmail SMTP): al insertarse una fila en `propuestas`, un **Database Webhook de Supabase** (INSERT) pega a **`/api/propuesta-creada`** (header `Authorization: Bearer WEBHOOK_SECRET`), que busca el email del demandante (service role) y le manda el aviso con **nodemailer + Gmail** (`solvithomes@gmail.com`). Los **otros** mails (confirmación de cuenta, alerta de urgentes) siguen pendientes de dominio + Resend.
+12. **Avisos por email** ✅ (sin dominio, vía Gmail SMTP `solvithomes@gmail.com`, nodemailer). Hay **dos Database Webhooks de Supabase** (INSERT) que pegan a endpoints propios (header `Authorization: Bearer WEBHOOK_SECRET`, email del destinatario via service role):
+    - **Propuesta** → webhook `aviso-propuestas` (tabla `propuestas`) → `/api/propuesta-creada` → mail al **demandante** ("te llegó una propuesta").
+    - **Publicación** → webhook `aviso-publicacion` (tabla `publicaciones`) → `/api/publicacion-creada` → **dos** mails: al **demandante** ("publicación creada") y a los **técnicos** cuyo `rubro` + `zona` coinciden con la publicación ("nuevo trabajo en tu zona y rubro").
+    - **Pendiente de dominio + Resend:** confirmación de cuenta (Supabase Auth SMTP).
 
 **Estados:**
 - `publicaciones.status`: `abierto` → `en_revision` (pago declarado) → `en_curso` (admin aprobó) → `cerrado` (código) / `en_disputa`.
@@ -246,15 +249,23 @@ El registro deja al usuario logueado directo.
 
 ---
 
-## 15. Aviso por email de propuesta — referencia de setup
+## 15. Avisos por email — referencia de setup
 
 - **Gmail App Password**: cuenta `solvithomes@gmail.com` con verificación en 2 pasos activada →
   https://myaccount.google.com/apppasswords (está **oculto** del menú, entrar por link directo) →
   crear → código de 16 letras → va en `GMAIL_APP_PASSWORD` (**sin espacios**).
 - **Service role key**: Supabase → Settings → API → `service_role` → va en `SUPABASE_SERVICE_ROLE_KEY`
   (Vercel, **solo Production/servidor**).
-- **Webhook**: Supabase → Database → Database Webhooks → tabla `public.propuestas`, evento **INSERT**,
-  HTTP POST a `https://solvitweb.vercel.app/api/propuesta-creada`, header
-  `Authorization: Bearer <WEBHOOK_SECRET>`.
-- **Endpoint**: `app/api/propuesta-creada/route.ts` (nodemailer + Gmail SMTP). Límite Gmail ~500/día.
+- **Webhooks** (Supabase → Database → Database Webhooks), ambos evento **INSERT**, método POST,
+  header `Authorization: Bearer <WEBHOOK_SECRET>` (el **mismo** secreto en los dos):
+  | Webhook | Tabla | URL endpoint | Manda mail a |
+  |---|---|---|---|
+  | `aviso-propuestas` | `public.propuestas` | `…/api/propuesta-creada` | demandante (te llegó propuesta) |
+  | `aviso-publicacion` | `public.publicaciones` | `…/api/publicacion-creada` | demandante (publicación creada) + técnicos del rubro+zona |
+- **Endpoints**: `app/api/propuesta-creada/route.ts` y `app/api/publicacion-creada/route.ts`
+  (nodemailer + Gmail SMTP, `runtime = "nodejs"`). El de publicación cruza `perfiles_profesionales`
+  por `rubro` + `zona` para avisar a los técnicos. Límite Gmail ~500/día.
+- ⚠️ Tras tocar estos endpoints: `git push` **y** `vercel --prod` (el alias `solvitweb` no se
+  reapunta solo — ver §14.1). Si un aviso "no llega", revisar `select … from net._http_response`
+  en el SQL Editor (status 200 = llegó al endpoint; 401 = header mal; vacío = el webhook no disparó).
 - A futuro (con dominio): migrar a **Resend** para mejor entregabilidad y remitente `@dominio`.
