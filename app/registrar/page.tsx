@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { CATEGORIES, ZONES } from "@/lib/data";
 import { LoadingScreen } from "@/components/LoadingScreen";
 
 export default function RegistrarPage() {
-  const router = useRouter();
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [email, setEmail] = useState("");
@@ -83,7 +81,11 @@ export default function RegistrarPage() {
 
     setLoading(false);
     setRedirecting(true);
-    setTimeout(() => router.push("/"), 1800);
+    // Navegación DURA (recarga real), no soft (router.push). En la PWA standalone
+    // del celular la transición client-side de Next se cuelga esperando el render
+    // del Server Component de "/", y el spinner queda infinito. Una recarga completa
+    // hace que el servidor lea la cookie de sesión recién creada y "/" cargue limpio.
+    setTimeout(() => window.location.assign("/"), 400);
   }
 
   if (redirecting) {

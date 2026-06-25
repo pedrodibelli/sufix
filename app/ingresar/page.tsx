@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import { LoadingScreen } from "@/components/LoadingScreen";
@@ -16,7 +16,6 @@ export default function IngresarPage() {
 }
 
 function IngresarInner() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/";
 
@@ -47,8 +46,10 @@ function IngresarInner() {
     }
 
     setRedirecting(true);
-    router.push(next);
-    router.refresh();
+    // Navegación DURA (recarga real), no soft (router.push/refresh): en la PWA del
+    // celular la transición client-side se cuelga y el spinner queda infinito.
+    const dest = next.startsWith("/") ? next : "/";
+    setTimeout(() => window.location.assign(dest), 400);
   }
 
   if (redirecting) return <LoadingScreen message="Iniciando sesión…" />;
