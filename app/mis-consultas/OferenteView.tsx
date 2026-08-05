@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "@/components/CategoryArt";
+import { supabase } from "@/lib/supabase";
 import { confirmarCodigo } from "./actions";
 import { ReportarProblemaModal } from "./ReportarProblemaModal";
 
@@ -297,8 +299,34 @@ export function OferenteView({
   apellido?: string;
   email?: string;
 }) {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("todas");
   const dark = true;
+
+  // Notificaciones en vivo: si el demandante nos elige (o cambia el estado de
+  // alguna de nuestras propuestas) mientras tenemos la página abierta, refresca
+  // solo. Mismo mecanismo que en DemandanteView.tsx.
+  useEffect(() => {
+    const propIds = new Set(propuestas.map((p) => p.id));
+    if (propIds.size === 0) return;
+
+    const channel = supabase
+      .channel("mis-consultas-oferente")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "propuestas" },
+        (payload) => {
+          const row = (payload.new ?? payload.old) as { id?: string } | null;
+          if (row?.id && propIds.has(row.id)) {
+            router.refresh();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [propuestas.map((p) => p.id).join(",")]);
 
   const displayName = [nombre, apellido].filter(Boolean).join(" ") || email || "Profesional";
   const initials =

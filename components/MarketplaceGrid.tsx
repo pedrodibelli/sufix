@@ -219,12 +219,17 @@ function JobCard({
     ? "0 8px 30px rgba(0,0,0,0.40)"
     : "0 8px 30px rgba(14,17,13,0.10)";
 
+  // Del lado del oferente, toda la tarjeta abre el detalle completo (útil cuando
+  // la descripción es larga y no entra en el preview) — no solo el botón.
+  const tarjetaClickeable = esProfesional && !sinSesion;
+
   return (
     <div
-      className={cardBase}
+      className={`${cardBase} ${tarjetaClickeable ? "cursor-pointer" : ""}`}
       style={{ animationDelay: `${Math.min(index * 45, 300)}ms`, transition: "box-shadow 200ms ease-out" }}
       onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = shadowHover; }}
       onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = ""; }}
+      onClick={tarjetaClickeable ? onContactar : undefined}
     >
       {/* Header: foto real o arte generativo */}
       <div className="relative h-44 w-full overflow-hidden">
@@ -282,7 +287,11 @@ function JobCard({
 
           {/* Oferente */}
           {!sinSesion && esProfesional && !yaContactado && (
-            <button type="button" onClick={onContactar} className="btn-primary w-full text-sm">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onContactar(); }}
+              className="btn-primary w-full text-sm"
+            >
               Quiero hacer este trabajo
             </button>
           )}

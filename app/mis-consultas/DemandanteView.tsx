@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "@/components/CategoryArt";
+import { supabase } from "@/lib/supabase";
 import { rechazarPropuesta, eliminarPublicacion, crearResena, elegirTecnico } from "./actions";
 import { COMISION_CONSULTA } from "@/lib/config";
 import { AceptarModal, type PropuestaParaPago, type PublicacionParaPago } from "@/components/AceptarModal";
@@ -845,6 +846,33 @@ export function DemandanteView({
   const [tab, setTab] = useState<Tab>("abierto");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [pagoInfo, setPagoInfo] = useState<{ propuesta: Propuesta; publicacion: Publicacion } | null>(null);
+
+  // Notificaciones en vivo: cuando un técnico avisa que quiere un trabajo (o
+  // cambia el estado de una propuesta), refrescamos sin que el usuario tenga
+  // que recargar la página. La tabla `propuestas` ya tiene Realtime habilitado
+  // (ver supabase/migrations/20260621_realtime_propuestas.sql); Supabase filtra
+  // los eventos por RLS, así que solo llegan los de nuestras propias publicaciones.
+  useEffect(() => {
+    const pubIds = new Set(publicaciones.map((p) => p.id));
+    if (pubIds.size === 0) return;
+
+    const channel = supabase
+      .channel("mis-consultas-demandante")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "propuestas" },
+        (payload) => {
+          const row = (payload.new ?? payload.old) as { publicacion_id?: string } | null;
+          if (row?.publicacion_id && pubIds.has(row.publicacion_id)) {
+            router.refresh();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [publicaciones.map((p) => p.id).join(",")]);
 
   function handleAceptar(propuesta: Propuesta, publicacion: Publicacion) {
     setPagoInfo({ propuesta, publicacion });
