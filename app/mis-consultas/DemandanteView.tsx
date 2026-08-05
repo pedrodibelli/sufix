@@ -6,7 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "@/components/CategoryArt";
-import { rechazarPropuesta, eliminarPublicacion, crearResena } from "./actions";
+import { rechazarPropuesta, eliminarPublicacion, crearResena, elegirTecnico } from "./actions";
+import { COMISION_CONSULTA } from "@/lib/config";
 import { AceptarModal, type PropuestaParaPago, type PublicacionParaPago } from "@/components/AceptarModal";
 import { ReportarProblemaModal } from "./ReportarProblemaModal";
 import { StarRating } from "@/components/StarRating";
@@ -26,6 +27,7 @@ type Propuesta = {
   publicacion_id: string;
   created_at: string;
   descuenta_de_presupuesto: boolean | null;
+  contacto_directo: boolean | null;
 };
 
 type PerfilProfesional = {
@@ -64,6 +66,7 @@ function StatusPill({ status }: { status: string }) {
     rechazada:  { label: "Rechazada",   cls: "bg-rose-100 text-rose-700" },
     pendiente:  { label: "Pendiente",   cls: "bg-amber-100 text-amber-700" },
     completada: { label: "Completada",  cls: "bg-emerald-100 text-emerald-700" },
+    interesado: { label: "Interesado",  cls: "bg-blue-100 text-blue-700" },
   };
   const s = map[status] ?? map.abierto;
   return (
@@ -220,6 +223,122 @@ function PropuestaRow({
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── InteresadoRow (flujo de contacto directo gratis) ─────────────────────────
+// A diferencia de PropuestaRow (flujo viejo con precio): no hay nada que
+// aceptar/pagar, el contacto ya está disponible. El demandante puede hablar por
+// WhatsApp con varios y, cuando decide, tocar "Elegir" para arrancar el
+// seguimiento (código + reseña).
+function InteresadoRow({
+  propuesta,
+  publicacion,
+  perfil,
+  resumen,
+  puedeElegir,
+  onElegido,
+}: {
+  propuesta: Propuesta;
+  publicacion: Publicacion;
+  perfil?: PerfilProfesional;
+  resumen?: Resumen;
+  puedeElegir: boolean;
+  onElegido: () => void;
+}) {
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState("");
+
+  const nombre = propuesta.nombre_profesional ?? "Profesional";
+  const primerNombre = nombre.split(" ")[0];
+  const initials = nombre.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const telefono = perfil?.telefono ?? null;
+
+  const cat = CATEGORIES.find((c) => c.slug === publicacion.category_slug);
+  const mensaje = encodeURIComponent(
+    `Hola ${primerNombre}! Te contacto por SolvIT por mi consulta: "${publicacion.title}" (${cat?.name ?? publicacion.category_slug} · ${publicacion.zone}). ¿Podemos hablar?`
+  );
+  const waLink = telefono ? `https://wa.me/${telefono.replace(/\D/g, "")}?text=${mensaje}` : null;
+
+  function handleElegir() {
+    setError("");
+    startTransition(async () => {
+      const r = await elegirTecnico(propuesta.id, publicacion.id);
+      if ("error" in r) {
+        setError(r.error);
+        return;
+      }
+      onElegido();
+    });
+  }
+
+  return (
+    <div className="rounded-xl border border-ink-100 bg-[#f5fdf9] p-3.5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex flex-1 items-center gap-3 min-w-0">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sv-dark to-sv-primary text-xs font-bold text-white">
+            {initials}
+          </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link
+                href={`/tecnico/${propuesta.profesional_id}`}
+                className="text-sm font-semibold text-sv-dark transition hover:text-sv-primary hover:underline"
+              >
+                {nombre}
+              </Link>
+            </div>
+            <Link href={`/tecnico/${propuesta.profesional_id}`} className="mt-0.5 inline-flex items-center gap-1.5">
+              {resumen ? (
+                <StarRating rating={resumen.promedio} reviews={resumen.total} />
+              ) : (
+                <span className="text-[11.5px] text-ink-400">Sin reseñas aún</span>
+              )}
+              <span className="text-[11px] font-medium text-sv-primary">Ver perfil →</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Tarifa de conexión: tachada, gratis por ahora */}
+        <div className="text-right shrink-0">
+          <div className="flex items-center justify-end gap-1.5">
+            <span className="text-sm text-ink-300 line-through">${COMISION_CONSULTA.toLocaleString("es-AR")}</span>
+            <span className="font-display text-xl font-bold leading-none tracking-tight text-emerald-600">$0</span>
+          </div>
+          <div className="text-[11px] text-ink-400 mt-0.5">tarifa de conexión</div>
+        </div>
+      </div>
+
+      {error && (
+        <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">{error}</p>
+      )}
+
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <a
+          href={waLink ?? undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-disabled={!waLink}
+          className={`flex-1 rounded-lg px-4 py-2 text-center text-xs font-semibold transition ${
+            waLink
+              ? "bg-[#25D366] text-white hover:brightness-95"
+              : "pointer-events-none bg-ink-100 text-ink-400"
+          }`}
+        >
+          💬 Hablar por WhatsApp
+        </a>
+        {puedeElegir && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={handleElegir}
+            className="flex-1 rounded-lg bg-sv-primary px-4 py-2 text-xs font-semibold text-white hover:bg-sv-olive disabled:opacity-50 transition"
+          >
+            {pending ? "Confirmando…" : "Elegir a este técnico"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -458,11 +577,25 @@ function MiConsultaCard({
   const pendingCount = pub.propuestas.filter(
     (p) => !p.estado || p.estado === "pendiente"
   ).length;
+  // Flujo de contacto directo gratis: técnicos interesados a la espera de que
+  // el demandante elija con cuál trabajar (ver InteresadoRow más arriba).
+  const interesados = pub.propuestas.filter(
+    (p) => p.contacto_directo && p.estado === "interesado"
+  );
+  const nuevosCount = pendingCount + interesados.length;
   const propuestaAceptada =
     pub.propuestas.find((p) => p.estado === "aceptada" || p.estado === "completada") ?? null;
   const perfil = propuestaAceptada ? (perfilMap[propuestaAceptada.profesional_id] ?? null) : null;
 
-  const toggleBtn = pub.status === "abierto" && pendingCount > 0 ? (
+  const toggleLabel = expanded
+    ? "Ocultar"
+    : pendingCount > 0 && interesados.length > 0
+    ? `Ver actividad (${nuevosCount})`
+    : interesados.length > 0
+    ? `Ver ${interesados.length} técnico${interesados.length !== 1 ? "s" : ""} interesado${interesados.length !== 1 ? "s" : ""}`
+    : `Ver ${pendingCount} propuesta${pendingCount !== 1 ? "s" : ""}`;
+
+  const toggleBtn = pub.status === "abierto" && nuevosCount > 0 ? (
     <button
       type="button"
       onClick={onToggle}
@@ -472,7 +605,7 @@ function MiConsultaCard({
           : "bg-sv-dark text-white hover:bg-sv-olive"
       }`}
     >
-      {expanded ? "Ocultar" : `Ver ${pendingCount} propuesta${pendingCount !== 1 ? "s" : ""}`}
+      {toggleLabel}
     </button>
   ) : null;
 
@@ -502,7 +635,7 @@ function MiConsultaCard({
         {/* Botón inline solo en sm+ */}
         {toggleBtn && <div className="hidden sm:flex shrink-0 self-center">{toggleBtn}</div>}
 
-        {pub.status === "abierto" && pendingCount === 0 && pub.propuestas.length > 0 && (
+        {pub.status === "abierto" && nuevosCount === 0 && pub.propuestas.length > 0 && (
           <span className="hidden sm:flex shrink-0 self-center text-xs text-ink-400">Sin nuevas</span>
         )}
 
@@ -557,7 +690,20 @@ function MiConsultaCard({
         </div>
       )}
 
-      {/* Nuevas propuestas recibidas — aviso destacado para el demandante */}
+      {/* Técnicos interesados (contacto directo gratis) — aviso destacado */}
+      {pub.status === "abierto" && interesados.length > 0 && !expanded && (
+        <div className="border-t border-ink-100 bg-sv-primary/5 px-5 py-4">
+          <p className="text-[10.5px] font-semibold uppercase tracking-wide text-sv-olive">
+            🙋 {interesados.length} técnico{interesados.length !== 1 ? "s" : ""} quiere{interesados.length !== 1 ? "n" : ""} hacer este trabajo
+          </p>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-500">
+            Hablá por WhatsApp con el que te convenga, sin cargo. Cuando decidas, tocá{" "}
+            <strong className="text-sv-dark">&ldquo;{toggleLabel}&rdquo;</strong> y elegilo para arrancar.
+          </p>
+        </div>
+      )}
+
+      {/* Nuevas propuestas recibidas (flujo viejo) — aviso destacado para el demandante */}
       {pub.status === "abierto" && pendingCount > 0 && !expanded && (
         <div className="border-t border-ink-100 bg-sv-primary/5 px-5 py-4">
           <p className="text-[10.5px] font-semibold uppercase tracking-wide text-sv-olive">
@@ -614,7 +760,33 @@ function MiConsultaCard({
         <CalificarBlock publicacionId={pub.id} yaResenada={yaResenada} />
       )}
 
-      {expanded && pub.status === "abierto" && (
+      {expanded && pub.status === "abierto" && interesados.length > 0 && (
+        <div className="border-t border-ink-100 px-5 pb-5 pt-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h4 className="font-display text-sm font-semibold text-sv-dark">
+              {interesados.length} técnico{interesados.length !== 1 ? "s" : ""} interesado{interesados.length !== 1 ? "s" : ""}
+            </h4>
+            <span className="text-[11px] text-ink-400">Más recientes primero</span>
+          </div>
+          <div className="space-y-2">
+            {[...interesados]
+              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+              .map((prop) => (
+                <InteresadoRow
+                  key={prop.id}
+                  propuesta={prop}
+                  publicacion={pub}
+                  perfil={perfilMap[prop.profesional_id]}
+                  resumen={resumenMap[prop.profesional_id]}
+                  puedeElegir={pub.status === "abierto"}
+                  onElegido={() => router.refresh()}
+                />
+              ))}
+          </div>
+        </div>
+      )}
+
+      {expanded && pub.status === "abierto" && pendingCount > 0 && (
         <div className="border-t border-ink-100 px-5 pb-5 pt-4">
           <div className="mb-3 flex items-center justify-between">
             <h4 className="font-display text-sm font-semibold text-sv-dark">
@@ -624,6 +796,7 @@ function MiConsultaCard({
           </div>
           <div className="space-y-2">
             {[...pub.propuestas]
+              .filter((p) => !p.contacto_directo)
               .sort((a, b) => Number(a.precio) - Number(b.precio))
               .map((prop) => (
                 <PropuestaRow

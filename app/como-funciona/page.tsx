@@ -18,8 +18,8 @@ const PASOS_CLIENTE = [
   },
   {
     icon: "🤝",
-    title: "Aceptás y coordinan",
-    body: "Elegís la oferta que más te convenza. Recién ahí pagás la tarifa de conexión. Si no aceptás nada, no pagás.",
+    title: "Elegís y coordinan por WhatsApp",
+    body: "Hablás con los técnicos interesados y elegís el que más te convenza. El contacto es gratis mientras dure la promo de lanzamiento.",
   },
 ];
 
@@ -43,8 +43,8 @@ const PASOS_TECNICO = [
 
 const FAQ = [
   {
-    q: "¿Por qué cobran solo al aceptar una oferta?",
-    a: "Porque el valor que aportamos es la conexión calificada. Si no te conectamos con un técnico que te sirve, no entregamos nada y no cobramos.",
+    q: "¿Cuánto cuesta contactar a un técnico?",
+    a: "Por ahora, nada — mientras estemos en lanzamiento, conectar con un técnico es gratis para los primeros usuarios. Más adelante vamos a cobrar una tarifa única por conexión.",
   },
   {
     q: "¿Cómo verifican a los técnicos?",
@@ -89,8 +89,8 @@ export default async function ComoFuncionaPage() {
           </h1>
           <p className="reveal delay-200 mt-5 max-w-sm text-[15px] leading-relaxed text-ink-500">
             {esTecnico
-              ? "Recibís trabajos ya descriptos, con foto. Cotizás solo los que te interesan y cobrás íntegro al cierre."
-              : "Publicás el problema. Técnicos verificados te mandan propuesta. Elegís solo si te convence — y pagás solo si aceptás."}
+              ? "Recibís trabajos ya descriptos, con foto. Avisás cuáles te interesan y cobrás íntegro al cierre."
+              : "Publicás el problema. Técnicos verificados te avisan que quieren hacerlo. Elegís y hablás por WhatsApp — gratis mientras dure el lanzamiento."}
           </p>
           <div className="reveal delay-300 mt-8 flex flex-col gap-3 sm:flex-row">
             {esTecnico ? (
@@ -169,10 +169,11 @@ export default async function ComoFuncionaPage() {
               <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">
                 Para clientes
               </p>
-              <p className="display mt-2 text-[2.4rem] leading-none font-semibold text-sv-dark">
-                $4.500
-              </p>
-              <p className="mt-1 text-sm text-ink-400">tarifa única por conexión</p>
+              <div className="mt-2 flex items-center gap-2.5">
+                <p className="text-xl font-medium text-ink-300 line-through">$4.500</p>
+                <p className="display text-[2.4rem] leading-none font-semibold text-emerald-600">$0</p>
+              </div>
+              <p className="mt-1 text-sm text-ink-400">tarifa de conexión — gratis por lanzamiento</p>
               <div className="my-5 h-px bg-ink-100" />
               <ul className="space-y-2.5 text-sm text-ink-600">
                 <li className="flex items-center gap-2.5">

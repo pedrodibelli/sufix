@@ -71,21 +71,27 @@ async function DemandanteData({
     propuestas: (propuestas ?? []).filter((p) => p.publicacion_id === pub.id),
   }));
 
-  // Fetch perfiles para propuestas aceptadas/completadas (el RLS solo devuelve los autorizados)
-  const proIdsAceptados = [
+  // Fetch perfiles para propuestas aceptadas/completadas (el RLS solo devuelve los
+  // autorizados) y también para los "interesados" del flujo de contacto directo
+  // gratis: ahí el teléfono se muestra apenas el técnico avisa, sin esperar a que
+  // el demandante elija a nadie.
+  const proIdsConContacto = [
     ...new Set(
       (propuestas ?? [])
-        .filter((p) => p.estado === "aceptada" || p.estado === "completada")
+        .filter((p) =>
+          p.estado === "aceptada" || p.estado === "completada" ||
+          (p.contacto_directo && p.estado === "interesado")
+        )
         .map((p) => p.profesional_id)
         .filter(Boolean)
     ),
   ];
   const { data: perfiles } =
-    proIdsAceptados.length > 0
+    proIdsConContacto.length > 0
       ? await supabase
           .from("perfiles_profesionales")
           .select("user_id, nombre, telefono, email, zona")
-          .in("user_id", proIdsAceptados)
+          .in("user_id", proIdsConContacto)
       : { data: [] };
 
   const perfilMap: Record<string, { user_id: string; nombre: string | null; telefono: string | null; email: string | null; zona: string | null }> =
@@ -136,7 +142,7 @@ async function OferenteData({
     .from("propuestas")
     // Columnas mínimas para la vista del oferente. NO traer codigo_pago: el técnico
     // debe pedírselo al demandante para cerrar el trabajo (no leerlo de los datos).
-    .select("id, publicacion_id, precio, titulo, zona, categoria, demandante, estado, created_at")
+    .select("id, publicacion_id, precio, titulo, zona, categoria, demandante, estado, created_at, contacto_directo")
     .eq("profesional_id", userId)
     .order("created_at", { ascending: false });
 

@@ -6,7 +6,10 @@ import Link from "next/link";
 import type { PostedJob } from "@/lib/data";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "./CategoryArt";
-import { ContactarModal } from "./ContactarModal";
+// Flujo viejo (precio de consulta + pago) pausado — ver lib/config.ts
+// PROPUESTAS_CON_PRECIO_ACTIVO. Para reactivarlo, volver a importar y usar
+// ContactarModal en vez de ContactoDirectoModal en este archivo.
+import { ContactoDirectoModal } from "./ContactoDirectoModal";
 
 interface Props {
   jobs: PostedJob[];
@@ -136,7 +139,7 @@ export function MarketplaceGrid({
           </>
         )}
 
-        {selected && <ContactarModal job={selected} onClose={() => setSelected(null)} />}
+        {selected && <ContactoDirectoModal job={selected} onClose={() => setSelected(null)} />}
       </>
     );
   }
@@ -174,7 +177,7 @@ export function MarketplaceGrid({
         ))}
       </div>
 
-      {selected && <ContactarModal job={selected} onClose={() => setSelected(null)} />}
+      {selected && <ContactoDirectoModal job={selected} onClose={() => setSelected(null)} />}
     </>
   );
 }
@@ -280,12 +283,12 @@ function JobCard({
           {/* Oferente */}
           {!sinSesion && esProfesional && !yaContactado && (
             <button type="button" onClick={onContactar} className="btn-primary w-full text-sm">
-              Contactar
+              Quiero hacer este trabajo
             </button>
           )}
           {!sinSesion && esProfesional && yaContactado && (
             <div className="w-full rounded-xl border border-zap-500/30 bg-zap-500/10 px-3 py-2 text-center text-xs font-medium text-zap-300">
-              Propuesta enviada · esperando respuesta
+              Ya avisaste tu interés · esperando que te elijan
             </div>
           )}
 

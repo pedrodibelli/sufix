@@ -78,14 +78,15 @@ export default async function HomePage({
     return true;
   });
 
-  // IDs de publicaciones donde el profesional ya tiene propuesta pendiente
+  // IDs de publicaciones donde el profesional ya tiene propuesta pendiente o ya
+  // avisó que quiere hacer el trabajo (flujo de contacto directo gratis).
   let yaContactadoIds: string[] = [];
   if (esProfesional && user) {
     const { data: propsPendientes } = await supabaseServer
       .from("propuestas")
       .select("publicacion_id")
       .eq("profesional_id", user.id)
-      .eq("estado", "pendiente");
+      .in("estado", ["pendiente", "interesado"]);
     yaContactadoIds = (propsPendientes ?? []).map((p: { publicacion_id: string }) => p.publicacion_id);
   }
 
@@ -121,8 +122,8 @@ export default async function HomePage({
                   Tu problema<br />tiene solución.
                 </h1>
                 <p className="mt-4 text-base leading-relaxed text-ink-500 sm:text-lg lg:text-xl">
-                  Describí lo que necesitás. Técnicos certificados te mandan
-                  presupuesto en minutos, sin cargos hasta que aceptes.
+                  Describí lo que necesitás. Técnicos certificados te contactan
+                  por WhatsApp en minutos — gratis por lanzamiento.
                 </p>
                 <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
                   <Link href="/publicar" className="btn-primary w-full py-4 text-base sm:w-auto sm:px-10">
@@ -133,7 +134,7 @@ export default async function HomePage({
                   </Link>
                 </div>
                 <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ink-400">
-                  <span>✓ Sin cargo hasta aceptar</span>
+                  <span>✓ Gratis por lanzamiento</span>
                   <span>✓ Técnicos verificados</span>
                   <span>✓ Respuesta en minutos</span>
                 </div>

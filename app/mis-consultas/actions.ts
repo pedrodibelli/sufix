@@ -1,7 +1,9 @@
 "use server";
 
+import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
+import { CUPO_CONTACTOS_GRATIS } from "@/lib/config";
 
 // El demandante declara que hizo la transferencia. NO desbloquea el contacto:
 // deja la propuesta en revisión hasta que un admin verifique el comprobante.
@@ -178,6 +180,136 @@ export async function reportarProblema(
     .from("publicaciones")
     .update({ status: "en_disputa" })
     .eq("id", publicacionId);
+
+  revalidatePath("/mis-consultas");
+  return { ok: true };
+}
+
+// ─── Flujo de contacto directo gratis (ver supabase/migrations/20260805_*) ─────
+
+// El oferente toca "Quiero hacer este trabajo": crea una propuesta sin precio,
+// marcada contacto_directo = true. Mientras haya cupo global, queda visible para
+// el demandante (nombre, reseñas, WhatsApp) sin que nadie pague nada.
+export async function crearContactoDirecto(
+  publicacionId: string,
+  job: {
+    titulo: string;
+    descripcion: string;
+    zona: string;
+    categoria: string;
+    foto: string | null;
+    demandante: string;
+  }
+): Promise<{ ok: true; yaExistia?: boolean } | { error: string }> {
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Necesitás iniciar sesión para contactar al cliente." };
+
+  const { data: pub } = await supabase
+    .from("publicaciones")
+    .select("status")
+    .eq("id", publicacionId)
+    .single();
+  if (!pub) return { error: "No encontramos esta publicación." };
+  if (pub.status !== "abierto") return { error: "Esta publicación ya no está disponible." };
+
+  // Evitar duplicados si el técnico ya la había reclamado antes.
+  const { data: existente } = await supabase
+    .from("propuestas")
+    .select("id")
+    .eq("publicacion_id", publicacionId)
+    .eq("profesional_id", user.id)
+    .eq("contacto_directo", true)
+    .maybeSingle();
+  if (existente) return { ok: true, yaExistia: true };
+
+  // Cupo global — se cuentan PUBLICACIONES con al menos un contacto gratis, no
+  // técnicos ("los primeros 1000 usuarios/trabajos"). Si esta publicación ya
+  // tiene algún interesado, no gasta cupo nuevo aunque este sea otro técnico.
+  // Necesita saltar RLS (un oferente no puede ver propuestas de otros), por eso
+  // se usa el service role solo para esta cuenta.
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (url && serviceKey) {
+    const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
+    const { data: pubsConContacto } = await admin
+      .from("propuestas")
+      .select("publicacion_id")
+      .eq("contacto_directo", true);
+    const publicacionesConCupoUsado = new Set((pubsConContacto ?? []).map((p) => p.publicacion_id));
+    const esNuevaParaEsteCupo = !publicacionesConCupoUsado.has(publicacionId);
+    if (esNuevaParaEsteCupo && publicacionesConCupoUsado.size >= CUPO_CONTACTOS_GRATIS) {
+      return { error: "Por ahora alcanzamos el cupo de contactos gratis. ¡Muy pronto habilitamos más!" };
+    }
+  }
+
+  const meta = user.user_metadata;
+  const nombrePro = [meta?.nombre, meta?.apellido].filter(Boolean).join(" ") || null;
+
+  const { error: insertError } = await supabase.from("propuestas").insert({
+    publicacion_id: publicacionId,
+    precio: 0,
+    contacto_directo: true,
+    estado: "interesado",
+    profesional_id: user.id,
+    nombre_profesional: nombrePro,
+    titulo: job.titulo,
+    descripcion: job.descripcion,
+    zona: job.zona,
+    categoria: job.categoria,
+    foto: job.foto,
+    demandante: job.demandante,
+  });
+
+  if (insertError) return { error: `No pudimos registrar tu interés: ${insertError.message}` };
+
+  revalidatePath("/mis-consultas");
+  return { ok: true };
+}
+
+// El demandante, después de hablar por WhatsApp con uno o más técnicos, elige
+// con cuál va a trabajar. Ahí (y solo ahí) se genera el código de 4 dígitos y la
+// publicación pasa a en_curso — mismo mecanismo que el pago viejo, sin el pago.
+export async function elegirTecnico(
+  propuestaId: string,
+  publicacionId: string
+): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autenticado" };
+
+  const { data: pub } = await supabase
+    .from("publicaciones")
+    .select("user_id, status")
+    .eq("id", publicacionId)
+    .single();
+  if (!pub || pub.user_id !== user.id) return { error: "No autorizado" };
+  if (pub.status !== "abierto") return { error: "Ya elegiste un técnico para este trabajo." };
+
+  const { data: propuesta } = await supabase
+    .from("propuestas")
+    .select("contacto_directo, estado")
+    .eq("id", propuestaId)
+    .single();
+  if (!propuesta) return { error: "No encontramos este contacto." };
+  if (!propuesta.contacto_directo || propuesta.estado !== "interesado") {
+    return { error: "Este técnico ya no está disponible." };
+  }
+
+  const codigo = String(Math.floor(1000 + Math.random() * 9000));
+  const now = new Date().toISOString();
+
+  const [{ error: errProp }, { error: errPub }] = await Promise.all([
+    supabase.from("propuestas").update({
+      estado: "aceptada",
+      codigo_pago: codigo,
+      aceptada_at: now,
+    }).eq("id", propuestaId),
+    supabase.from("publicaciones").update({ status: "en_curso" }).eq("id", publicacionId),
+  ]);
+
+  if (errProp) return { error: `Error al confirmar: ${errProp.message}` };
+  if (errPub) console.error("[elegirTecnico] publicaciones update:", errPub.message);
 
   revalidatePath("/mis-consultas");
   return { ok: true };

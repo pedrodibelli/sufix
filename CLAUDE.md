@@ -192,6 +192,44 @@ Vercel. El código usa:
 > 📌 Hubo un intento de "modelo conexión" (cobrar solo los $4.500 y que el técnico cobre directo al
 > cliente). Se **descartó**: la plataforma cobra todo y Mateo le paga al técnico al concretarse.
 
+### 9.1 Flujo de "contacto directo gratis" (2026-08, temporal — PAUSA el modelo de arriba)
+
+**Objetivo:** generar movimiento en el marketplace mientras es chico. Nadie paga nada —
+ni cliente ni técnico — hasta tener una base de usuarios activos definida.
+
+- El oferente ya **no cotiza un precio de consulta**. Toca *"Quiero hacer este trabajo"*
+  (`components/ContactoDirectoModal.tsx`) → se crea una `propuesta` con `contacto_directo = true`,
+  `precio = 0`, `estado = 'interesado'` (`crearContactoDirecto` en `app/mis-consultas/actions.ts`).
+- **Pueden reclamar el mismo trabajo varios técnicos a la vez** (no es exclusivo). El demandante
+  recibe **mail + aviso en la web** con el teléfono/WhatsApp y perfil (reseñas) de cada uno, y es
+  **el demandante quien escribe primero** al técnico (no al revés).
+- El cartel de precio se muestra tachado al demandante: `~~$4.500~~ $0` (`InteresadoRow` en
+  `DemandanteView.tsx`), con un botón directo a WhatsApp (mensaje precargado con el título/zona/
+  categoría de la consulta, para que el técnico —que puede tener muchas— sepa de qué se trata).
+- El código de 4 dígitos / seguimiento / reseña **NO se genera solo con reclamar el trabajo**.
+  El demandante tiene que volver a la app y tocar **"Elegir a este técnico"** en la fila
+  correspondiente (`elegirTecnico` en `app/mis-consultas/actions.ts`) — ahí, y solo ahí, se genera
+  el código y `publicaciones.status` pasa a `en_curso` (mismo mecanismo que `aprobar_pago`, sin el
+  pago). Una vez elegido, la publicación deja de aceptar nuevos técnicos.
+- **Cupo gratis: "los primeros 1000 usuarios/trabajos", no 1000 técnicos.** Se cuentan
+  **publicaciones distintas** con al menos un interesado contra `CUPO_CONTACTOS_GRATIS` en
+  `lib/config.ts` (hoy: 1000). Si a un trabajo que ya tiene cupo usado se le suman más técnicos,
+  **no gasta cupo nuevo** — solo cuenta la primera vez que una publicación consigue un interesado.
+  Se calcula con el service role porque un técnico no puede ver, por RLS, las propuestas de otros.
+- **RLS nueva:** migración `20260805_contacto_directo_gratis.sql` agrega la policy
+  `perfil_contacto_directo` sobre `perfiles_profesionales` — deja ver el teléfono del técnico
+  cuando `contacto_directo = true` y `estado = 'interesado'` (la policy vieja solo lo permitía en
+  `aceptada`/`completada`). Es **aditiva**, no reemplaza ni afloja la policy vieja.
+- **El flujo viejo (precio de consulta + pago de $4.500 por transferencia) NO se borró.**
+  `ContactarModal.tsx` y `AceptarModal.tsx` siguen intactos en el repo, simplemente
+  `MarketplaceGrid.tsx` dejó de invocarlos (usa `ContactoDirectoModal` en su lugar). Para volver a
+  cobrar: en `MarketplaceGrid.tsx` volver a usar `ContactarModal`, y prender
+  `PROPUESTAS_CON_PRECIO_ACTIVO` en `lib/config.ts` (hoy es solo documentación/flag, no hay
+  gating automático más allá de ese swap de componente).
+- **Pendiente/pausado a propósito:** no hay forma de calificar/cerrar un trabajo si el demandante
+  nunca toca "Elegir a este técnico" — está bien así por ahora (mucha gente puede escribir por
+  WhatsApp sin que eso implique un trabajo formal en curso).
+
 ## 10. Base de datos (Supabase) y migraciones
 
 **Tablas:** `publicaciones`, `propuestas`, `perfiles_profesionales`, `verificaciones`, `disputas`, `resenas`.

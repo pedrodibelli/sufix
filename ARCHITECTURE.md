@@ -6,7 +6,13 @@ Este documento describe la estructura técnica del proyecto para que un agente d
 
 ## Resumen ejecutivo
 
-SolvIT es un marketplace de servicios para el hogar en Buenos Aires construido con **Next.js 16 App Router** y **Supabase**. Tiene dos actores: demandantes (publican problemas) y oferentes/profesionales (envían propuestas de precio). El flujo culmina en un pago por transferencia bancaria y un intercambio de código de verificación.
+SolvIT es un marketplace de servicios para el hogar en Buenos Aires construido con **Next.js 16 App Router** y **Supabase**. Tiene dos actores: demandantes (publican problemas) y oferentes/profesionales.
+
+> ⚠️ **2026-08: flujo de pago pausado temporalmente.** Lo que sigue describe el flujo histórico
+> (propuesta con precio + pago por transferencia). Hoy el marketplace usa un flujo de **contacto
+> directo gratis** (sin precio, sin pago, elegís por WhatsApp) — ver **CLAUDE.md §9.1** para el
+> detalle completo y cómo revertir. El código viejo (`ContactarModal.tsx`, `AceptarModal.tsx`)
+> sigue en el repo sin borrar, solo dejó de usarse desde `MarketplaceGrid.tsx`.
 
 ---
 
@@ -60,13 +66,16 @@ taller/
 │   ├── FilterDropdown.tsx        # Dropdown de filtros
 │   ├── StarRating.tsx            # Componente de estrellas
 │   │
-│   ├── ContactarModal.tsx        # Modal para que el oferente envíe una propuesta
-│   │                               Guarda: precio, datos del profesional desde user_metadata
+│   ├── ContactarModal.tsx        # (PAUSADO, ver CLAUDE.md §9.1) Modal para que el oferente
+│   │                               envíe una propuesta con precio. Ya no se usa desde
+│   │                               MarketplaceGrid.tsx, pero el código sigue intacto.
 │   │
-│   ├── AceptarModal.tsx          # Modal de pago en 3 pasos (demandante acepta propuesta)
-│   │                               Paso 0: Resumen con precio + comisión $4500
-│   │                               Paso 1: Datos de transferencia bancaria
-│   │                               Paso 3: Datos del profesional desbloqueados + código
+│   ├── AceptarModal.tsx          # (PAUSADO) Modal de pago en 3 pasos (demandante acepta
+│   │                               propuesta con precio + comisión $4500 por transferencia)
+│   │
+│   ├── ContactoDirectoModal.tsx  # (ACTIVO) Reemplaza a ContactarModal: el oferente avisa que
+│   │                               quiere el trabajo, sin precio. Ver crearContactoDirecto()
+│   │                               en app/mis-consultas/actions.ts
 │   │
 │   ├── EliminarPublicacion.tsx   # Botón para eliminar una publicación propia
 │   ├── LogoutButton.tsx          # Botón de cerrar sesión

@@ -19,13 +19,15 @@ type Propuesta = {
   estado: string | null;
   created_at: string;
   photo: string | null;
+  contacto_directo: boolean | null;
 };
 
-type Tab = "todas" | "pendiente" | "aceptada" | "completada" | "rechazada";
+type Tab = "todas" | "pendiente" | "interesado" | "aceptada" | "completada" | "rechazada";
 
 const ESTADO_MAP: Record<string, { label: string; cls: string; darkCls: string }> = {
   pendiente:        { label: "Pendiente",        cls: "bg-amber-100 text-amber-700",     darkCls: "bg-amber-400/15 text-amber-300" },
   pago_en_revision: { label: "Pago en revisión",  cls: "bg-amber-100 text-amber-700",     darkCls: "bg-amber-400/15 text-amber-300" },
+  interesado: { label: "Esperando al cliente", cls: "bg-blue-100 text-blue-700",         darkCls: "bg-blue-400/15 text-blue-300" },
   aceptada:   { label: "Aceptada",   cls: "bg-sv-primary/10 text-sv-olive",    darkCls: "bg-zap-500/20 text-zap-300" },
   completada: { label: "Completada", cls: "bg-emerald-100 text-emerald-700",   darkCls: "bg-emerald-500/20 text-emerald-300" },
   rechazada:  { label: "Rechazada",  cls: "bg-rose-100 text-rose-700",         darkCls: "bg-rose-500/15 text-rose-400" },
@@ -137,7 +139,7 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
   const labelCls = dark ? "text-zap-500"  : "text-ink-400";
   const demCls   = dark ? "text-zap-200"  : "text-sv-dark";
 
-  const priceBlock = estado !== "rechazada" && (
+  const priceBlock = !p.contacto_directo && estado !== "rechazada" && (
     <>
       <div className={`font-display text-[22px] font-semibold leading-none tracking-tight ${priceCls}`}>
         ${Number(p.precio).toLocaleString("es-AR")}
@@ -194,16 +196,32 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
         )}
       </div>
 
-      {/* Aceptada y pagada: aviso destacado + input para cerrar con el código */}
+      {/* Interesado (contacto directo gratis): esperando que el cliente elija */}
+      {estado === "interesado" && p.contacto_directo && (
+        <div className={`mt-3 rounded-xl border p-4 ${dark ? "border-blue-500/25 bg-blue-500/10" : "border-blue-200 bg-blue-50"}`}>
+          <p className={`text-sm font-semibold ${dark ? "text-blue-300" : "text-blue-700"}`}>
+            🙋 Le avisamos a {p.demandante ?? "el cliente"} que querés este trabajo
+          </p>
+          <p className={`mt-1 text-[12.5px] leading-relaxed ${dark ? "text-blue-100/80" : "text-blue-800"}`}>
+            Es gratis, no tenés que hacer nada más. Si te elige entre los interesados, te va a escribir directo por WhatsApp.
+          </p>
+        </div>
+      )}
+
+      {/* Aceptada (con o sin pago, según el flujo): aviso + input para cerrar con el código */}
       {estado === "aceptada" && (
         <>
           <div className={`mt-3 rounded-xl border p-4 ${dark ? "border-emerald-500/25 bg-emerald-500/10" : "border-emerald-200 bg-emerald-50"}`}>
             <p className={`text-sm font-semibold ${dark ? "text-emerald-300" : "text-emerald-700"}`}>
-              🎉 ¡Te aceptaron y ya pagaron!
+              {p.contacto_directo ? "🎉 ¡El cliente te eligió!" : "🎉 ¡Te aceptaron y ya pagaron!"}
             </p>
             <p className={`mt-1 text-[12.5px] leading-relaxed ${dark ? "text-emerald-100/80" : "text-emerald-800"}`}>
-              <strong>{p.demandante ?? "El cliente"}</strong> abonó la consulta. Coordiná la visita
-              por WhatsApp. <strong>SolvIT te paga tu consulta</strong> cuando se cierre el trabajo.
+              {p.contacto_directo ? (
+                <><strong>{p.demandante ?? "El cliente"}</strong> te eligió para este trabajo. Coordiná la visita por WhatsApp.</>
+              ) : (
+                <><strong>{p.demandante ?? "El cliente"}</strong> abonó la consulta. Coordiná la visita
+                por WhatsApp. <strong>SolvIT te paga tu consulta</strong> cuando se cierre el trabajo.</>
+              )}
             </p>
           </div>
           <ConfirmarCodigoBlock propuestaId={p.id} dark={dark} />
@@ -295,6 +313,7 @@ export function OferenteView({
   const tabs: { id: Tab; label: string; count: number }[] = [
     { id: "todas",      label: "Todas",       count: propuestas.length },
     { id: "pendiente",  label: "Pendientes",  count: propuestas.filter((p) => getEstado(p) === "pendiente").length },
+    { id: "interesado", label: "Interesado",  count: propuestas.filter((p) => getEstado(p) === "interesado").length },
     { id: "aceptada",   label: "Aceptadas",   count: propuestas.filter((p) => getEstado(p) === "aceptada").length },
     { id: "completada", label: "Completadas", count: propuestas.filter((p) => getEstado(p) === "completada").length },
     { id: "rechazada",  label: "Rechazadas",  count: propuestas.filter((p) => getEstado(p) === "rechazada").length },
