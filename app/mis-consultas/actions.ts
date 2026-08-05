@@ -213,19 +213,22 @@ export async function crearContactoDirecto(
   if (!pub) return { error: "No encontramos esta publicación." };
   if (pub.status !== "abierto") return { error: "Esta publicación ya no está disponible." };
 
-  // Evitar duplicados si el técnico ya la había reclamado antes.
+  // Evitar duplicados si el técnico ya la había reclamado antes. Las que
+  // canceló ('cancelada') no bloquean — puede volver a anotarse.
   const { data: existente } = await supabase
     .from("propuestas")
     .select("id")
     .eq("publicacion_id", publicacionId)
     .eq("profesional_id", user.id)
     .eq("contacto_directo", true)
+    .in("estado", ["interesado", "aceptada", "completada"])
     .maybeSingle();
   if (existente) return { ok: true, yaExistia: true };
 
-  // Cupo global — se cuentan PUBLICACIONES con al menos un contacto gratis, no
-  // técnicos ("los primeros 1000 usuarios/trabajos"). Si esta publicación ya
-  // tiene algún interesado, no gasta cupo nuevo aunque este sea otro técnico.
+  // Cupo global — se cuentan PUBLICACIONES con al menos un contacto gratis
+  // ACTIVO, no técnicos ("los primeros 1000 usuarios/trabajos"). Si esta
+  // publicación ya tiene algún interesado, no gasta cupo nuevo aunque este sea
+  // otro técnico. Si todos los interesados cancelaron, el cupo se libera.
   // Necesita saltar RLS (un oferente no puede ver propuestas de otros), por eso
   // se usa el service role solo para esta cuenta.
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -235,7 +238,8 @@ export async function crearContactoDirecto(
     const { data: pubsConContacto } = await admin
       .from("propuestas")
       .select("publicacion_id")
-      .eq("contacto_directo", true);
+      .eq("contacto_directo", true)
+      .in("estado", ["interesado", "aceptada", "completada"]);
     const publicacionesConCupoUsado = new Set((pubsConContacto ?? []).map((p) => p.publicacion_id));
     const esNuevaParaEsteCupo = !publicacionesConCupoUsado.has(publicacionId);
     if (esNuevaParaEsteCupo && publicacionesConCupoUsado.size >= CUPO_CONTACTOS_GRATIS) {
@@ -262,6 +266,35 @@ export async function crearContactoDirecto(
   });
 
   if (insertError) return { error: `No pudimos registrar tu interés: ${insertError.message}` };
+
+  revalidatePath("/mis-consultas");
+  return { ok: true };
+}
+
+// El técnico se arrepiente antes de que lo elijan: saca su interés de la vista
+// del demandante. No borra la fila (más simple/seguro con el mismo mecanismo de
+// RLS que ya usa rechazarPropuesta), solo cambia el estado — y libera el cupo
+// gratis de esa publicación si era el único interesado (ver crearContactoDirecto).
+export async function cancelarInteres(
+  propuestaId: string
+): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autenticado" };
+
+  const { data: propuesta } = await supabase
+    .from("propuestas")
+    .select("profesional_id, contacto_directo, estado")
+    .eq("id", propuestaId)
+    .single();
+  if (!propuesta) return { error: "No encontramos este contacto." };
+  if (propuesta.profesional_id !== user.id) return { error: "No autorizado" };
+  if (!propuesta.contacto_directo || propuesta.estado !== "interesado") {
+    return { error: "Ya no se puede cancelar este contacto." };
+  }
+
+  const { error } = await supabase.from("propuestas").update({ estado: "cancelada" }).eq("id", propuestaId);
+  if (error) return { error: `No pudimos cancelar: ${error.message}` };
 
   revalidatePath("/mis-consultas");
   return { ok: true };

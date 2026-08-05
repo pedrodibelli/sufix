@@ -7,7 +7,7 @@ import Link from "next/link";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "@/components/CategoryArt";
 import { supabase } from "@/lib/supabase";
-import { confirmarCodigo } from "./actions";
+import { confirmarCodigo, cancelarInteres } from "./actions";
 import { ReportarProblemaModal } from "./ReportarProblemaModal";
 
 type Propuesta = {
@@ -30,6 +30,7 @@ const ESTADO_MAP: Record<string, { label: string; cls: string; darkCls: string }
   pendiente:        { label: "Pendiente",        cls: "bg-amber-100 text-amber-700",     darkCls: "bg-amber-400/15 text-amber-300" },
   pago_en_revision: { label: "Pago en revisión",  cls: "bg-amber-100 text-amber-700",     darkCls: "bg-amber-400/15 text-amber-300" },
   interesado: { label: "Esperando al cliente", cls: "bg-blue-100 text-blue-700",         darkCls: "bg-blue-400/15 text-blue-300" },
+  cancelada: { label: "Cancelaste el interés", cls: "bg-ink-100 text-ink-500",           darkCls: "bg-white/10 text-zap-400" },
   aceptada:   { label: "Aceptada",   cls: "bg-sv-primary/10 text-sv-olive",    darkCls: "bg-zap-500/20 text-zap-300" },
   completada: { label: "Completada", cls: "bg-emerald-100 text-emerald-700",   darkCls: "bg-emerald-500/20 text-emerald-300" },
   rechazada:  { label: "Rechazada",  cls: "bg-rose-100 text-rose-700",         darkCls: "bg-rose-500/15 text-rose-400" },
@@ -126,10 +127,27 @@ function ConfirmarCodigoBlock({ propuestaId, dark }: { propuestaId: string; dark
 
 // ─── MiPropuestaCard ──────────────────────────────────────────────────────────
 function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
+  const router = useRouter();
   const [reportando, setReportando] = useState(false);
+  const [confirmandoCancelar, setConfirmandoCancelar] = useState(false);
+  const [cancelError, setCancelError] = useState("");
+  const [cancelando, startCancelar] = useTransition();
   const cat = CATEGORIES.find((c) => c.slug === p.categoria);
   const estado = p.estado ?? "pendiente";
   const puedeReportar = estado === "aceptada" || estado === "completada";
+
+  function handleCancelar() {
+    setCancelError("");
+    startCancelar(async () => {
+      const r = await cancelarInteres(p.id);
+      if ("error" in r) {
+        setCancelError(r.error);
+        return;
+      }
+      setConfirmandoCancelar(false);
+      router.refresh();
+    });
+  }
 
   const cardCls = dark
     ? "rounded-2xl border border-white/10 bg-[#162420] p-5"
@@ -207,6 +225,40 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
           <p className={`mt-1 text-[12.5px] leading-relaxed ${dark ? "text-blue-100/80" : "text-blue-800"}`}>
             Es gratis, no tenés que hacer nada más. Si te elige entre los interesados, te va a escribir directo por WhatsApp.
           </p>
+
+          {!confirmandoCancelar ? (
+            <button
+              type="button"
+              onClick={() => setConfirmandoCancelar(true)}
+              className={`mt-3 text-xs font-medium underline-offset-2 hover:underline ${dark ? "text-blue-300/70 hover:text-blue-200" : "text-blue-700/70 hover:text-blue-800"}`}
+            >
+              Ya no me interesa este trabajo
+            </button>
+          ) : (
+            <div className={`mt-3 rounded-lg border p-3 ${dark ? "border-white/10 bg-black/20" : "border-blue-200 bg-white"}`}>
+              <p className={`text-xs ${dark ? "text-zap-300" : "text-ink-600"}`}>
+                ¿Seguro que ya no querés hacer este trabajo? El cliente deja de verte entre los interesados.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmandoCancelar(false)}
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${dark ? "border-white/15 text-zap-300 hover:bg-white/5" : "border-ink-200 text-ink-600 hover:bg-ink-50"}`}
+                >
+                  Seguir interesado
+                </button>
+                <button
+                  type="button"
+                  disabled={cancelando}
+                  onClick={handleCancelar}
+                  className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50"
+                >
+                  {cancelando ? "Cancelando…" : "Sí, cancelar interés"}
+                </button>
+              </div>
+              {cancelError && <p className="mt-1.5 text-xs text-rose-500">{cancelError}</p>}
+            </div>
+          )}
         </div>
       )}
 

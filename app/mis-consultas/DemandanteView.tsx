@@ -250,6 +250,7 @@ function InteresadoRow({
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
+  const [confirmandoElegir, setConfirmandoElegir] = useState(false);
 
   const nombre = propuesta.nombre_profesional ?? "Profesional";
   const primerNombre = nombre.split(" ")[0];
@@ -315,31 +316,57 @@ function InteresadoRow({
         <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">{error}</p>
       )}
 
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <a
-          href={waLink ?? undefined}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-disabled={!waLink}
-          className={`flex-1 rounded-lg px-4 py-2 text-center text-xs font-semibold transition ${
-            waLink
-              ? "bg-[#25D366] text-white hover:brightness-95"
-              : "pointer-events-none bg-ink-100 text-ink-400"
-          }`}
-        >
-          💬 Hablar por WhatsApp
-        </a>
-        {puedeElegir && (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={handleElegir}
-            className="flex-1 rounded-lg bg-sv-primary px-4 py-2 text-xs font-semibold text-white hover:bg-sv-olive disabled:opacity-50 transition"
+      {!confirmandoElegir ? (
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <a
+            href={waLink ?? undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-disabled={!waLink}
+            className={`flex-1 rounded-lg px-4 py-2 text-center text-xs font-semibold transition ${
+              waLink
+                ? "bg-[#25D366] text-white hover:brightness-95"
+                : "pointer-events-none bg-ink-100 text-ink-400"
+            }`}
           >
-            {pending ? "Confirmando…" : "Elegir a este técnico"}
-          </button>
-        )}
-      </div>
+            💬 Hablar por WhatsApp
+          </a>
+          {puedeElegir && (
+            <button
+              type="button"
+              onClick={() => setConfirmandoElegir(true)}
+              className="flex-1 rounded-lg bg-sv-primary px-4 py-2 text-xs font-semibold text-white hover:bg-sv-olive transition"
+            >
+              Elegir a este técnico
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="mt-3 rounded-lg border border-sv-primary/25 bg-sv-primary/5 p-3">
+          <p className="text-xs text-ink-600">
+            ¿Confirmás que elegís a <strong className="text-sv-dark">{primerNombre}</strong>? Se genera el
+            código de seguimiento y el trabajo deja de mostrarse a nuevos técnicos.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => setConfirmandoElegir(false)}
+              className="rounded-lg border border-ink-200 px-3 py-1.5 text-xs font-medium text-ink-600 transition hover:bg-ink-50 disabled:opacity-50"
+            >
+              Todavía no
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={handleElegir}
+              className="rounded-lg bg-sv-primary px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-sv-olive disabled:opacity-50"
+            >
+              {pending ? "Confirmando…" : `Sí, elegir a ${primerNombre}`}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -688,6 +715,22 @@ function MiConsultaCard({
               {borrarError && <p className="mt-1.5 text-xs text-rose-600">{borrarError}</p>}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Esperando el primer interesado — tranquiliza mientras no hay actividad */}
+      {pub.status === "abierto" && pub.propuestas.length === 0 && (
+        <div className="border-t border-ink-100 bg-ink-50/60 px-5 py-4">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-sv-primary" />
+            <p className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">
+              Buscando técnicos
+            </p>
+          </div>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-500">
+            Ya está publicado y visible para técnicos verificados de tu zona y rubro. Apenas alguien
+            esté interesado te avisamos por mail y acá mismo — no hace falta que hagas nada más.
+          </p>
         </div>
       )}
 

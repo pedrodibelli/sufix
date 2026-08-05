@@ -162,6 +162,29 @@ export default async function HomePage({
               </p>
             </div>
 
+            {/* Banner: contacto gratis por lanzamiento */}
+            {!sinSesion && (
+              <div className={`mb-6 flex items-center gap-3.5 rounded-2xl border p-4 sm:p-5 ${
+                esProfesional ? "border-sv-primary/25 bg-sv-primary/10" : "border-sv-primary/25 bg-sv-primary/5"
+              }`}>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sv-primary/15 text-xl">
+                  🎉
+                </span>
+                <div className="min-w-0">
+                  <p className={`text-sm font-semibold ${esProfesional ? "text-zap-50" : "text-sv-dark"}`}>
+                    {esProfesional
+                      ? "Contactar clientes es gratis por lanzamiento"
+                      : "Conectar con un técnico es gratis por lanzamiento"}
+                  </p>
+                  <p className={`mt-0.5 text-[13px] ${esProfesional ? "text-zap-300" : "text-ink-500"}`}>
+                    {esProfesional
+                      ? "Sin comisión, sin cotizar nada — avisá que te interesa el trabajo y esperá que el cliente te elija."
+                      : "Sin cargo por ahora. Hablá por WhatsApp con los técnicos interesados y elegí el que más te convenga."}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Cartel: pedidos urgentes del rubro del técnico */}
             {esProfesional && urgentesDeMiRubro.length > 0 && (
               <div className="mb-6 rounded-2xl border border-rose-400/30 bg-rose-500/10 p-4 sm:p-5">

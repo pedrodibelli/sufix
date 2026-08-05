@@ -207,10 +207,18 @@ ni cliente ni técnico — hasta tener una base de usuarios activos definida.
   `DemandanteView.tsx`), con un botón directo a WhatsApp (mensaje precargado con el título/zona/
   categoría de la consulta, para que el técnico —que puede tener muchas— sepa de qué se trata).
 - El código de 4 dígitos / seguimiento / reseña **NO se genera solo con reclamar el trabajo**.
-  El demandante tiene que volver a la app y tocar **"Elegir a este técnico"** en la fila
-  correspondiente (`elegirTecnico` en `app/mis-consultas/actions.ts`) — ahí, y solo ahí, se genera
-  el código y `publicaciones.status` pasa a `en_curso` (mismo mecanismo que `aprobar_pago`, sin el
-  pago). Una vez elegido, la publicación deja de aceptar nuevos técnicos.
+  El demandante tiene que volver a la app y tocar **"Elegir a este técnico"** (con un paso de
+  confirmación intermedio) en la fila correspondiente (`elegirTecnico` en
+  `app/mis-consultas/actions.ts`) — ahí, y solo ahí, se genera el código y `publicaciones.status`
+  pasa a `en_curso` (mismo mecanismo que `aprobar_pago`, sin el pago). Una vez elegido, la
+  publicación deja de aceptar nuevos técnicos.
+- El técnico puede arrepentirse antes de ser elegido con **"Ya no me interesa este trabajo"**
+  (`cancelarInteres`) → `estado = 'cancelada'`. No borra la fila (mismo patrón RLS que
+  `rechazarPropuesta`). El cupo y el chequeo de duplicados (`crearContactoDirecto`) ignoran las
+  filas `cancelada` — el técnico puede volver a anotarse después.
+- **Notificaciones en vivo:** `DemandanteView.tsx`/`OferenteView.tsx` se suscriben por Realtime a
+  la tabla `propuestas` (ya habilitada desde antes) y hacen `router.refresh()` cuando cambia algo
+  de lo propio, sin recargar la página.
 - **Cupo gratis: "los primeros 1000 usuarios/trabajos", no 1000 técnicos.** Se cuentan
   **publicaciones distintas** con al menos un interesado contra `CUPO_CONTACTOS_GRATIS` en
   `lib/config.ts` (hoy: 1000). Si a un trabajo que ya tiene cupo usado se le suman más técnicos,
