@@ -301,8 +301,9 @@ function InteresadoRow({
           </div>
         </div>
 
-        {/* Tarifa de conexión: tachada, gratis por ahora */}
-        <div className="text-right shrink-0">
+        {/* Tarifa de conexión: tachada, gratis por ahora. En mobile no se repite
+            acá — ya se ve grande arriba, en el header del modal. */}
+        <div className="hidden text-right shrink-0 sm:block">
           <div className="flex items-center justify-end gap-1.5">
             <span className="text-sm text-ink-300 line-through">${COMISION_CONSULTA.toLocaleString("es-AR")}</span>
             <span className="font-display text-xl font-bold leading-none tracking-tight text-emerald-600">$0</span>
