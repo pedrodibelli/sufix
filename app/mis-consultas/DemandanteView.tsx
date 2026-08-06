@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -370,6 +370,88 @@ function InteresadoRow({
   );
 }
 
+// ─── TecnicosInteresadosModal ──────────────────────────────────────────────────
+// Se abre a pantalla completa (bottom sheet en mobile) al tocar "Ver técnicos
+// interesados" — antes esto se expandía inline y no llamaba la atención. El
+// header destaca bien grande que conectar es gratis por ser de los primeros.
+function TecnicosInteresadosModal({
+  publicacion,
+  interesados,
+  perfilMap,
+  resumenMap,
+  onClose,
+  onElegido,
+}: {
+  publicacion: Publicacion;
+  interesados: Propuesta[];
+  perfilMap: Record<string, PerfilProfesional>;
+  resumenMap: Record<string, Resumen>;
+  onClose: () => void;
+  onElegido: () => void;
+}) {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  const ordenados = [...interesados].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+
+  return (
+    <div
+      className="animate-backdrop fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        className="animate-modal relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header celebratorio: el foco es que se note bien que es gratis */}
+        <div className="relative shrink-0 bg-gradient-to-br from-sv-dark to-sv-primary px-6 pb-7 pt-6 text-center text-white">
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm hover:bg-white/25"
+          >
+            ✕
+          </button>
+          <div className="text-4xl">🎉</div>
+          <h2 className="display mt-2 text-xl font-bold leading-snug sm:text-2xl">
+            {interesados.length} técnico{interesados.length !== 1 ? "s" : ""} quiere
+            {interesados.length !== 1 ? "n" : ""} hacer tu trabajo
+          </h2>
+          <p className="mt-2 text-[13px] text-white/80">
+            Sos de los primeros usuarios de SolvIT — por eso conectar es
+          </p>
+          <div className="mt-1.5 flex items-center justify-center gap-2.5">
+            <span className="text-lg font-medium text-white/50 line-through">
+              ${COMISION_CONSULTA.toLocaleString("es-AR")}
+            </span>
+            <span className="font-display text-4xl font-extrabold text-emerald-300">$0</span>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto bg-[#f5fdf9] p-4">
+          <div className="space-y-2.5">
+            {ordenados.map((prop) => (
+              <InteresadoRow
+                key={prop.id}
+                propuesta={prop}
+                publicacion={publicacion}
+                perfil={perfilMap[prop.profesional_id]}
+                resumen={resumenMap[prop.profesional_id]}
+                puedeElegir={publicacion.status === "abierto"}
+                onElegido={onElegido}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── ProfesionalContacto ──────────────────────────────────────────────────────
 function ProfesionalContacto({
   propuesta,
@@ -586,6 +668,7 @@ function MiConsultaCard({
   const [confirmandoBorrar, setConfirmandoBorrar] = useState(false);
   const [borrando, startBorrar] = useTransition();
   const [borrarError, setBorrarError] = useState("");
+  const [mostrarInteresados, setMostrarInteresados] = useState(false);
 
   function handleEliminar() {
     setBorrarError("");
@@ -609,20 +692,22 @@ function MiConsultaCard({
   const interesados = pub.propuestas.filter(
     (p) => p.contacto_directo && p.estado === "interesado"
   );
-  const nuevosCount = pendingCount + interesados.length;
   const propuestaAceptada =
     pub.propuestas.find((p) => p.estado === "aceptada" || p.estado === "completada") ?? null;
   const perfil = propuestaAceptada ? (perfilMap[propuestaAceptada.profesional_id] ?? null) : null;
 
-  const toggleLabel = expanded
-    ? "Ocultar"
-    : pendingCount > 0 && interesados.length > 0
-    ? `Ver actividad (${nuevosCount})`
-    : interesados.length > 0
-    ? `Ver ${interesados.length} técnico${interesados.length !== 1 ? "s" : ""} interesado${interesados.length !== 1 ? "s" : ""}`
-    : `Ver ${pendingCount} propuesta${pendingCount !== 1 ? "s" : ""}`;
+  const hayInteresados = pub.status === "abierto" && interesados.length > 0;
+  const hayPendientesLegacy = pub.status === "abierto" && !hayInteresados && pendingCount > 0;
 
-  const toggleBtn = pub.status === "abierto" && nuevosCount > 0 ? (
+  const toggleBtn = hayInteresados ? (
+    <button
+      type="button"
+      onClick={() => setMostrarInteresados(true)}
+      className="rounded-xl bg-sv-primary px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:bg-sv-olive whitespace-nowrap"
+    >
+      🎉 Ver {interesados.length} técnico{interesados.length !== 1 ? "s" : ""} interesado{interesados.length !== 1 ? "s" : ""}
+    </button>
+  ) : hayPendientesLegacy ? (
     <button
       type="button"
       onClick={onToggle}
@@ -632,7 +717,7 @@ function MiConsultaCard({
           : "bg-sv-dark text-white hover:bg-sv-olive"
       }`}
     >
-      {toggleLabel}
+      {expanded ? "Ocultar" : `Ver ${pendingCount} propuesta${pendingCount !== 1 ? "s" : ""}`}
     </button>
   ) : null;
 
@@ -662,7 +747,7 @@ function MiConsultaCard({
         {/* Botón inline solo en sm+ */}
         {toggleBtn && <div className="hidden sm:flex shrink-0 self-center">{toggleBtn}</div>}
 
-        {pub.status === "abierto" && nuevosCount === 0 && pub.propuestas.length > 0 && (
+        {pub.status === "abierto" && !hayInteresados && !hayPendientesLegacy && pub.propuestas.length > 0 && (
           <span className="hidden sm:flex shrink-0 self-center text-xs text-ink-400">Sin nuevas</span>
         )}
 
@@ -733,21 +818,25 @@ function MiConsultaCard({
         </div>
       )}
 
-      {/* Técnicos interesados (contacto directo gratis) — aviso destacado */}
-      {pub.status === "abierto" && interesados.length > 0 && !expanded && (
-        <div className="border-t border-ink-100 bg-sv-primary/5 px-5 py-4">
+      {/* Técnicos interesados (contacto directo gratis) — banner clickeable y celebratorio */}
+      {hayInteresados && (
+        <button
+          type="button"
+          onClick={() => setMostrarInteresados(true)}
+          className="block w-full border-t border-ink-100 bg-gradient-to-r from-sv-primary/10 to-emerald-50 px-5 py-4 text-left transition hover:from-sv-primary/15"
+        >
           <p className="text-[10.5px] font-semibold uppercase tracking-wide text-sv-olive">
-            🙋 {interesados.length} técnico{interesados.length !== 1 ? "s" : ""} quiere{interesados.length !== 1 ? "n" : ""} hacer este trabajo
+            🎉 {interesados.length} técnico{interesados.length !== 1 ? "s" : ""} quiere{interesados.length !== 1 ? "n" : ""} hacer este trabajo — ¡gratis!
           </p>
           <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-500">
-            Hablá por WhatsApp con el que te convenga, sin cargo. Cuando decidas, tocá{" "}
-            <strong className="text-sv-dark">&ldquo;{toggleLabel}&rdquo;</strong> y elegilo para arrancar.
+            Sos de los primeros usuarios: conectar no cuesta nada.{" "}
+            <strong className="text-sv-dark">Tocá para ver quién es y elegir →</strong>
           </p>
-        </div>
+        </button>
       )}
 
       {/* Nuevas propuestas recibidas (flujo viejo) — aviso destacado para el demandante */}
-      {pub.status === "abierto" && pendingCount > 0 && !expanded && (
+      {pub.status === "abierto" && !hayInteresados && pendingCount > 0 && !expanded && (
         <div className="border-t border-ink-100 bg-sv-primary/5 px-5 py-4">
           <p className="text-[10.5px] font-semibold uppercase tracking-wide text-sv-olive">
             📩 {pendingCount} propuesta{pendingCount !== 1 ? "s" : ""} nueva{pendingCount !== 1 ? "s" : ""}
@@ -803,32 +892,6 @@ function MiConsultaCard({
         <CalificarBlock publicacionId={pub.id} yaResenada={yaResenada} />
       )}
 
-      {expanded && pub.status === "abierto" && interesados.length > 0 && (
-        <div className="border-t border-ink-100 px-5 pb-5 pt-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h4 className="font-display text-sm font-semibold text-sv-dark">
-              {interesados.length} técnico{interesados.length !== 1 ? "s" : ""} interesado{interesados.length !== 1 ? "s" : ""}
-            </h4>
-            <span className="text-[11px] text-ink-400">Más recientes primero</span>
-          </div>
-          <div className="space-y-2">
-            {[...interesados]
-              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-              .map((prop) => (
-                <InteresadoRow
-                  key={prop.id}
-                  propuesta={prop}
-                  publicacion={pub}
-                  perfil={perfilMap[prop.profesional_id]}
-                  resumen={resumenMap[prop.profesional_id]}
-                  puedeElegir={pub.status === "abierto"}
-                  onElegido={() => router.refresh()}
-                />
-              ))}
-          </div>
-        </div>
-      )}
-
       {expanded && pub.status === "abierto" && pendingCount > 0 && (
         <div className="border-t border-ink-100 px-5 pb-5 pt-4">
           <div className="mb-3 flex items-center justify-between">
@@ -852,6 +915,20 @@ function MiConsultaCard({
               ))}
           </div>
         </div>
+      )}
+
+      {mostrarInteresados && (
+        <TecnicosInteresadosModal
+          publicacion={pub}
+          interesados={interesados}
+          perfilMap={perfilMap}
+          resumenMap={resumenMap}
+          onClose={() => setMostrarInteresados(false)}
+          onElegido={() => {
+            setMostrarInteresados(false);
+            router.refresh();
+          }}
+        />
       )}
     </div>
   );
