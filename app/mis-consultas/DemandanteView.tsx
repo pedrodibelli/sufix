@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -670,6 +670,19 @@ function MiConsultaCard({
   const [borrando, startBorrar] = useTransition();
   const [borrarError, setBorrarError] = useState("");
   const [mostrarInteresados, setMostrarInteresados] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar el menú "⋯" al tocar/clickear afuera.
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickFuera(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickFuera);
+    return () => document.removeEventListener("mousedown", handleClickFuera);
+  }, [menuOpen]);
 
   function handleEliminar() {
     setBorrarError("");
@@ -753,55 +766,59 @@ function MiConsultaCard({
         )}
 
         {pub.status === "abierto" && (
-          <button
-            type="button"
-            onClick={() => { setMenuOpen((v) => !v); setConfirmandoBorrar(false); }}
-            aria-label="Opciones de la publicación"
-            className="shrink-0 self-start rounded-lg px-2 py-1 text-lg leading-none text-ink-400 transition hover:bg-ink-50 hover:text-ink-700"
-          >
-            ⋯
-          </button>
-        )}
-      </div>
-
-      {/* Menú ⋯ — eliminar publicación (solo abiertas) */}
-      {menuOpen && pub.status === "abierto" && (
-        <div className="border-t border-ink-100 bg-rose-50/60 px-5 py-4">
-          {!confirmandoBorrar ? (
+          <div ref={menuRef} className="relative shrink-0 self-start">
             <button
               type="button"
-              onClick={() => setConfirmandoBorrar(true)}
-              className="text-sm font-semibold text-rose-600 hover:underline"
+              onClick={() => { setMenuOpen((v) => !v); setConfirmandoBorrar(false); }}
+              aria-label="Opciones de la publicación"
+              className={`flex h-9 w-9 items-center justify-center rounded-lg text-xl leading-none transition ${
+                menuOpen ? "bg-ink-100 text-ink-700" : "text-ink-400 hover:bg-ink-50 hover:text-ink-700"
+              }`}
             >
-              🗑 Eliminar publicación
+              ⋯
             </button>
-          ) : (
-            <div>
-              <p className="text-sm text-ink-700">
-                ¿Seguro que querés eliminarla? No se puede deshacer.
-              </p>
-              <div className="mt-2 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setConfirmandoBorrar(false)}
-                  className="rounded-lg border border-ink-200 px-3 py-1.5 text-sm font-medium text-ink-600 transition hover:bg-ink-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  disabled={borrando}
-                  onClick={handleEliminar}
-                  className="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50"
-                >
-                  {borrando ? "Eliminando…" : "Sí, eliminar"}
-                </button>
+
+            {/* Menú desplegable, anclado justo debajo del botón */}
+            {menuOpen && (
+              <div className="absolute right-0 top-full z-10 mt-1.5 w-60 rounded-xl border border-ink-100 bg-white p-3 shadow-lg">
+                {!confirmandoBorrar ? (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmandoBorrar(true)}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+                  >
+                    🗑 Eliminar publicación
+                  </button>
+                ) : (
+                  <div>
+                    <p className="px-0.5 text-[13px] text-ink-700">
+                      ¿Seguro? No se puede deshacer.
+                    </p>
+                    <div className="mt-2.5 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmandoBorrar(false)}
+                        className="flex-1 rounded-lg border border-ink-200 px-3 py-1.5 text-sm font-medium text-ink-600 transition hover:bg-ink-50"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        disabled={borrando}
+                        onClick={handleEliminar}
+                        className="flex-1 rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50"
+                      >
+                        {borrando ? "Eliminando…" : "Sí, eliminar"}
+                      </button>
+                    </div>
+                    {borrarError && <p className="mt-1.5 text-xs text-rose-600">{borrarError}</p>}
+                  </div>
+                )}
               </div>
-              {borrarError && <p className="mt-1.5 text-xs text-rose-600">{borrarError}</p>}
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Esperando el primer interesado — tranquiliza mientras no hay actividad */}
       {pub.status === "abierto" && pub.propuestas.length === 0 && (
