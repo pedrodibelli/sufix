@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "@/components/CategoryArt";
-import { supabase } from "@/lib/supabase";
 import { rechazarPropuesta, eliminarPublicacion, crearResena, elegirTecnico } from "./actions";
 import { COMISION_CONSULTA } from "@/lib/config";
 import { AceptarModal, type PropuestaParaPago, type PublicacionParaPago } from "@/components/AceptarModal";
@@ -83,8 +82,8 @@ function ConsultaThumb({ slug, photo }: { slug: string; photo: string | null }) 
   const cat = CATEGORIES.find((c) => c.slug === slug);
   if (photo) {
     return (
-      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl">
-        <Image src={photo} alt="" fill sizes="64px" className="object-cover" />
+      <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-2xl sm:h-16 sm:w-16">
+        <Image src={photo} alt="" fill sizes="72px" className="object-cover" />
       </div>
     );
   }
@@ -92,7 +91,7 @@ function ConsultaThumb({ slug, photo }: { slug: string; photo: string | null }) 
     <CategoryArt
       icon={cat?.icon ?? "🔧"}
       hue={cat?.hue ?? 180}
-      className="h-16 w-16 shrink-0 rounded-2xl"
+      className="h-[72px] w-[72px] shrink-0 rounded-2xl sm:h-16 sm:w-16"
     />
   );
 }
@@ -323,7 +322,7 @@ function InteresadoRow({
             target="_blank"
             rel="noopener noreferrer"
             aria-disabled={!waLink}
-            className={`flex-1 rounded-lg px-4 py-2 text-center text-xs font-semibold transition ${
+            className={`flex-1 rounded-lg px-4 py-3 text-center text-sm font-semibold transition sm:py-2 sm:text-xs ${
               waLink
                 ? "bg-[#25D366] text-white hover:brightness-95"
                 : "pointer-events-none bg-ink-100 text-ink-400"
@@ -335,7 +334,7 @@ function InteresadoRow({
             <button
               type="button"
               onClick={() => setConfirmandoElegir(true)}
-              className="flex-1 rounded-lg bg-sv-primary px-4 py-2 text-xs font-semibold text-white hover:bg-sv-olive transition"
+              className="flex-1 rounded-lg bg-sv-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-sv-olive sm:py-2 sm:text-xs"
             >
               Elegir a este técnico
             </button>
@@ -347,12 +346,12 @@ function InteresadoRow({
             ¿Confirmás que elegís a <strong className="text-sv-dark">{primerNombre}</strong>? Se genera el
             código de seguimiento y el trabajo deja de mostrarse a nuevos técnicos.
           </p>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2.5 flex gap-2">
             <button
               type="button"
               disabled={pending}
               onClick={() => setConfirmandoElegir(false)}
-              className="rounded-lg border border-ink-200 px-3 py-1.5 text-xs font-medium text-ink-600 transition hover:bg-ink-50 disabled:opacity-50"
+              className="rounded-lg border border-ink-200 px-3 py-2.5 text-sm font-medium text-ink-600 transition hover:bg-ink-50 disabled:opacity-50 sm:py-1.5 sm:text-xs"
             >
               Todavía no
             </button>
@@ -360,7 +359,7 @@ function InteresadoRow({
               type="button"
               disabled={pending}
               onClick={handleElegir}
-              className="rounded-lg bg-sv-primary px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-sv-olive disabled:opacity-50"
+              className="rounded-lg bg-sv-primary px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-sv-olive disabled:opacity-50 sm:py-1.5 sm:text-xs"
             >
               {pending ? "Confirmando…" : `Sí, elegir a ${primerNombre}`}
             </button>
@@ -890,32 +889,10 @@ export function DemandanteView({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [pagoInfo, setPagoInfo] = useState<{ propuesta: Propuesta; publicacion: Publicacion } | null>(null);
 
-  // Notificaciones en vivo: cuando un técnico avisa que quiere un trabajo (o
-  // cambia el estado de una propuesta), refrescamos sin que el usuario tenga
-  // que recargar la página. La tabla `propuestas` ya tiene Realtime habilitado
-  // (ver supabase/migrations/20260621_realtime_propuestas.sql); Supabase filtra
-  // los eventos por RLS, así que solo llegan los de nuestras propias publicaciones.
-  useEffect(() => {
-    const pubIds = new Set(publicaciones.map((p) => p.id));
-    if (pubIds.size === 0) return;
-
-    const channel = supabase
-      .channel("mis-consultas-demandante")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "propuestas" },
-        (payload) => {
-          const row = (payload.new ?? payload.old) as { publicacion_id?: string } | null;
-          if (row?.publicacion_id && pubIds.has(row.publicacion_id)) {
-            router.refresh();
-          }
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [publicaciones.map((p) => p.id).join(",")]);
+  // Notificaciones en vivo: las maneja RealtimeRefresh (montado en el Header
+  // para toda la app) — escucha cambios en `propuestas` y hace router.refresh(),
+  // lo que además actualiza el punto rojo del nav. No hace falta una suscripción
+  // propia acá.
 
   function handleAceptar(propuesta: Propuesta, publicacion: Publicacion) {
     setPagoInfo({ propuesta, publicacion });
@@ -970,42 +947,42 @@ export function DemandanteView({
 
   return (
     <>
-    <div className="space-y-5">
-      {/* Profile header */}
-      <div className="flex items-center gap-5 rounded-2xl border border-ink-100 bg-white p-6 shadow-[0_1px_2px_rgba(40,63,59,0.04)]">
-        <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sv-dark to-sv-primary font-display text-3xl font-semibold text-white">
+    <div className="space-y-4 sm:space-y-5">
+      {/* Profile header — compacto en mobile para no tapar las consultas */}
+      <div className="flex items-center gap-3 rounded-2xl border border-ink-100 bg-white p-3.5 shadow-[0_1px_2px_rgba(40,63,59,0.04)] sm:gap-5 sm:p-6">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sv-dark to-sv-primary font-display text-base font-semibold text-white sm:h-20 sm:w-20 sm:text-3xl">
           {initials}
         </span>
         <div className="min-w-0">
-          <div className="mb-1.5 flex flex-wrap items-center gap-2.5">
-            <h1 className="display text-2xl">{displayName}</h1>
-            <span className="rounded-full bg-zap-100 px-2.5 py-1 text-[11.5px] font-semibold text-zap-700">
+          <div className="flex flex-wrap items-center gap-2 sm:mb-1.5 sm:gap-2.5">
+            <h1 className="display text-base sm:text-2xl">{displayName}</h1>
+            <span className="rounded-full bg-zap-100 px-2 py-0.5 text-[10.5px] font-semibold text-zap-700 sm:px-2.5 sm:py-1 sm:text-[11.5px]">
               Demandante
             </span>
           </div>
-          {email && <p className="text-sm text-ink-400">✉ {email}</p>}
+          {email && <p className="hidden text-sm text-ink-400 sm:block">✉ {email}</p>}
         </div>
       </div>
 
-      {/* Stat strip */}
+      {/* Stat strip — en mobile, solo las 2 métricas que importan para actuar */}
       <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-ink-100 bg-white sm:grid-cols-4">
         {stats.map((s, i) => (
-          <div key={s.label} className={`p-5 ${statBorder(i)}`}>
+          <div key={s.label} className={`p-3 sm:p-5 ${statBorder(i)} ${i >= 2 ? "hidden sm:block" : ""}`}>
             <div
-              className={`font-display text-[26px] leading-none tracking-tight sm:text-[28px] ${
+              className={`font-display text-xl leading-none tracking-tight sm:text-[28px] ${
                 s.accent ? "text-sv-primary" : "text-sv-dark"
               }`}
             >
               {s.value}
             </div>
-            <div className="mt-1.5 text-xs text-ink-400">{s.label}</div>
+            <div className="mt-1 text-[11px] text-ink-400 sm:mt-1.5 sm:text-xs">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Section */}
       <div>
-        <h2 className="display mb-3.5 text-xl sm:text-[22px]">Mis consultas</h2>
+        <h2 className="display mb-3 text-lg sm:mb-3.5 sm:text-[22px]">Mis consultas</h2>
 
         {/* Tab bar */}
         <div className="flex border-b border-ink-100">

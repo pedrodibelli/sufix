@@ -23,8 +23,10 @@ export async function Header() {
   const dk = esProfesional;
 
   // Punto rojo de novedades en "Mis consultas":
-  //  - Demandante: propuestas/presupuestos nuevos (sin responder) en sus publicaciones abiertas.
-  //  - Oferente: propuestas suyas ya aceptadas+pagadas (tiene que coordinar/cerrar).
+  //  - Demandante: propuestas/presupuestos nuevos (flujo viejo) + técnicos
+  //    interesados nuevos (flujo de contacto directo gratis) sin responder,
+  //    en sus publicaciones abiertas.
+  //  - Oferente: propuestas suyas ya aceptadas (tiene que coordinar/cerrar).
   let novedades = 0;
   if (user) {
     if (esProfesional) {
@@ -46,7 +48,7 @@ export async function Header() {
           .from("propuestas")
           .select("id", { count: "exact", head: true })
           .in("publicacion_id", ids)
-          .or("estado.is.null,estado.eq.pendiente");
+          .or("estado.is.null,estado.eq.pendiente,estado.eq.interesado");
         novedades = count ?? 0;
       }
     }

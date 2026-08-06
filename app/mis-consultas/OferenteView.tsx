@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/data";
 import { CategoryArt } from "@/components/CategoryArt";
-import { supabase } from "@/lib/supabase";
 import { confirmarCodigo, cancelarInteres } from "./actions";
 import { ReportarProblemaModal } from "./ReportarProblemaModal";
 
@@ -239,11 +238,11 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
               <p className={`text-xs ${dark ? "text-zap-300" : "text-ink-600"}`}>
                 ¿Seguro que ya no querés hacer este trabajo? El cliente deja de verte entre los interesados.
               </p>
-              <div className="mt-2 flex gap-2">
+              <div className="mt-2.5 flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => setConfirmandoCancelar(false)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${dark ? "border-white/15 text-zap-300 hover:bg-white/5" : "border-ink-200 text-ink-600 hover:bg-ink-50"}`}
+                  className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition sm:py-1.5 sm:text-xs ${dark ? "border-white/15 text-zap-300 hover:bg-white/5" : "border-ink-200 text-ink-600 hover:bg-ink-50"}`}
                 >
                   Seguir interesado
                 </button>
@@ -251,7 +250,7 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
                   type="button"
                   disabled={cancelando}
                   onClick={handleCancelar}
-                  className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50"
+                  className="rounded-lg bg-rose-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50 sm:py-1.5 sm:text-xs"
                 >
                   {cancelando ? "Cancelando…" : "Sí, cancelar interés"}
                 </button>
@@ -351,34 +350,11 @@ export function OferenteView({
   apellido?: string;
   email?: string;
 }) {
-  const router = useRouter();
   const [tab, setTab] = useState<Tab>("todas");
   const dark = true;
 
-  // Notificaciones en vivo: si el demandante nos elige (o cambia el estado de
-  // alguna de nuestras propuestas) mientras tenemos la página abierta, refresca
-  // solo. Mismo mecanismo que en DemandanteView.tsx.
-  useEffect(() => {
-    const propIds = new Set(propuestas.map((p) => p.id));
-    if (propIds.size === 0) return;
-
-    const channel = supabase
-      .channel("mis-consultas-oferente")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "propuestas" },
-        (payload) => {
-          const row = (payload.new ?? payload.old) as { id?: string } | null;
-          if (row?.id && propIds.has(row.id)) {
-            router.refresh();
-          }
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [propuestas.map((p) => p.id).join(",")]);
+  // Notificaciones en vivo: las maneja RealtimeRefresh (montado en el Header
+  // para toda la app) — no hace falta una suscripción propia acá.
 
   const displayName = [nombre, apellido].filter(Boolean).join(" ") || email || "Profesional";
   const initials =
@@ -424,38 +400,38 @@ export function OferenteView({
   }
 
   return (
-    <div className="space-y-5">
-      {/* Profile header */}
-      <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-[#162420] p-5">
-        <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-zap-600 to-zap-400 font-display text-2xl font-semibold text-white sm:h-20 sm:w-20 sm:text-3xl">
+    <div className="space-y-4 sm:space-y-5">
+      {/* Profile header — compacto en mobile para no tapar los trabajos */}
+      <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#162420] p-3.5 sm:gap-4 sm:p-5">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-zap-600 to-zap-400 font-display text-base font-semibold text-white sm:h-20 sm:w-20 sm:text-3xl">
           {initials}
         </span>
         <div className="min-w-0">
-          <div className="mb-1.5 flex flex-wrap items-center gap-2">
-            <h1 className="display text-xl text-zap-50 sm:text-2xl">{displayName}</h1>
-            <span className="rounded-full bg-zap-500/20 px-2.5 py-1 text-[11.5px] font-semibold text-zap-300">
+          <div className="flex flex-wrap items-center gap-2 sm:mb-1.5">
+            <h1 className="display text-base text-zap-50 sm:text-2xl">{displayName}</h1>
+            <span className="rounded-full bg-zap-500/20 px-2 py-0.5 text-[10.5px] font-semibold text-zap-300 sm:px-2.5 sm:py-1 sm:text-[11.5px]">
               Técnico
             </span>
           </div>
-          {email && <p className="text-sm text-zap-500">✉ {email}</p>}
+          {email && <p className="hidden text-sm text-zap-500 sm:block">✉ {email}</p>}
         </div>
       </div>
 
-      {/* Stat strip */}
+      {/* Stat strip — en mobile, solo las 2 métricas que importan para actuar */}
       <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-white/10 bg-[#162420] sm:grid-cols-4">
         {stats.map((s, i) => (
-          <div key={s.label} className={`p-5 ${statBorder(i)} border-white/10`}>
-            <div className={`font-display text-[26px] leading-none tracking-tight sm:text-[28px] ${s.accent ? "text-zap-300" : "text-zap-50"}`}>
+          <div key={s.label} className={`p-3 sm:p-5 ${statBorder(i)} border-white/10 ${i >= 2 ? "hidden sm:block" : ""}`}>
+            <div className={`font-display text-xl leading-none tracking-tight sm:text-[28px] ${s.accent ? "text-zap-300" : "text-zap-50"}`}>
               {s.value}
             </div>
-            <div className="mt-1.5 text-xs text-zap-500">{s.label}</div>
+            <div className="mt-1 text-[11px] text-zap-500 sm:mt-1.5 sm:text-xs">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Section */}
       <div>
-        <h2 className="display mb-3.5 text-xl text-zap-50 sm:text-[22px]">Mis propuestas</h2>
+        <h2 className="display mb-3 text-lg text-zap-50 sm:mb-3.5 sm:text-[22px]">Mis propuestas</h2>
 
         {/* Tab bar */}
         <div className="no-scrollbar flex overflow-x-auto border-b border-white/10">
