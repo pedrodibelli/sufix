@@ -3,20 +3,21 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ZONES, CATEGORIES } from "@/lib/data";
+import { RubroChips } from "@/components/RubroChips";
 import { actualizarPerfil } from "./actions";
 
 export function PerfilForm({
   perfil,
   dark = false,
 }: {
-  perfil: { telefono: string | null; zona: string | null; rubro: string | null } | null;
+  perfil: { telefono: string | null; zona: string | null; rubro: string[] | null } | null;
   dark?: boolean;
 }) {
   const router = useRouter();
   const [editando, setEditando] = useState(false);
   const [telefono, setTelefono] = useState(perfil?.telefono ?? "");
   const [zona, setZona] = useState(perfil?.zona ?? "");
-  const [rubro, setRubro] = useState(perfil?.rubro ?? "");
+  const [rubro, setRubro] = useState<string[]>(perfil?.rubro ?? []);
   const [pending, startT] = useTransition();
   const [msg, setMsg] = useState<{ ok?: boolean; text: string } | null>(null);
 
@@ -37,7 +38,7 @@ export function PerfilForm({
   function cancelar() {
     setTelefono(perfil?.telefono ?? "");
     setZona(perfil?.zona ?? "");
-    setRubro(perfil?.rubro ?? "");
+    setRubro(perfil?.rubro ?? []);
     setMsg(null);
     setEditando(false);
   }
@@ -102,13 +103,18 @@ export function PerfilForm({
       </div>
 
       <div>
-        <label className={labelCls}>Rubro</label>
-        <select className={inputCls} disabled={!editando} value={rubro} onChange={(e) => setRubro(e.target.value)}>
-          <option value="">Elegí un rubro</option>
-          {CATEGORIES.map((c) => (
-            <option key={c.slug} value={c.slug}>{c.name}</option>
-          ))}
-        </select>
+        <label className={labelCls}>Rubro(s) — podés elegir más de uno</label>
+        {editando ? (
+          <RubroChips selected={rubro} onChange={setRubro} dark={dark} />
+        ) : (
+          <div className={inputCls}>
+            {rubro.length > 0
+              ? rubro
+                  .map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name ?? slug)
+                  .join(", ")
+              : "—"}
+          </div>
+        )}
       </div>
 
       {msg && (

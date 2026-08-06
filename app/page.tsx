@@ -81,27 +81,35 @@ export default async function HomePage({
   // IDs de publicaciones donde el profesional ya tiene propuesta pendiente o ya
   // avisó que quiere hacer el trabajo (flujo de contacto directo gratis).
   let yaContactadoIds: string[] = [];
+  // Rubros del técnico (puede tener varios) — se leen de perfiles_profesionales,
+  // no de user_metadata: ese queda desactualizado en cuanto edita su perfil.
+  let misCategorias: string[] = [];
   if (esProfesional && user) {
-    const { data: propsPendientes } = await supabaseServer
-      .from("propuestas")
-      .select("publicacion_id")
-      .eq("profesional_id", user.id)
-      .in("estado", ["pendiente", "interesado"]);
+    const [{ data: propsPendientes }, { data: miPerfil }] = await Promise.all([
+      supabaseServer
+        .from("propuestas")
+        .select("publicacion_id")
+        .eq("profesional_id", user.id)
+        .in("estado", ["pendiente", "interesado"]),
+      supabaseServer.from("perfiles_profesionales").select("rubro").eq("user_id", user.id).maybeSingle(),
+    ]);
     yaContactadoIds = (propsPendientes ?? []).map((p: { publicacion_id: string }) => p.publicacion_id);
+    misCategorias = miPerfil?.rubro ?? [];
   }
 
   const activeCount = (cat ? 1 : 0) + (zona ? 1 : 0);
   const supabaseJobIds = supabaseJobs.map((j) => j.id);
 
-  // Pedidos URGENTES (hoy) del rubro del técnico, abiertos y sin propuesta suya
-  const miCategoria = esProfesional ? (user?.user_metadata?.categoria as string | undefined) : undefined;
+  // Pedidos URGENTES (hoy) de los rubros del técnico, abiertos y sin propuesta suya
   const esUrgenteDeMiRubro = (j: PostedJob) =>
     j.urgency === "hoy" &&
-    j.categorySlug === miCategoria &&
+    misCategorias.includes(j.categorySlug) &&
     j.status === "abierto" &&
     !yaContactadoIds.includes(j.id);
-  const urgentesDeMiRubro = miCategoria ? allJobs.filter(esUrgenteDeMiRubro) : [];
-  const rubroNombre = CATEGORIES.find((c) => c.slug === miCategoria)?.name;
+  const urgentesDeMiRubro = misCategorias.length > 0 ? allJobs.filter(esUrgenteDeMiRubro) : [];
+  const rubrosNombres = misCategorias
+    .map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name)
+    .filter((n): n is string => Boolean(n));
 
   // Para el técnico, los urgentes de su rubro van primero en la grilla
   const jobsParaGrid = esProfesional
@@ -194,7 +202,7 @@ export default async function HomePage({
                     <p className="font-semibold text-rose-200">
                       {urgentesDeMiRubro.length} pedido{urgentesDeMiRubro.length !== 1 ? "s" : ""} urgente
                       {urgentesDeMiRubro.length !== 1 ? "s" : ""}
-                      {rubroNombre ? ` de ${rubroNombre}` : ""} para hoy
+                      {rubrosNombres.length > 0 ? ` de ${rubrosNombres.join(" / ")}` : ""} para hoy
                     </p>
                     <p className="mt-0.5 text-sm text-zap-300">
                       Alguien necesita resolverlo hoy mismo. Mandá tu propuesta antes que otros técnicos.

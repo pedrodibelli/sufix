@@ -39,7 +39,8 @@ export default async function TecnicoPage({
 
   const nombre = perfil.nombre ?? "Profesional";
   const initials = nombre.split(" ").filter(Boolean).map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
-  const rubroNombre = CATEGORIES.find((c) => c.slug === perfil.rubro)?.name ?? perfil.rubro;
+  const rubros: string[] = Array.isArray(perfil.rubro) ? perfil.rubro : perfil.rubro ? [perfil.rubro] : [];
+  const rubrosNombres = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name ?? slug);
   const promedio = resumen ? Number(resumen.promedio) : 0;
   const total = resumen ? Number(resumen.total) : 0;
   const lista = (resenas ?? []) as Resena[];
@@ -68,11 +69,21 @@ export default async function TecnicoPage({
                   {total > 0 ? (
                     <StarRating rating={promedio} reviews={total} size="md" />
                   ) : (
-                    <span className="text-ink-400">Sin reseñas aún</span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-zap-100 px-2 py-0.5 text-[12px] font-medium text-sv-olive">
+                      🆕 Nuevo en SolvIT
+                    </span>
                   )}
-                  {rubroNombre && <span>🔧 {rubroNombre}</span>}
                   {perfil.zona && <span>📍 {perfil.zona}</span>}
                 </div>
+                {rubrosNombres.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {rubrosNombres.map((n) => (
+                      <span key={n} className="rounded-full border border-ink-200 px-2.5 py-0.5 text-[12px] font-medium text-ink-600">
+                        🔧 {n}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

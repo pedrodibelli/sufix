@@ -25,7 +25,7 @@ export async function actualizarDatosCuenta(data: {
 export async function actualizarPerfil(data: {
   telefono: string;
   zona: string;
-  rubro: string;
+  rubro: string[];
 }): Promise<{ ok: true } | { error: string }> {
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
@@ -36,7 +36,7 @@ export async function actualizarPerfil(data: {
     .update({
       telefono: data.telefono.trim() || null,
       zona: data.zona || null,
-      rubro: data.rubro || null,
+      rubro: data.rubro.length > 0 ? data.rubro : null,
     })
     .eq("user_id", user.id);
 

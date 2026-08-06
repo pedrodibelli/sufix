@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { CATEGORIES, ZONES } from "@/lib/data";
+import { ZONES } from "@/lib/data";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { RubroChips } from "@/components/RubroChips";
 
 export default function RegistrarPage() {
   const [nombre, setNombre] = useState("");
@@ -17,7 +18,7 @@ export default function RegistrarPage() {
   // Campos solo para profesionales
   const [dni, setDni] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [categoria, setCategoria] = useState("");
+  const [categorias, setCategorias] = useState<string[]>([]);
   const [zona, setZona] = useState("");
 
   const [error, setError] = useState("");
@@ -35,7 +36,7 @@ export default function RegistrarPage() {
     if (esProfesional) {
       if (!dni.trim()) { setError("El DNI es obligatorio para profesionales."); return; }
       if (!telefono.trim()) { setError("El teléfono es obligatorio para profesionales."); return; }
-      if (!categoria) { setError("Seleccioná tu rubro."); return; }
+      if (categorias.length === 0) { setError("Seleccioná al menos un rubro."); return; }
       if (!zona) { setError("Seleccioná tu zona de trabajo."); return; }
     }
     if (password !== confirm) {
@@ -58,7 +59,7 @@ export default function RegistrarPage() {
     if (esProfesional) {
       metadata.dni = dni.trim();
       metadata.telefono = telefono.trim();
-      metadata.categoria = categoria;
+      metadata.categorias = categorias;
       metadata.zona = zona;
     }
 
@@ -218,21 +219,12 @@ export default function RegistrarPage() {
                 </Field>
               </div>
 
-              <Field label="Rubro">
-                <select
-                  title="Rubro"
-                  value={categoria}
-                  onChange={(e) => setCategoria(e.target.value)}
-                  className="field"
-                >
-                  <option value="">Seleccioná tu rubro</option>
-                  {CATEGORIES.map((c) => (
-                    <option key={c.slug} value={c.slug}>
-                      {c.icon} {c.name}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+              <div>
+                <span className="label">Rubro(s) — podés elegir más de uno</span>
+                <div className="mt-2">
+                  <RubroChips selected={categorias} onChange={setCategorias} />
+                </div>
+              </div>
 
               <Field label="Zona de trabajo">
                 <select

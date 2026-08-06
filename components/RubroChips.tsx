@@ -1,0 +1,53 @@
+"use client";
+
+import { CATEGORIES } from "@/lib/data";
+
+// Selector de varios rubros a la vez (chips que se prenden/apagan). Un
+// técnico puede hacer más de un tipo de trabajo — antes solo se podía elegir
+// uno. Se usa en /registrar y /perfil.
+export function RubroChips({
+  selected,
+  onChange,
+  disabled = false,
+  dark = false,
+}: {
+  selected: string[];
+  onChange: (next: string[]) => void;
+  disabled?: boolean;
+  dark?: boolean;
+}) {
+  function toggle(slug: string) {
+    if (disabled) return;
+    onChange(
+      selected.includes(slug)
+        ? selected.filter((s) => s !== slug)
+        : [...selected, slug]
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {CATEGORIES.map((c) => {
+        const active = selected.includes(c.slug);
+        return (
+          <button
+            key={c.slug}
+            type="button"
+            disabled={disabled}
+            onClick={() => toggle(c.slug)}
+            aria-pressed={active}
+            className={`rounded-full border px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed ${
+              active
+                ? "border-sv-primary bg-sv-primary text-white"
+                : dark
+                ? "border-white/15 bg-white/5 text-zap-300 hover:border-sv-primary/60 hover:text-white"
+                : "border-ink-200 bg-white text-ink-500 hover:border-sv-primary hover:text-sv-dark"
+            } ${disabled && !active ? "opacity-50" : ""}`}
+          >
+            {c.icon} {c.name}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

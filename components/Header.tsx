@@ -88,7 +88,7 @@ export async function Header() {
         {/* Nav central */}
         <nav className="hidden items-center gap-0.5 sm:flex">
           <Link href="/" className={navLink}>Marketplace</Link>
-          {!user && <Link href="/como-funciona" className={navLink}>Cómo funciona</Link>}
+          <Link href="/como-funciona" className={navLink}>Cómo funciona</Link>
           {user && (
             <Link href="/mis-consultas" className={`relative ${navLink}`}>
               Mis consultas

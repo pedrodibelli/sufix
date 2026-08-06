@@ -51,12 +51,18 @@ export function MarketplaceGrid({
   if (jobs.length === 0 && misJobs.length === 0) {
     return (
       <div className={`rounded-2xl border p-10 text-center ${esProfesional ? "border-white/10 bg-[#162420]" : "card"}`}>
-        <div className="text-2xl">🤷</div>
+        <div className="text-2xl">{esProfesional ? "🔍" : "🤷"}</div>
         <h3 className={`display mt-2 text-2xl ${esProfesional ? "text-zap-50" : "text-sv-dark"}`}>Sin resultados</h3>
-        <p className={`mt-2 ${esProfesional ? "text-zap-400" : "text-ink-400"}`}>Probá con otro filtro o publicá tu problema directo.</p>
-        <Link href="/publicar" className="btn-primary mt-6 inline-block">
-          Publicar mi problema
-        </Link>
+        <p className={`mt-2 ${esProfesional ? "text-zap-400" : "text-ink-400"}`}>
+          {esProfesional
+            ? "Todavía no hay trabajos que coincidan con tu zona o rubro. Te avisamos por mail apenas aparezca uno."
+            : "Probá con otro filtro o publicá tu problema directo."}
+        </p>
+        {!esProfesional && (
+          <Link href="/publicar" className="btn-primary mt-6 inline-block">
+            Publicar mi problema
+          </Link>
+        )}
       </div>
     );
   }

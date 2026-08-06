@@ -26,7 +26,7 @@ export default async function PerfilPage() {
       ? nombreMeta.slice(0, 2).toUpperCase()
       : (user.email?.[0]?.toUpperCase() ?? "U");
 
-  let perfil: { telefono: string | null; zona: string | null; rubro: string | null } | null = null;
+  let perfil: { telefono: string | null; zona: string | null; rubro: string[] | null } | null = null;
   let promedio = 0;
   let total = 0;
   let resenas: Resena[] = [];

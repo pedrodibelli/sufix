@@ -77,10 +77,12 @@ export async function POST(req: NextRequest) {
     // ── 2) Aviso a los técnicos del rubro + zona ────────────────────────────
     let tecnicosNotificados = 0;
     if (rubro && zona) {
+      // rubro es un array (un técnico puede tener varios) — .contains() chequea
+      // que el array de la fila incluya este valor.
       const { data: tecnicos, error: tErr } = await admin
         .from("perfiles_profesionales")
         .select("email, user_id")
-        .eq("rubro", rubro)
+        .contains("rubro", [rubro])
         .eq("zona", zona);
 
       if (tErr) {

@@ -162,7 +162,7 @@ Vercel. El código usa:
 5. **Verificación manual** (admin en `/admin`): aprueba el pago → se desbloquea el contacto del técnico, se genera un **código de 4 dígitos**, estado → `en_curso`.
 6. **Cierre**: el técnico hace el trabajo y cobra su consulta directo; el cliente le da el **código**; el técnico lo ingresa → estado → `cerrado`. Habilita la **reseña**.
 7. **Reseñas**: el demandante califica al técnico (★ + comentario). Se ve en cada propuesta (★ + cantidad) y en el **perfil del técnico** (`/tecnico/[id]`).
-8. **Perfiles** (`/perfil`): el técnico edita teléfono/zona/rubro y ve su reputación; el demandante edita nombre/apellido y ve las opiniones que dejó. Datos con candado/lápiz para editar.
+8. **Perfiles** (`/perfil`): el técnico edita teléfono/zona/**rubros (puede elegir varios**, ej. plomero + gasista — `perfiles_profesionales.rubro` es `text[]`, no un solo valor) y ve su reputación; el demandante edita nombre/apellido y ve las opiniones que dejó. Datos con candado/lápiz para editar.
 9. **Disputas**: cualquiera "reporta un problema" → `status='en_disputa'` → el admin lo resuelve en `/admin`.
 10. **Avisos in-app**: punto rojo 🔴 en "Mis consultas" (demandante: propuestas nuevas; técnico: propuestas aceptadas). **Tiempo real** vía Supabase Realtime (se actualiza solo).
 11. **PWA + Mobile**: ícono iOS (`apple-icon`, fondo verde oscuro), manifest, standalone. Barra de navegación inferior (Inicio / Mis consultas) solo en mobile. Menú del perfil (avatar arriba a la derecha).
