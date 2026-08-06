@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { ZONES } from "@/lib/data";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { RubroChips } from "@/components/RubroChips";
-import { GoogleButton } from "@/components/GoogleButton";
+// import { GoogleButton } from "@/components/GoogleButton"; // pausado, ver CLAUDE.md
 
 export default function RegistrarPage() {
   const [nombre, setNombre] = useState("");
@@ -105,20 +105,24 @@ export default function RegistrarPage() {
           Gratis. Sin comisiones. Tu problema, resuelto.
         </p>
 
+        {/* Login con Google: PAUSADO a propósito (ver CLAUDE.md) — abría
+            demasiadas variables de configuración por ahora. El código
+            (GoogleButton.tsx, app/auth/callback/route.ts) queda listo para
+            reactivar más adelante, solo hay que volver a poner esto:
         <div className="mt-6">
           <GoogleButton next="/" />
           <p className="mt-2 text-center text-xs text-ink-400">
             ¿Sos técnico? Registrate con el formulario de abajo — necesitamos tu DNI y teléfono.
           </p>
         </div>
-
         <div className="my-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-ink-100" />
           <span className="text-xs text-ink-400">o con mail</span>
           <div className="h-px flex-1 bg-ink-100" />
         </div>
+        */}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Nombre">
               <input

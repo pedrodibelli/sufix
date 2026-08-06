@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { GoogleButton } from "@/components/GoogleButton";
+// import { GoogleButton } from "@/components/GoogleButton"; // pausado, ver CLAUDE.md
 
 export default function IngresarPage() {
   return (
@@ -63,17 +63,19 @@ function IngresarInner() {
             Tu casa anda mal, vos no tenés que perder la mañana.
           </p>
 
+          {/* Login con Google: PAUSADO a propósito (ver CLAUDE.md). Para
+              reactivar, descomentar esto y el import de arriba:
           <div className="mt-6">
             <GoogleButton next={next} />
           </div>
-
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-ink-100" />
             <span className="text-xs text-ink-400">o con mail</span>
             <div className="h-px flex-1 bg-ink-100" />
           </div>
+          */}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             <Field label="Email">
               <input
                 type="email"

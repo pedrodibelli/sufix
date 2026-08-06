@@ -286,6 +286,25 @@ El registro deja al usuario logueado directo.
 - Notificaciones push (web push) — build grande.
 - Indicador de disputa también del lado del técnico.
 
+**Login con Google — PAUSADO a propósito (2026-08):**
+- El código está armado y probado (redirige bien a Supabase con los parámetros
+  correctos), pero abría muchas variables de configuración externa (Google
+  Cloud, pantalla de consentimiento, credenciales) y se decidió no avanzar
+  por ahora. **No se borró nada**, solo se comentó el botón:
+  - `components/GoogleButton.tsx` — el botón, sin usar en ningún lado por ahora.
+  - `app/auth/callback/route.ts` — recibe la vuelta del login con Google (PKCE),
+    marca `es_profesional=false` en la primera vez (el botón es solo para
+    demandantes; los técnicos siguen con el formulario porque necesitamos DNI y
+    teléfono, que Google no da).
+  - En `app/registrar/page.tsx` y `app/ingresar/page.tsx` el `<GoogleButton />`
+    y su import quedaron comentados (buscar "pausado" en esos archivos).
+- **Para reactivarlo:** descomentar esas dos líneas en cada página, y
+  configurar el proveedor Google en Supabase (Google Cloud Console → crear
+  credenciales OAuth con redirect URI `https://<project-ref>.supabase.co/auth/v1/callback`
+  → pegar Client ID/Secret en Supabase → Authentication → Providers → Google
+  → agregar `https://solvitweb.vercel.app/**` a Authentication → URL
+  Configuration → Redirect URLs).
+
 ## 14. Cómo trabajar en este repo (workflow para Claude)
 1. **Cambio de código** → `npm run build` (verificar que compila) → `git add -A` → commit → `git push origin main`. ⚠️ **El push NO siempre re-apunta el dominio `solvitweb.vercel.app` al último deploy** (puede quedar sirviendo código viejo). Correr **`vercel --prod`** después para forzar el alias. (Co-author trailer: `Claude Opus 4.8 <noreply@anthropic.com>`.)
 2. **Cambio de base de datos** → crear el `.sql` en `supabase/migrations/` Y **darle el SQL al usuario para correr en el SQL Editor** (no se aplica solo).
