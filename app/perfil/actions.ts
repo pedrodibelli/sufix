@@ -46,3 +46,32 @@ export async function actualizarPerfil(data: {
   revalidatePath(`/tecnico/${user.id}`);
   return { ok: true };
 }
+
+// Cambiar contraseña (demandante o técnico). Pide la contraseña actual antes
+// de cambiarla — no porque Supabase lo exija (alcanza con la sesión activa),
+// sino como resguardo: útil sobre todo para cuentas creadas a mano por el
+// equipo con una contraseña temporal mandada por WhatsApp, donde no podemos
+// asumir que solo el dueño la vio.
+export async function cambiarPassword(data: {
+  passwordActual: string;
+  passwordNueva: string;
+}): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || !user.email) return { error: "No autenticado" };
+
+  if (data.passwordNueva.length < 8) {
+    return { error: "La contraseña nueva debe tener al menos 8 caracteres." };
+  }
+
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: data.passwordActual,
+  });
+  if (verifyError) return { error: "La contraseña actual no es correcta." };
+
+  const { error } = await supabase.auth.updateUser({ password: data.passwordNueva });
+  if (error) return { error: error.message };
+
+  return { ok: true };
+}

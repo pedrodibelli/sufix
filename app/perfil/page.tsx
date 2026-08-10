@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { PerfilForm } from "./PerfilForm";
 import { DatosCuentaForm } from "./DatosCuentaForm";
+import { CambiarPasswordForm } from "./CambiarPasswordForm";
 
 export const revalidate = 0;
 
@@ -90,8 +91,9 @@ export default async function PerfilPage() {
               {/* Mis datos (editables) */}
               <section className="mt-6">
                 <h2 className="display text-lg">Mis datos</h2>
-                <div className="mt-3">
+                <div className="mt-3 space-y-3">
                   <DatosCuentaForm nombre={nombreMeta ?? ""} apellido={apellidoMeta ?? ""} />
+                  <CambiarPasswordForm />
                 </div>
               </section>
 
@@ -188,8 +190,9 @@ export default async function PerfilPage() {
           {/* Datos editables */}
           <section className="mt-8">
             <h2 className="display text-lg text-zap-50">Mis datos</h2>
-            <div className="mt-3">
+            <div className="mt-3 space-y-3">
               <PerfilForm perfil={perfil} dark />
+              <CambiarPasswordForm dark />
             </div>
           </section>
         </div>
