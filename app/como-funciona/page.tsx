@@ -77,10 +77,10 @@ export default async function ComoFuncionaPage() {
     <>
       <Header />
       <ScrollReveal />
-      <main className="bg-[#f5fdf9]">
+      <main className="bg-white">
 
         {/* ── Hero ── */}
-        <section className="border-b border-ink-100/60 py-14 sm:py-20 lg:py-24">
+        <section className="bg-white py-14 sm:py-20 lg:py-24">
           <div className="container-pad">
             <div className="mx-auto max-w-2xl text-center">
               <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.18em] text-sv-primary">
@@ -117,7 +117,7 @@ export default async function ComoFuncionaPage() {
 
         {/* ── Flujo cliente ── */}
         {mostrarCliente && (
-        <section className="bg-white">
+        <section className="bg-zap-100">
           <div className="container-pad py-14 sm:py-20">
             <div className="mx-auto max-w-2xl text-center">
               <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-400">
@@ -163,7 +163,7 @@ export default async function ComoFuncionaPage() {
         )}
 
         {/* ── Precios ── */}
-        <section className="py-14 sm:py-20">
+        <section className="bg-white py-14 sm:py-20">
           <div className="container-pad">
             <div className="mx-auto max-w-4xl">
               <div className="text-center">
@@ -232,7 +232,7 @@ export default async function ComoFuncionaPage() {
         </section>
 
         {/* ── FAQ ── */}
-        <section className="bg-white">
+        <section className="bg-zap-100">
           <div className="container-pad py-14 sm:py-20">
             <div className="mx-auto max-w-2xl">
               <h2 className="reveal delay-0 display text-center text-2xl text-sv-dark sm:text-3xl">
@@ -256,7 +256,7 @@ export default async function ComoFuncionaPage() {
         </section>
 
         {/* ── CTA final ── */}
-        <section className="py-14 sm:py-20">
+        <section className="bg-white py-14 sm:py-20">
           <div className="container-pad">
             <div className="reveal mx-auto max-w-3xl rounded-2xl bg-sv-dark px-7 py-10 text-center sm:px-12 sm:py-14">
               {esTecnico ? (
