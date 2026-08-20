@@ -24,7 +24,7 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Sufix — Soluciones para tu hogar en Buenos Aires",
   description:
-    "Marketplace de servicios para el hogar en CABA. Publicá tu problema, técnicos verificados compiten por tomarlo. Sin presupuestos al voleo, sin perder la mañana.",
+    "Encontrá técnicos verificados para tu hogar en CABA. Mirá perfiles y reseñas, y contactalos directo por WhatsApp — sin publicar nada, sin esperar propuestas.",
   // Nombre + modo standalone al agregar a inicio en iOS
   appleWebApp: {
     capable: true,

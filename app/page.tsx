@@ -155,24 +155,24 @@ export default async function HomePage({
             <div className="container-pad">
               <div className="mx-auto max-w-2xl text-center">
                 <h1 className="display text-4xl leading-[1.12] text-sv-dark sm:text-5xl lg:text-6xl">
-                  Tu problema<br />tiene solución.
+                  Tu técnico ideal,<br />a un mensaje de distancia.
                 </h1>
                 <p className="mt-4 text-base leading-relaxed text-ink-500 sm:text-lg lg:text-xl">
-                  Describí lo que necesitás. Técnicos certificados te contactan
-                  por WhatsApp en minutos — gratis por lanzamiento.
+                  Mirá perfiles verificados, sus reseñas y su zona, y escribile
+                  directo por WhatsApp — sin publicar nada, sin esperar propuestas.
                 </p>
                 <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
-                  <Link href="/publicar" className="btn-primary w-full py-4 text-base sm:w-auto sm:px-10">
-                    Publicar mi problema
-                  </Link>
+                  <a href="#tecnicos" className="btn-primary w-full py-4 text-base sm:w-auto sm:px-10">
+                    Ver técnicos ↓
+                  </a>
                   <Link href="/registrar" className="btn-ghost w-full py-4 text-base text-ink-500 sm:w-auto sm:px-10">
-                    Soy técnico, quiero trabajar →
+                    Soy técnico, quiero aparecer acá →
                   </Link>
                 </div>
                 <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ink-400">
-                  <span>✓ Gratis por lanzamiento</span>
+                  <span>✓ Sin costo</span>
                   <span>✓ Técnicos verificados</span>
-                  <span>✓ Respuesta en minutos</span>
+                  <span>✓ Contacto directo por WhatsApp</span>
                 </div>
               </div>
             </div>
@@ -181,16 +181,16 @@ export default async function HomePage({
 
         {/* Directorio de técnicos — para demandantes y visitantes, no técnicos */}
         {!esProfesional && (
-          <section className={`py-10 sm:py-14 ${sinSesion ? "bg-[#f5fdf9]" : ""}`}>
+          <section id="tecnicos" className={`py-10 sm:py-14 ${sinSesion ? "bg-[#f5fdf9]" : ""}`}>
             <div className="container-pad">
               <div className="mb-6">
                 <div className="flex items-center gap-2 text-xs text-ink-400">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-sv-primary" />
                   <span className="font-medium uppercase tracking-widest">Técnicos disponibles</span>
                 </div>
-                <h1 className="display mt-1.5 text-3xl text-sv-dark md:text-4xl">
+                <h2 className="display mt-1.5 text-3xl text-sv-dark md:text-4xl">
                   Encontrá tu técnico
-                </h1>
+                </h2>
                 <p className="mt-1 text-sm text-ink-400">
                   Mirá su perfil, sus reseñas y escribile por WhatsApp directo — sin costo, sin esperar propuestas.
                 </p>
@@ -200,19 +200,25 @@ export default async function HomePage({
           </section>
         )}
 
+        {/* Consultas activas — flujo viejo (publicar problema), pausado para
+            demandantes/visitantes: ahora se contacta al técnico directo desde
+            el directorio de arriba. Se sigue mostrando al técnico logueado
+            (es su pantalla principal) y el código queda intacto para revertir
+            fácil — ver CLAUDE.md "Pivot 2026-08-20/21". */}
+        {esProfesional && (
         <section className="min-h-screen py-10">
           <div className="container-pad">
 
             {/* Intro */}
             <div className="mb-8">
-              <div className={`flex items-center gap-2 text-xs ${esProfesional ? "text-zap-500" : "text-ink-400"}`}>
+              <div className="flex items-center gap-2 text-xs text-zap-500">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-sv-primary" />
                 <span className="font-medium uppercase tracking-widest">En vivo</span>
               </div>
-              <h1 className={`display mt-1.5 text-3xl md:text-4xl ${esProfesional ? "text-white" : "text-sv-dark"}`}>
+              <h1 className="display mt-1.5 text-3xl md:text-4xl text-white">
                 Consultas activas
               </h1>
-              <p className={`mt-1 text-sm ${esProfesional ? "text-zap-400" : "text-ink-400"}`}>
+              <p className="mt-1 text-sm text-zap-400">
                 {allJobs.length === 0
                   ? "Todavía no hay consultas publicadas."
                   : `${allJobs.length} ${allJobs.length === 1 ? "problema esperando un técnico" : "problemas esperando un técnico"}`}
@@ -220,27 +226,19 @@ export default async function HomePage({
             </div>
 
             {/* Banner: contacto gratis por lanzamiento */}
-            {!sinSesion && (
-              <div className={`mb-6 flex items-center gap-3.5 rounded-2xl border p-4 sm:p-5 ${
-                esProfesional ? "border-sv-primary/25 bg-sv-primary/10" : "border-sv-primary/25 bg-sv-primary/5"
-              }`}>
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sv-primary/15 text-xl">
-                  🎉
-                </span>
-                <div className="min-w-0">
-                  <p className={`text-sm font-semibold ${esProfesional ? "text-zap-50" : "text-sv-dark"}`}>
-                    {esProfesional
-                      ? "Contactar clientes es gratis por lanzamiento"
-                      : "Conectar con un técnico es gratis por lanzamiento"}
-                  </p>
-                  <p className={`mt-0.5 text-[13px] ${esProfesional ? "text-zap-300" : "text-ink-500"}`}>
-                    {esProfesional
-                      ? "Sin comisión, sin cotizar nada — avisá que te interesa el trabajo y esperá que el cliente te elija."
-                      : "Sin cargo por ahora. Hablá por WhatsApp con los técnicos interesados y elegí el que más te convenga."}
-                  </p>
-                </div>
+            <div className="mb-6 flex items-center gap-3.5 rounded-2xl border border-sv-primary/25 bg-sv-primary/10 p-4 sm:p-5">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sv-primary/15 text-xl">
+                🎉
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-zap-50">
+                  Contactar clientes es gratis por lanzamiento
+                </p>
+                <p className="mt-0.5 text-[13px] text-zap-300">
+                  Sin comisión, sin cotizar nada — avisá que te interesa el trabajo y esperá que el cliente te elija.
+                </p>
               </div>
-            )}
+            </div>
 
             {/* Cartel: pedidos urgentes del rubro del técnico */}
             {esProfesional && urgentesDeMiRubro.length > 0 && (
@@ -294,6 +292,7 @@ export default async function HomePage({
             />
           </div>
         </section>
+        )}
       </main>
       <Footer />
     </>

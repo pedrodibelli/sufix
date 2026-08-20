@@ -7,44 +7,44 @@ import { createSupabaseServer } from "@/lib/supabase-server";
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const PASOS_CLIENTE = [
   {
-    icon: "📸",
-    title: "Publicás el problema",
-    body: "Subís una foto o video, describís qué pasó y la plataforma lo muestra a técnicos verificados en tu zona.",
+    icon: "🔍",
+    title: "Explorás perfiles",
+    body: "Mirás foto, rubros, zona y reseñas de técnicos verificados cerca tuyo — sin registrarte.",
   },
   {
-    icon: "📩",
-    title: "Recibís propuestas",
-    body: "Solo profesionales con identidad auditada pueden ofertar. Ves su precio, rubro y reputación antes de decidir.",
+    icon: "💬",
+    title: "Elegís y escribís",
+    body: "Tocás \"Contactar por WhatsApp\" en el perfil que te convenza. Un clic, sin formularios ni esperas.",
   },
   {
     icon: "🤝",
-    title: "Elegís y coordinan por WhatsApp",
-    body: "Hablás con los técnicos interesados y elegís el que más te convenza. El contacto es gratis mientras dure la promo de lanzamiento.",
+    title: "Coordinan directo",
+    body: "Hablan por WhatsApp, acuerdan precio y fecha entre ustedes. Sin intermediarios, sin comisión.",
   },
 ];
 
 const PASOS_TECNICO = [
   {
     icon: "📋",
-    title: "Te registrás y validamos",
-    body: "Validamos tu identidad, antecedentes y matrícula si corresponde. Quedás verificado en 48–72 hs.",
+    title: "Te registrás y armás tu perfil",
+    body: "Cargá tu foto, tus rubros y tu zona — es lo primero que ve un cliente antes de escribirte.",
   },
   {
-    icon: "🎯",
-    title: "Tomás los trabajos que querés",
-    body: "Filtrás por zona, rubro y rango de precio. Tu agenda la armás vos. Sin asignaciones forzadas.",
+    icon: "👀",
+    title: "Aparecés en el directorio",
+    body: "Cualquiera puede ver tu perfil, tus reseñas y contactarte — con cuenta o sin ella.",
   },
   {
-    icon: "💰",
-    title: "Cobrás íntegro al cierre",
-    body: "El pago queda respaldado por la plataforma y se libera con tu código de cierre. Cero retenciones.",
+    icon: "💬",
+    title: "Te escriben directo por WhatsApp",
+    body: "Coordinás el trabajo y cobrás vos, directo con el cliente. Cero comisión, cero intermediarios.",
   },
 ];
 
 const FAQ = [
   {
     q: "¿Cuánto cuesta contactar a un técnico?",
-    a: "Por ahora, nada — mientras estemos en lanzamiento, conectar con un técnico es gratis para los primeros usuarios. Más adelante vamos a cobrar una tarifa única por conexión.",
+    a: "Nada. Mirar perfiles, reseñas y escribirle a un técnico por WhatsApp es gratis, hoy y siempre.",
   },
   {
     q: "¿Cómo verifican a los técnicos?",
@@ -52,11 +52,11 @@ const FAQ = [
   },
   {
     q: "¿Qué pasa si el trabajo sale mal?",
-    a: "Tenés 30 días de garantía de reparación. Si el técnico no responde, Sufix te asigna otro sin costo adicional.",
+    a: "El contacto y la coordinación son directos entre vos y el técnico — te recomendamos acordar bien el alcance y el precio antes de arrancar. Es algo que estamos mejorando a medida que la plataforma crece.",
   },
   {
-    q: "¿Pueden contactarme por fuera de la app?",
-    a: "Sí, pero perdés la garantía, el respaldo del pago y la reputación auditada del técnico.",
+    q: "¿La plataforma cobra algo del trabajo?",
+    a: "No. Sufix no cobra comisión ni gestiona el pago — coordinás el precio y la forma de pago directo con el técnico.",
   },
 ];
 
@@ -92,17 +92,17 @@ export default async function ComoFuncionaPage() {
               </h1>
               <p className="reveal delay-200 mt-5 text-base leading-relaxed text-ink-500 sm:text-lg">
                 {esTecnico
-                  ? "Recibís trabajos ya descriptos, con foto. Avisás cuáles te interesan y cobrás íntegro al cierre."
-                  : "Publicás el problema. Técnicos verificados te avisan que quieren hacerlo. Elegís y hablás por WhatsApp — gratis mientras dure el lanzamiento."}
+                  ? "Los clientes te encuentran por tu perfil — foto, zona, rubros y reseñas — y te escriben directo por WhatsApp. Completalo para que te elijan."
+                  : "Mirás perfiles de técnicos verificados, sus reseñas y su zona. Elegís el que te convenza y le escribís directo por WhatsApp — sin publicar nada, sin esperar propuestas."}
               </p>
               <div className="reveal delay-300 mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
                 {esTecnico ? (
-                  <Link href="/" className="btn-primary text-center">
-                    Ver consultas disponibles
+                  <Link href="/perfil" className="btn-primary text-center">
+                    Completar mi perfil
                   </Link>
                 ) : (
-                  <Link href="/publicar" className="btn-primary text-center">
-                    Publicar mi problema
+                  <Link href="/#tecnicos" className="btn-primary text-center">
+                    Ver técnicos
                   </Link>
                 )}
                 {!user && (
@@ -149,7 +149,7 @@ export default async function ComoFuncionaPage() {
                 Si sos técnico
               </h2>
               <p className="reveal delay-200 mt-2 text-sm text-white/50 sm:text-base">
-                Cero comisiones sobre tu cotización. Llegás con el problema ya descripto.
+                Cero comisiones. Tu perfil es tu vidriera — el cliente te escribe directo.
               </p>
             </div>
 
@@ -182,21 +182,20 @@ export default async function ComoFuncionaPage() {
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">
                     Para clientes
                   </p>
-                  <div className="mt-2 flex items-center gap-2.5">
-                    <p className="text-xl font-medium text-ink-300 line-through">$4.500</p>
-                    <p className="display text-[2.4rem] leading-none font-semibold text-emerald-600">$0</p>
-                  </div>
-                  <p className="mt-1 text-sm text-ink-400">tarifa de conexión — gratis por lanzamiento</p>
+                  <p className="display mt-2 text-[2.4rem] leading-none font-semibold text-emerald-600">
+                    $0
+                  </p>
+                  <p className="mt-1 text-sm text-ink-400">buscar y contactar técnicos</p>
                   <div className="my-5 h-px bg-ink-100" />
                   <ul className="space-y-2.5 text-sm text-ink-600">
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> $0 por publicar el problema
+                      <span className="text-sv-primary">✓</span> $0 por ver perfiles y reseñas
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> $0 si ningún técnico te convence
+                      <span className="text-sv-primary">✓</span> $0 por escribir por WhatsApp
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> Técnico verificado incluido
+                      <span className="text-sv-primary">✓</span> Elegís vos, sin apuro
                     </li>
                   </ul>
                 </div>
@@ -215,13 +214,13 @@ export default async function ComoFuncionaPage() {
                   <div className="my-5 h-px bg-sv-primary/15" />
                   <ul className="space-y-2.5 text-sm text-ink-600">
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> $0 por publicar propuestas
+                      <span className="text-sv-primary">✓</span> $0 por aparecer en el directorio
                     </li>
                     <li className="flex items-center gap-2.5">
                       <span className="text-sv-primary">✓</span> $0 por usar la plataforma
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> Pago liberado al cierre del trabajo
+                      <span className="text-sv-primary">✓</span> Cobrás directo del cliente, sin intermediarios
                     </li>
                   </ul>
                 </div>
@@ -262,31 +261,31 @@ export default async function ComoFuncionaPage() {
               {esTecnico ? (
                 <>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary">
-                    Tu próximo trabajo
+                    Tu próximo cliente
                   </p>
                   <h3 className="display mt-2 text-2xl text-white sm:text-3xl">
-                    Encontrá trabajos en tu zona.
+                    Ya te está buscando.
                   </h3>
                   <p className="mt-2 text-sm text-white/50 sm:text-base">
-                    Cotizás solo los que te convienen. Cero comisiones.
+                    Completá tu perfil — foto, zona y rubros — para aparecer en el directorio.
                   </p>
-                  <Link href="/" className="btn-primary mt-7 inline-block px-10">
-                    Ver consultas disponibles
+                  <Link href="/perfil" className="btn-primary mt-7 inline-block px-10">
+                    Completar mi perfil
                   </Link>
                 </>
               ) : (
                 <>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary">
-                    Sin riesgo
+                    Sin costo
                   </p>
                   <h3 className="display mt-2 text-2xl text-white sm:text-3xl">
-                    Publicá y esperá propuestas.
+                    Tu técnico te está esperando.
                   </h3>
                   <p className="mt-2 text-sm text-white/50 sm:text-base">
-                    Si nadie te convence, no pagás. Nada.
+                    Mirá perfiles, reseñas y escribile directo. Cero costo, cero vueltas.
                   </p>
-                  <Link href="/publicar" className="btn-primary mt-7 inline-block px-10">
-                    Publicar mi problema
+                  <Link href="/#tecnicos" className="btn-primary mt-7 inline-block px-10">
+                    Ver técnicos
                   </Link>
                 </>
               )}
