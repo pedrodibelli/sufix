@@ -22,13 +22,12 @@ export async function actualizarDatosCuenta(data: {
   return { ok: true };
 }
 
-// Foto de perfil (demandante o técnico). El archivo ya se subió al bucket
-// `avatars` desde el cliente (AvatarUpload) — acá solo guardamos la URL.
-// Se guarda en user_metadata para que el propio usuario se vea reflejado al
-// toque (Header, /perfil) sin queries extra; si es técnico, además se
-// duplica en perfiles_profesionales.foto_url para que sea visible en su
-// perfil público y en las tarjetas de contacto (mismo patrón que `nombre`).
-export async function actualizarAvatar(url: string): Promise<{ ok: true } | { error: string }> {
+// Foto de perfil (demandante o técnico). Se guarda en user_metadata para que
+// el propio usuario se vea reflejado al toque (Header, /perfil) sin queries
+// extra; si es técnico, además se duplica en perfiles_profesionales.foto_url
+// para que sea visible en su perfil público y en las tarjetas de contacto
+// (mismo patrón que `nombre`). Compartido por subir y quitar (url = null).
+async function guardarAvatarUrl(url: string | null): Promise<{ ok: true } | { error: string }> {
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "No autenticado" };
@@ -52,6 +51,25 @@ export async function actualizarAvatar(url: string): Promise<{ ok: true } | { er
   revalidatePath(`/tecnico/${user.id}`);
   revalidatePath("/");
   return { ok: true };
+}
+
+// El archivo ya se subió al bucket `avatars` desde el cliente (AvatarUpload)
+// — acá solo guardamos la URL resultante.
+export async function actualizarAvatar(url: string): Promise<{ ok: true } | { error: string }> {
+  return guardarAvatarUrl(url);
+}
+
+// Quita la foto de perfil: borra el archivo del bucket y limpia la URL
+// guardada. Vuelve a mostrarse el círculo de iniciales.
+export async function eliminarAvatar(): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autenticado" };
+
+  // No falla si el archivo no existe — simplemente no borra nada.
+  await supabase.storage.from("avatars").remove([`${user.id}/avatar`]);
+
+  return guardarAvatarUrl(null);
 }
 
 export async function actualizarPerfil(data: {
