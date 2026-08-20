@@ -903,8 +903,12 @@ function MiConsultaCard({
         <ProfesionalContacto propuesta={propuestaAceptada} pubTitle={pub.title} pubStatus={pub.status} perfil={perfil} />
       )}
 
-      {/* Calificar al técnico cuando el trabajo está cerrado */}
-      {pub.status === "cerrado" && propuestaAceptada && (
+      {/* Calificar al técnico cuando el trabajo está cerrado — PAUSADO (pivot
+          2026-08-2x, ver CLAUDE.md): con el directorio de técnicos casi no
+          hay trabajos que lleguen a "cerrado" por acá. La reseña ahora se
+          deja directo desde /tecnico/[id] (DejarResenaForm). El componente
+          y la función crearResena quedan intactos por si se revierte. */}
+      {false && pub.status === "cerrado" && propuestaAceptada && (
         <CalificarBlock publicacionId={pub.id} yaResenada={yaResenada} />
       )}
 

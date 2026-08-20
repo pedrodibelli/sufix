@@ -1,10 +1,13 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
 import { Avatar } from "@/components/Avatar";
+import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
 import { CATEGORIES } from "@/lib/data";
 import { createSupabaseServer } from "@/lib/supabase-server";
+import { DejarResenaForm } from "./DejarResenaForm";
 
 export const revalidate = 0;
 
@@ -23,6 +26,7 @@ export default async function TecnicoPage({
 }) {
   const { id } = await params;
   const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: perfil } = await supabase
     .from("perfiles_publicos")
@@ -95,14 +99,14 @@ export default async function TecnicoPage({
               </div>
 
               {waLink && (
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <ContactarWhatsAppButton
+                  tecnicoId={id}
+                  waLink={waLink}
+                  origen="perfil"
                   className="btn-primary w-full py-3.5 text-base sm:w-auto sm:px-8"
                 >
                   💬 Contactar por WhatsApp
-                </a>
+                </ContactarWhatsAppButton>
               )}
             </div>
 
@@ -128,7 +132,7 @@ export default async function TecnicoPage({
 
           {lista.length === 0 ? (
             <div className="mt-5 rounded-2xl border border-dashed border-ink-200 p-10 text-center text-ink-400">
-              Todavía no tiene reseñas. ¡Sé el primero en calificarlo después de un trabajo!
+              Todavía no tiene reseñas. ¡Sé el primero en calificarlo!
             </div>
           ) : (
             <div className={`mt-5 ${lista.length > 3 ? "flex gap-3 overflow-x-auto pb-2 no-scrollbar sm:block sm:space-y-3 sm:overflow-visible" : "space-y-3"}`}>
@@ -149,6 +153,17 @@ export default async function TecnicoPage({
               ))}
             </div>
           )}
+
+          {user && user.id !== id ? (
+            <DejarResenaForm tecnicoId={id} />
+          ) : !user ? (
+            <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-ink-200 p-5">
+              <p className="text-sm text-ink-500">¿Ya lo contactaste? Iniciá sesión para dejar tu reseña.</p>
+              <Link href="/ingresar" className="btn-outline shrink-0 text-sm">
+                Ingresar
+              </Link>
+            </div>
+          ) : null}
         </section>
       </main>
       <Footer />

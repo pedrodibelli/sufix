@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
+import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
 import { CATEGORIES } from "@/lib/data";
 
 export type TecnicoPublico = {
@@ -71,15 +72,14 @@ export function TecnicoCard({
         </div>
       </Link>
 
-      <a
-        href={waLink ?? undefined}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-disabled={!waLink}
+      <ContactarWhatsAppButton
+        tecnicoId={tecnico.user_id}
+        waLink={waLink}
+        origen="home"
         className={`btn-primary mt-3 block w-full text-center text-sm ${!waLink ? "pointer-events-none opacity-50" : ""}`}
       >
         💬 Contactar por WhatsApp
-      </a>
+      </ContactarWhatsAppButton>
     </div>
   );
 }
