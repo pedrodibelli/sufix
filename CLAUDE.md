@@ -16,6 +16,44 @@
 > `sufix.com.ar` como dominio real está **pendiente** de recuperar el acceso a la cuenta
 > de Vercel (ver §6 y la nota de la sesión sobre el 2FA).
 
+> ⚠️ **Pivot de producto 2026-08-20/21: "publicar problema" → "directorio de técnicos".**
+> La home dejó de tener como flujo principal "el demandante publica su problema y espera
+> propuestas". Ahora, tanto para logueados como para visitantes sin cuenta, la home muestra
+> primero un **directorio de perfiles de técnicos** (foto, rubros, zona, reseñas) con un
+> botón **"Contactar por WhatsApp"** directo en cada tarjeta — cero clics de más, sin login,
+> sin publicar nada antes. Es una **prueba de concepto**, no una decisión definitiva: la idea
+> es generar movimiento rápido; si funciona, más adelante se vuelve (parcial o totalmente) al
+> modelo anterior.
+>
+> **Qué cambió técnicamente:**
+> - `app/page.tsx`: nueva sección "Encontrá tu técnico" (usa `TecnicosGrid`/`TecnicoCard`)
+>   arriba de "Consultas activas". Solo se muestra si `!esProfesional` (a un técnico logueado
+>   le siguen mostrando el feed de trabajos, no colegas).
+> - `app/tecnico/[id]/page.tsx`: botón de WhatsApp agregado junto al nombre.
+> - `perfiles_publicos` (vista) ahora expone `telefono` — antes protegido a propósito (Tarea 3,
+>   2026-06-09: solo se revelaba tras pago/propuesta). Se decidió conscientemente hacerlo
+>   público: el técnico quiere que lo llamen, es el equivalente a una guía de oficios. Ver
+>   `supabase/migrations/20260821_telefono_publico_directorio.sql` para el detalle y cómo
+>   revertirlo si hiciera falta.
+>
+> **Qué NO se tocó** (nada se borró, todo sigue en el repo): el flujo viejo completo —
+> `/publicar`, la sección "Consultas activas" (sigue debajo en la home), `propuestas`,
+> `ContactarModal`/`AceptarModal`, el cupo `CUPO_CONTACTOS_GRATIS` — todo intacto. El pivot es
+> aditivo: se agregó una sección nueva arriba, no se quitó la vieja.
+>
+> **Cómo volver atrás si en algún momento se quiere volver al modelo viejo:**
+> - **Revert liviano (recomendado primero)**: en `app/page.tsx`, sacar/comentar el bloque
+>   `{!esProfesional && (<section>...<TecnicosGrid .../></section>)}`. La home vuelve a mostrar
+>   solo "Consultas activas" como antes, sin tocar nada más — todo el código nuevo queda ahí,
+>   pausado, listo para reactivar (mismo patrón que ya usamos con el login de Google o el
+>   flujo de pago viejo).
+> - **Revert completo (código exacto de antes del pivot)**: existe el tag de git
+>   `idea-publicar-problema-2026-08-20`, apuntando al commit justo antes de este cambio.
+>   `git checkout idea-publicar-problema-2026-08-20` para ver/recuperar ese estado exacto.
+> - Si se revierte, evaluar si conviene volver a sacar `telefono` de `perfiles_publicos`
+>   (dejarlo público no rompe nada por sí solo, pero ya no tendría el mismo sentido sin el
+>   botón de WhatsApp en la home).
+
 ---
 
 ## 1. Qué es esto
