@@ -90,11 +90,11 @@ async function DemandanteData({
     proIdsConContacto.length > 0
       ? await supabase
           .from("perfiles_profesionales")
-          .select("user_id, nombre, telefono, email, zona")
+          .select("user_id, nombre, telefono, email, zona, foto_url")
           .in("user_id", proIdsConContacto)
       : { data: [] };
 
-  const perfilMap: Record<string, { user_id: string; nombre: string | null; telefono: string | null; email: string | null; zona: string | null }> =
+  const perfilMap: Record<string, { user_id: string; nombre: string | null; telefono: string | null; email: string | null; zona: string | null; foto_url: string | null }> =
     Object.fromEntries((perfiles ?? []).map((p) => [p.user_id, p]));
 
   // Reputación de los técnicos que ofertaron + qué trabajos ya calificó el usuario

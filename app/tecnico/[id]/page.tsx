@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
+import { Avatar } from "@/components/Avatar";
 import { CATEGORIES } from "@/lib/data";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
@@ -25,7 +26,7 @@ export default async function TecnicoPage({
 
   const { data: perfil } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado")
+    .select("user_id, nombre, zona, rubro, verificado, foto_url")
     .eq("user_id", id)
     .maybeSingle();
 
@@ -53,9 +54,7 @@ export default async function TecnicoPage({
         <section className="border-b border-ink-100 bg-white">
           <div className="container-pad py-10">
             <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-              <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sv-dark to-sv-primary font-display text-2xl font-semibold text-white">
-                {initials}
-              </span>
+              <Avatar url={perfil.foto_url} initials={initials} size={80} textClass="font-display text-2xl" />
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="display text-3xl text-sv-dark">{nombre}</h1>

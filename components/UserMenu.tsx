@@ -4,11 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { Avatar } from "@/components/Avatar";
 
 interface Props {
   displayName: string;
   email: string;
   initials: string;
+  avatarUrl?: string | null;
   esProfesional: boolean;
   isAdmin: boolean;
   dark?: boolean;
@@ -18,6 +20,7 @@ export function UserMenu({
   displayName,
   email,
   initials,
+  avatarUrl = null,
   esProfesional,
   isAdmin,
   dark = false,
@@ -63,11 +66,16 @@ export function UserMenu({
             : "sm:border-ink-100 sm:bg-ink-50/60 sm:hover:bg-ink-100"
         }`}
       >
-        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-offset-1 sm:h-6 sm:w-6 sm:ring-0 ${
-          dark ? "ring-zap-400/60 ring-offset-[#0e1a17]" : "ring-sv-primary/50 ring-offset-white"
-        } ${avatarCls}`}>
-          {initials}
-        </span>
+        <Avatar
+          url={avatarUrl}
+          initials={initials}
+          size={28}
+          fallbackClass={avatarCls}
+          textClass="text-[10px]"
+          className={`ring-2 ring-offset-1 sm:ring-0 ${
+            dark ? "ring-zap-400/60 ring-offset-[#0e1a17]" : "ring-sv-primary/50 ring-offset-white"
+          }`}
+        />
         <span className={`hidden text-sm font-medium sm:inline ${nameCls}`}>{displayName}</span>
         <span className={`hidden rounded-full px-1.5 py-px text-[10px] font-semibold sm:inline ${roleBadgeCls}`}>
           {roleLabel}
@@ -92,9 +100,7 @@ export function UserMenu({
             {/* Datos del usuario */}
             <div className={`border-b px-4 py-3 ${dividerCls}`}>
               <div className="flex items-center gap-2">
-                <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${avatarCls}`}>
-                  {initials}
-                </span>
+                <Avatar url={avatarUrl} initials={initials} size={32} fallbackClass={avatarCls} textClass="text-[11px]" />
                 <div className="min-w-0">
                   <p className={`truncate text-sm font-semibold ${nameCls}`}>{displayName}</p>
                   <p className={`truncate text-[11px] ${subtleCls}`}>{email}</p>

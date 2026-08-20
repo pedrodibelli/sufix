@@ -11,6 +11,7 @@ import { COMISION_CONSULTA } from "@/lib/config";
 import { AceptarModal, type PropuestaParaPago, type PublicacionParaPago } from "@/components/AceptarModal";
 import { ReportarProblemaModal } from "./ReportarProblemaModal";
 import { StarRating } from "@/components/StarRating";
+import { Avatar } from "@/components/Avatar";
 
 type Resumen = { promedio: number; total: number };
 
@@ -36,6 +37,7 @@ type PerfilProfesional = {
   telefono: string | null;
   email: string | null;
   zona: string | null;
+  foto_url: string | null;
 };
 
 type Publicacion = {
@@ -278,9 +280,7 @@ function InteresadoRow({
     <div className="rounded-xl border border-ink-100 bg-[#f5fdf9] p-3.5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex flex-1 items-center gap-3 min-w-0">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sv-dark to-sv-primary text-xs font-bold text-white">
-            {initials}
-          </span>
+          <Avatar url={perfil?.foto_url} initials={initials} size={40} textClass="text-xs" />
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <Link
@@ -487,9 +487,7 @@ function ProfesionalContacto({
 
       {/* Pro header */}
       <div className="mb-3 flex items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sv-dark to-sv-primary text-xs font-bold text-white">
-          {initials}
-        </span>
+        <Avatar url={perfil?.foto_url} initials={initials} size={40} textClass="text-xs" />
         <div>
           <p className="text-sm font-semibold text-sv-dark">{nombre}</p>
           <p className="text-[11px] text-ink-400">Profesional verificado en Sufix</p>

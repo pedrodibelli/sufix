@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { createSupabaseServer } from "@/lib/supabase-server";
+import { AvatarUpload } from "@/components/AvatarUpload";
 import { PerfilForm } from "./PerfilForm";
 import { DatosCuentaForm } from "./DatosCuentaForm";
 import { CambiarPasswordForm } from "./CambiarPasswordForm";
@@ -26,6 +27,7 @@ export default async function PerfilPage() {
       : nombreMeta
       ? nombreMeta.slice(0, 2).toUpperCase()
       : (user.email?.[0]?.toUpperCase() ?? "U");
+  const avatarUrl = (user.user_metadata?.avatar_url as string | undefined) ?? null;
 
   let perfil: { telefono: string | null; zona: string | null; rubro: string[] | null } | null = null;
   let promedio = 0;
@@ -73,9 +75,7 @@ export default async function PerfilPage() {
               {/* Cabecera */}
               <div className="mt-6 card p-6">
                 <div className="flex items-center gap-4">
-                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sv-dark to-sv-primary font-display text-2xl font-semibold text-white">
-                    {initials}
-                  </span>
+                  <AvatarUpload userId={user.id} initials={initials} avatarUrl={avatarUrl} size={64} />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="display text-xl">{displayName}</h2>
@@ -143,8 +143,13 @@ export default async function PerfilPage() {
       <Header />
       <main className="min-h-screen bg-[#0e1a17]">
         <div className="container-pad py-10">
-          <h1 className="display text-2xl text-zap-50">Mi perfil</h1>
-          <p className="mt-1 text-sm text-zap-400">{displayName} · Técnico</p>
+          <div className="flex items-center gap-4">
+            <AvatarUpload userId={user.id} initials={initials} avatarUrl={avatarUrl} size={64} dark />
+            <div>
+              <h1 className="display text-2xl text-zap-50">Mi perfil</h1>
+              <p className="mt-1 text-sm text-zap-400">{displayName} · Técnico</p>
+            </div>
+          </div>
 
           {/* Reputación */}
           <section className="mt-6">

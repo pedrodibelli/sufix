@@ -18,6 +18,7 @@ export async function Header() {
 
   const nombre = user?.user_metadata?.nombre as string | undefined;
   const apellido = user?.user_metadata?.apellido as string | undefined;
+  const avatarUrl = (user?.user_metadata?.avatar_url as string | undefined) ?? null;
   const esProfesional = user?.user_metadata?.es_profesional === true;
   const isAdmin = isAdminEmail(user?.email);
   const dk = esProfesional;
@@ -106,6 +107,7 @@ export async function Header() {
               displayName={displayName}
               email={user.email ?? ""}
               initials={initials}
+              avatarUrl={avatarUrl}
               esProfesional={esProfesional}
               isAdmin={isAdmin}
               dark={dk}

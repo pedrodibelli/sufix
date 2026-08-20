@@ -22,6 +22,38 @@ export async function actualizarDatosCuenta(data: {
   return { ok: true };
 }
 
+// Foto de perfil (demandante o técnico). El archivo ya se subió al bucket
+// `avatars` desde el cliente (AvatarUpload) — acá solo guardamos la URL.
+// Se guarda en user_metadata para que el propio usuario se vea reflejado al
+// toque (Header, /perfil) sin queries extra; si es técnico, además se
+// duplica en perfiles_profesionales.foto_url para que sea visible en su
+// perfil público y en las tarjetas de contacto (mismo patrón que `nombre`).
+export async function actualizarAvatar(url: string): Promise<{ ok: true } | { error: string }> {
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "No autenticado" };
+
+  const meta = user.user_metadata ?? {};
+  const { error: metaError } = await supabase.auth.updateUser({
+    data: { ...meta, avatar_url: url },
+  });
+  if (metaError) return { error: metaError.message };
+
+  if (meta.es_profesional === true) {
+    const { error: tablaError } = await supabase
+      .from("perfiles_profesionales")
+      .update({ foto_url: url })
+      .eq("user_id", user.id);
+    if (tablaError) return { error: tablaError.message };
+  }
+
+  revalidatePath("/perfil");
+  revalidatePath("/mis-consultas");
+  revalidatePath(`/tecnico/${user.id}`);
+  revalidatePath("/");
+  return { ok: true };
+}
+
 export async function actualizarPerfil(data: {
   telefono: string;
   zona: string;
