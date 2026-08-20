@@ -26,7 +26,7 @@ export default function AppleIcon() {
       >
         {/* logo 225x239 escalado a 132x140 manteniendo proporción */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} width={132} height={140} alt="SolvIT" />
+        <img src={src} width={132} height={140} alt="Sufix" />
       </div>
     ),
     { ...size }

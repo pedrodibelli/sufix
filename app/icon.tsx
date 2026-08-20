@@ -22,7 +22,7 @@ export default function Icon() {
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} width={60} height={64} alt="SolvIT" />
+        <img src={src} width={60} height={64} alt="Sufix" />
       </div>
     ),
     { ...size }

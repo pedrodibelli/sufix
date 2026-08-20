@@ -78,7 +78,7 @@ function ConfirmarCodigoBlock({ propuestaId, dark }: { propuestaId: string; dark
           ✓ Trabajo confirmado
         </p>
         <p className={`mt-1 text-xs ${dark ? "text-emerald-400/70" : "text-emerald-600"}`}>
-          El trabajo quedó registrado como completado en SolvIT.
+          El trabajo quedó registrado como completado en Sufix.
         </p>
       </div>
     );
@@ -273,7 +273,7 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
                 <><strong>{p.demandante ?? "El cliente"}</strong> te eligió para este trabajo. Coordiná la visita por WhatsApp.</>
               ) : (
                 <><strong>{p.demandante ?? "El cliente"}</strong> abonó la consulta. Coordiná la visita
-                por WhatsApp. <strong>SolvIT te paga tu consulta</strong> cuando se cierre el trabajo.</>
+                por WhatsApp. <strong>Sufix te paga tu consulta</strong> cuando se cierre el trabajo.</>
               )}
             </p>
           </div>
@@ -289,7 +289,7 @@ function MiPropuestaCard({ p, dark }: { p: Propuesta; dark: boolean }) {
             Trabajo completado
           </div>
           <p className={`mt-0.5 text-[11.5px] ${dark ? "text-emerald-400/70" : "text-emerald-600"}`}>
-            El código fue confirmado y el trabajo quedó cerrado en SolvIT.
+            El código fue confirmado y el trabajo quedó cerrado en Sufix.
           </p>
         </div>
       )}

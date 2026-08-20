@@ -142,7 +142,7 @@ export default async function ProfesionalPage({
               <div className="sticky top-24 space-y-4">
                 <div className="card p-5">
                   <div className="text-xs uppercase tracking-wider text-ink-500">
-                    Verificación SolvIT
+                    Verificación Sufix
                   </div>
                   <ul className="mt-3 space-y-2 text-sm">
                     <li className="flex items-center gap-2">
@@ -161,7 +161,7 @@ export default async function ProfesionalPage({
                     )}
                   </ul>
                   <div className="mt-4 text-xs text-ink-500">
-                    En SolvIT desde {pro.verifiedSince}
+                    En Sufix desde {pro.verifiedSince}
                   </div>
                 </div>
 
@@ -181,7 +181,7 @@ export default async function ProfesionalPage({
                 <div className="card p-5">
                   <div className="text-sm font-semibold">¿Sospechás un problema?</div>
                   <p className="mt-1 text-xs text-ink-600">
-                    Reportá al equipo de SolvIT y revisamos en 24 hs.
+                    Reportá al equipo de Sufix y revisamos en 24 hs.
                   </p>
                   <button className="btn-outline mt-3 w-full text-xs">
                     Reportar

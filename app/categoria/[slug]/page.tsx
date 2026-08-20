@@ -51,7 +51,7 @@ export default async function CategoriaPage({
             <div className="mt-6 flex flex-wrap gap-3 text-sm text-ink-700">
               <span className="chip">📋 {cat.count} profesionales</span>
               <span className="chip">⏱ Hoy mismo disponible</span>
-              <span className="chip">✅ Garantía SolvIT</span>
+              <span className="chip">✅ Garantía Sufix</span>
             </div>
           </div>
         </section>

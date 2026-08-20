@@ -49,7 +49,7 @@ function ProgressBar({ step }: { step: number }) {
   );
 }
 
-// TODO: reemplazar por los datos de SolvIT cuando se cree la cuenta + Mercado Pago.
+// TODO: reemplazar por los datos de Sufix cuando se cree la cuenta + Mercado Pago.
 const DATOS_TRANSFERENCIA = [
   { label: "CVU",    value: "0000003100036596584321" },
   { label: "Alias",  value: "matteo.osunaa" },
@@ -58,7 +58,7 @@ const DATOS_TRANSFERENCIA = [
 ];
 
 // Número de WhatsApp al que el demandante envía el comprobante.
-// TODO: cambiar por el número de SolvIT cuando exista.
+// TODO: cambiar por el número de Sufix cuando exista.
 const WHATSAPP_COMPROBANTE = "541157980934";
 
 // ─── Step 0: Resumen ──────────────────────────────────────────────────────────
@@ -152,7 +152,7 @@ function StepResumen({
         </div>
 
         <p className="mt-3 text-center text-[11px] text-ink-400">
-          🔒 SolvIT retiene el pago y se lo libera al técnico cuando confirmás el trabajo.
+          🔒 Sufix retiene el pago y se lo libera al técnico cuando confirmás el trabajo.
         </p>
       </div>
 
@@ -268,7 +268,7 @@ function StepPago({
         )}
         <p className="mt-2 text-center text-[11px] text-ink-400">
           Al confirmar aceptás los{" "}
-          <span className="text-sv-primary">términos del servicio</span> de SolvIT.
+          <span className="text-sv-primary">términos del servicio</span> de Sufix.
         </p>
       </div>
     </>
@@ -284,7 +284,7 @@ function StepEnRevision({
   onClose: () => void;
 }) {
   const waMsg = encodeURIComponent(
-    "Hola! Te envío el comprobante de mi transferencia en SolvIT."
+    "Hola! Te envío el comprobante de mi transferencia en Sufix."
   );
   const waLink = `https://wa.me/${WHATSAPP_COMPROBANTE}?text=${waMsg}`;
 
@@ -354,7 +354,7 @@ export function AceptarModal({ propuesta, publicacion, onClose, onPagoExitoso }:
   const hue = cat?.hue ?? 180;
   const precio = Number(propuesta.precio);
   const comision = COMISION_CONSULTA;
-  // El cliente paga la consulta + la tarifa de conexión a la plataforma. SolvIT le
+  // El cliente paga la consulta + la tarifa de conexión a la plataforma. Sufix le
   // paga la consulta al técnico cuando el trabajo se concreta (payout manual de Mateo).
   const total = precio + comision;
   const [error, setError] = useState<string | null>(null);

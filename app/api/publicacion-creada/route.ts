@@ -54,9 +54,9 @@ export async function POST(req: NextRequest) {
     if (emailDemandante) {
       try {
         await transporter.sendMail({
-          from: `SolvIT <${process.env.GMAIL_USER}>`,
+          from: `Sufix <${process.env.GMAIL_USER}>`,
           to: emailDemandante,
-          subject: "Publicamos tu pedido en SolvIT",
+          subject: "Publicamos tu pedido en Sufix",
           html: card({
             eyebrow: "Publicación creada",
             titulo: `¡Listo${nombre ? `, ${nombre}` : ""}! Tu pedido ya está publicado.`,
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         if (!t.email || t.user_id === pub.user_id) continue;
         try {
           await transporter.sendMail({
-            from: `SolvIT <${process.env.GMAIL_USER}>`,
+            from: `Sufix <${process.env.GMAIL_USER}>`,
             to: t.email,
             subject: "Nuevo trabajo en tu zona y rubro",
             html: card({
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Plantilla HTML compartida por los dos mails (branding SolvIT).
+// Plantilla HTML compartida por los dos mails (branding Sufix).
 function card(o: {
   eyebrow: string;
   titulo: string;
@@ -138,7 +138,7 @@ function card(o: {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;padding:40px 16px;"><tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
       <tr><td align="center" style="padding-bottom:32px;">
-        <span style="font-size:22px;font-weight:700;color:#1a2e1e;">Solv<span style="color:#3d9b5e;">IT</span></span>
+        <span style="font-size:22px;font-weight:700;color:#1a2e1e;">Su<span style="color:#3d9b5e;">Fix</span></span>
       </td></tr>
       <tr><td style="background:#ffffff;border-radius:20px;padding:40px 32px;border:1px solid #e4ede7;">
         <p style="margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#3d9b5e;">${o.eyebrow}</p>
@@ -150,7 +150,7 @@ function card(o: {
         <a href="${o.ctaHref}" style="display:block;text-align:center;background:#3d9b5e;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 24px;border-radius:12px;margin-bottom:20px;">${o.ctaText}</a>
         <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;line-height:1.6;">${o.nota}</p>
       </td></tr>
-      <tr><td align="center" style="padding-top:24px;"><p style="margin:0;font-size:12px;color:#94a3b8;">SolvIT</p></td></tr>
+      <tr><td align="center" style="padding-top:24px;"><p style="margin:0;font-size:12px;color:#94a3b8;">Sufix</p></td></tr>
     </table>
   </td></tr></table>
 </body></html>`;

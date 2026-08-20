@@ -249,7 +249,7 @@ export default async function ServicioPage({
                 <div className="border-t border-ink-100 bg-ink-50 p-5 text-xs">
                   <ul className="space-y-2 text-ink-700">
                     <li className="flex items-start gap-2">
-                      <span>🛡️</span> Pago respaldado por SolvIT
+                      <span>🛡️</span> Pago respaldado por Sufix
                     </li>
                     <li className="flex items-start gap-2">
                       <span>⏱️</span> {service.delivery}

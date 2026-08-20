@@ -71,16 +71,16 @@ export async function POST(req: NextRequest) {
 
       const telefonoLimpio = perfilPro?.telefono ? String(perfilPro.telefono).replace(/\D/g, "") : null;
       const mensajeWa = encodeURIComponent(
-        `Hola ${tecnico.split(" ")[0]}! Te contacto por SolvIT por mi consulta: "${titulo}".`
+        `Hola ${tecnico.split(" ")[0]}! Te contacto por Sufix por mi consulta: "${titulo}".`
       );
       const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensajeWa}` : null;
       const perfilLink = `${appUrl}/tecnico/${propuesta.profesional_id}`;
 
       try {
         await transporter.sendMail({
-          from: `SolvIT <${process.env.GMAIL_USER}>`,
+          from: `Sufix <${process.env.GMAIL_USER}>`,
           to: email,
-          subject: "Un técnico quiere hacer tu trabajo en SolvIT",
+          subject: "Un técnico quiere hacer tu trabajo en Sufix",
           html: `
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;padding:40px 16px;"><tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
       <tr><td align="center" style="padding-bottom:32px;">
-        <span style="font-size:22px;font-weight:700;color:#1a2e1e;">Solv<span style="color:#3d9b5e;">IT</span></span>
+        <span style="font-size:22px;font-weight:700;color:#1a2e1e;">Su<span style="color:#3d9b5e;">Fix</span></span>
       </td></tr>
       <tr><td style="background:#ffffff;border-radius:20px;padding:40px 32px;border:1px solid #e4ede7;">
         <p style="margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#3d9b5e;">Nuevo interesado · sin cargo</p>
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
           Pueden escribirte varios técnicos para el mismo trabajo — elegí el que más te convenga desde &ldquo;Mis consultas&rdquo;.
         </p>
       </td></tr>
-      <tr><td align="center" style="padding-top:24px;"><p style="margin:0;font-size:12px;color:#94a3b8;">SolvIT</p></td></tr>
+      <tr><td align="center" style="padding-top:24px;"><p style="margin:0;font-size:12px;color:#94a3b8;">Sufix</p></td></tr>
     </table>
   </td></tr></table>
 </body></html>`,
@@ -121,9 +121,9 @@ export async function POST(req: NextRequest) {
 
     try {
       await transporter.sendMail({
-        from: `SolvIT <${process.env.GMAIL_USER}>`,
+        from: `Sufix <${process.env.GMAIL_USER}>`,
         to: email,
-        subject: "Recibiste una propuesta en SolvIT",
+        subject: "Recibiste una propuesta en Sufix",
         html: `
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;padding:40px 16px;"><tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
       <tr><td align="center" style="padding-bottom:32px;">
-        <span style="font-size:22px;font-weight:700;color:#1a2e1e;">Solv<span style="color:#3d9b5e;">IT</span></span>
+        <span style="font-size:22px;font-weight:700;color:#1a2e1e;">Su<span style="color:#3d9b5e;">Fix</span></span>
       </td></tr>
       <tr><td style="background:#ffffff;border-radius:20px;padding:40px 32px;border:1px solid #e4ede7;">
         <p style="margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#3d9b5e;">Nueva propuesta</p>
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
         </a>
         <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">No te cobramos nada hasta que aceptes una propuesta.</p>
       </td></tr>
-      <tr><td align="center" style="padding-top:24px;"><p style="margin:0;font-size:12px;color:#94a3b8;">SolvIT</p></td></tr>
+      <tr><td align="center" style="padding-top:24px;"><p style="margin:0;font-size:12px;color:#94a3b8;">Sufix</p></td></tr>
     </table>
   </td></tr></table>
 </body></html>`,

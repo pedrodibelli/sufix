@@ -4,8 +4,8 @@ import type { MetadataRoute } from "next";
 // En iOS el ícono de inicio lo maneja apple-icon.tsx + appleWebApp (layout).
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "SolvIT",
-    short_name: "SolvIT",
+    name: "Sufix",
+    short_name: "Sufix",
     description: "Soluciones para tu hogar en Buenos Aires",
     start_url: "/",
     display: "standalone",

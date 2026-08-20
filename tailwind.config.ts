@@ -23,7 +23,7 @@ export default {
           900: "#1e221c",
           950: "#0e110d",
         },
-        // Paleta de marca SolvIT (informe de diseño)
+        // Paleta de marca Sufix (informe de diseño)
         sv: {
           mint: "#99DDC8",      // Fondos y respiración visual
           light: "#95BF74",     // Elementos amigables

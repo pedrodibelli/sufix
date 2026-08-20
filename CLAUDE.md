@@ -1,15 +1,26 @@
-# Contexto del proyecto — SolvIT
+# Contexto del proyecto — Sufix
 
 > Este archivo resume el contexto operativo del proyecto para que cualquier sesión de
 > Claude Code (y yo mismo) arranque entendiendo la situación. No reemplaza al README
 > (que describe el producto y el esquema de datos), sino que lo complementa con el
 > contexto de **propiedad, repos, deploy y credenciales**.
 
+> ⚠️ **Rebranding 2026-08-20: "SolvIT" → "Sufix".** El producto se renombró (competidor
+> `solvitapp.com.ar` ocupando el nombre viejo + investigación de marca sin conflictos
+> para "Sufix"). Se compraron `sufix.com.ar`, `sufix.store`, `sufix.online` y
+> `sufixapp.com`. Todo el texto de marca visible al usuario ya dice "Sufix" en el código.
+> **Lo que sigue con el nombre viejo a propósito** (son identificadores de infraestructura,
+> no marca): el repo `github.com/pedrodibelli/solvit`, el proyecto Vercel `sope/solvit`,
+> la URL en vivo `solvitweb.vercel.app`, el email admin `solvithomes@gmail.com`, y las
+> menciones históricas a `solvit.homes` (dominio viejo de Mateo, ya no se usa). Conectar
+> `sufix.com.ar` como dominio real está **pendiente** de recuperar el acceso a la cuenta
+> de Vercel (ver §6 y la nota de la sesión sobre el 2FA).
+
 ---
 
 ## 1. Qué es esto
 
-**SolvIT** — marketplace de servicios para el hogar en Buenos Aires. Conecta
+**Sufix** — marketplace de servicios para el hogar en Buenos Aires. Conecta
 **demandantes** (gente con un problema en casa) con **oferentes/profesionales**.
 Detalle completo del producto, journeys y esquema de base de datos: ver `README.md`.
 
@@ -67,7 +78,7 @@ Vercel. El código usa:
 | `NEXT_PUBLIC_SUPABASE_URL` | **Sí** | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Sí** | Usar la **anon / publishable** key (ver abajo). Se necesita también en build. |
 | `RESEND_API_KEY` | No | Si falta, el envío de email se saltea y la app sigue andando |
-| `NEXT_PUBLIC_APP_URL` | Recomendada | Si falta, los links de confirmación apuntan a `https://solvit.homes`. Setear a la URL real del deploy. |
+| `NEXT_PUBLIC_APP_URL` | Recomendada | Si falta, los links de confirmación apuntan a `https://sufix.com.ar` (dominio nuevo, todavía sin conectar al deploy — ver nota de rebranding arriba). Setear a la URL real del deploy. |
 | `CRON_SECRET` | Recomendada | Sin esto, el cron diario de keepalive devuelve 401 (inofensivo) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Para el mail | **Secreta, solo servidor.** La usa `/api/propuesta-creada` para leer el email del demandante. NUNCA `NEXT_PUBLIC`. |
 | `GMAIL_USER` | Para el mail | `solvithomes@gmail.com` — remitente del aviso de propuesta |
@@ -131,15 +142,18 @@ Vercel. El código usa:
 
 ## 7. Dominio y emails (Resend)
 
-- **Decisión: no uso el dominio viejo (`solvit.homes`).** Al deployar conecto el repo en
-  Vercel y uso el **dominio nuevo que genera Vercel** (`*.vercel.app`).
-- El código referencia `solvit.homes` y envía desde `noreply@solvit.homes`, dominio
-  verificado en una cuenta de Resend de otra persona — que **no** tengo.
+- **Decisión histórica: no usé el dominio viejo (`solvit.homes`, de Mateo).** Al deployar
+  conecté el repo en Vercel y usé el **dominio que genera Vercel** (`*.vercel.app`) — sigue
+  siendo la URL en producción hoy (ver nota de rebranding al principio del archivo).
+- El código de `/publicar/actions.ts` (email dormido de Resend) ahora referencia
+  `sufix.com.ar` y envía desde `noreply@sufix.com.ar` — dominio propio, comprado en
+  2026-08, pero **todavía sin verificar en ninguna cuenta de Resend**.
 - Por eso: dejar `RESEND_API_KEY` **sin setear** → los emails transaccionales se saltean y
   la app sigue andando (no rompe).
-- Setear `NEXT_PUBLIC_APP_URL` a la URL nueva de Vercel para que los links de confirmación
-  apunten bien (overridea el default `solvit.homes`).
-- **URL de producción actual: `https://solvitweb.vercel.app`** (no `solvit.homes`).
+- Setear `NEXT_PUBLIC_APP_URL` a la URL real del deploy para que los links de confirmación
+  apunten bien (overridea el default `sufix.com.ar`, que hoy no resuelve a nada).
+- **URL de producción actual: `https://solvitweb.vercel.app`** (dominio `sufix.com.ar` aún
+  no conectado — pendiente de recuperar acceso a Vercel, ver §6).
 
 ---
 

@@ -52,7 +52,7 @@ const FAQ = [
   },
   {
     q: "¿Qué pasa si el trabajo sale mal?",
-    a: "Tenés 30 días de garantía de reparación. Si el técnico no responde, SolvIT te asigna otro sin costo adicional.",
+    a: "Tenés 30 días de garantía de reparación. Si el técnico no responde, Sufix te asigna otro sin costo adicional.",
   },
   {
     q: "¿Pueden contactarme por fuera de la app?",

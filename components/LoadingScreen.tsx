@@ -5,7 +5,7 @@ export function LoadingScreen({ message = "Cargando…" }: { message?: string })
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#f5fdf9] animate-in fade-in duration-200">
       {/* Wordmark */}
       <div className="mb-10">
-        <span className="font-display text-[32px] font-semibold tracking-tight text-sv-dark">SolvIT</span>
+        <span className="font-display text-[32px] font-semibold tracking-tight text-sv-dark">Sufix</span>
       </div>
 
       {/* Spinner de anillo */}

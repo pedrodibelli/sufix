@@ -1,4 +1,4 @@
-# SolvIT — Arquitectura y contexto para agentes IA
+# Sufix — Arquitectura y contexto para agentes IA
 
 Este documento describe la estructura técnica del proyecto para que un agente de IA pueda entender el contexto completo sin leer todo el código.
 
@@ -6,7 +6,7 @@ Este documento describe la estructura técnica del proyecto para que un agente d
 
 ## Resumen ejecutivo
 
-SolvIT es un marketplace de servicios para el hogar en Buenos Aires construido con **Next.js 16 App Router** y **Supabase**. Tiene dos actores: demandantes (publican problemas) y oferentes/profesionales.
+Sufix es un marketplace de servicios para el hogar en Buenos Aires construido con **Next.js 16 App Router** y **Supabase**. Tiene dos actores: demandantes (publican problemas) y oferentes/profesionales.
 
 > ⚠️ **2026-08: flujo de pago pausado temporalmente.** Lo que sigue describe el flujo histórico
 > (propuesta con precio + pago por transferencia). Hoy el marketplace usa un flujo de **contacto
@@ -51,7 +51,7 @@ taller/
 │   └── not-found.tsx             # Página 404
 │
 ├── components/                   # Componentes reutilizables
-│   ├── Header.tsx                # Header con logo SolvIT, nav, user pill con rol
+│   ├── Header.tsx                # Header con logo Sufix, nav, user pill con rol
 │   ├── Footer.tsx                # Footer simple
 │   ├── Logo.tsx                  # Logo SVG aislado
 │   │
@@ -175,7 +175,7 @@ Componente `components/CategoryArt.tsx` — genera un thumbnail visual para cada
 
 [DemandanteView tab "Cerradas"]
   → muestra ProfesionalContacto con teléfono, WhatsApp, email, zona
-  → muestra aviso IMPORTANTE con número de SolvIT para confirmar pago
+  → muestra aviso IMPORTANTE con número de Sufix para confirmar pago
 ```
 
 ---

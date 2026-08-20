@@ -22,13 +22,13 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "SolvIT — Soluciones para tu hogar en Buenos Aires",
+  title: "Sufix — Soluciones para tu hogar en Buenos Aires",
   description:
     "Marketplace de servicios para el hogar en CABA. Publicá tu problema, técnicos verificados compiten por tomarlo. Sin presupuestos al voleo, sin perder la mañana.",
   // Nombre + modo standalone al agregar a inicio en iOS
   appleWebApp: {
     capable: true,
-    title: "SolvIT",
+    title: "Sufix",
     statusBarStyle: "default",
   },
 };

@@ -184,7 +184,7 @@ export const PROS: Pro[] = [
       { label: "Trabajos cerrados", value: "134" },
       { label: "Calificación", value: "4.96" },
       { label: "Reintervención", value: "0.7%" },
-      { label: "En SolvIT desde", value: "Mar 2026" },
+      { label: "En Sufix desde", value: "Mar 2026" },
     ],
   },
   {
@@ -214,7 +214,7 @@ export const PROS: Pro[] = [
       { label: "Trabajos cerrados", value: "98" },
       { label: "Calificación", value: "4.92" },
       { label: "Reintervención", value: "1.2%" },
-      { label: "En SolvIT desde", value: "Feb 2026" },
+      { label: "En Sufix desde", value: "Feb 2026" },
     ],
   },
   {
@@ -242,7 +242,7 @@ export const PROS: Pro[] = [
       { label: "Trabajos cerrados", value: "201" },
       { label: "Calificación", value: "4.88" },
       { label: "Reintervención", value: "1.9%" },
-      { label: "En SolvIT desde", value: "Ene 2026" },
+      { label: "En Sufix desde", value: "Ene 2026" },
     ],
   },
   {
@@ -270,7 +270,7 @@ export const PROS: Pro[] = [
       { label: "Trabajos cerrados", value: "312" },
       { label: "Calificación", value: "4.97" },
       { label: "Tiempo en sitio", value: "<40 min" },
-      { label: "En SolvIT desde", value: "Mar 2026" },
+      { label: "En Sufix desde", value: "Mar 2026" },
     ],
   },
   {
@@ -298,7 +298,7 @@ export const PROS: Pro[] = [
       { label: "Trabajos cerrados", value: "56" },
       { label: "Calificación", value: "4.94" },
       { label: "Reintervención", value: "0.0%" },
-      { label: "En SolvIT desde", value: "Abr 2026" },
+      { label: "En Sufix desde", value: "Abr 2026" },
     ],
   },
   {
@@ -326,7 +326,7 @@ export const PROS: Pro[] = [
       { label: "Trabajos cerrados", value: "47" },
       { label: "Calificación", value: "4.91" },
       { label: "Reintervención", value: "0.4%" },
-      { label: "En SolvIT desde", value: "Feb 2026" },
+      { label: "En Sufix desde", value: "Feb 2026" },
     ],
   },
 ];

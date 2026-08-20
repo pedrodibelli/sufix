@@ -83,7 +83,7 @@ export default async function OferentesPage() {
                 Productividad, no solo clientes.
               </h2>
               <p className="mt-4 text-ink-700">
-                Otros marketplaces te venden visibilidad. SolvIT te vende
+                Otros marketplaces te venden visibilidad. Sufix te vende
                 eficiencia: el cliente ya describió el problema, ya aceptó un
                 rango y está en zona de alto ticket.
               </p>
@@ -193,7 +193,7 @@ export default async function OferentesPage() {
                 Solicitar verificación
               </button>
               <p className="text-xs text-ink-500">
-                Al continuar aceptás recibir un llamado del equipo de SolvIT
+                Al continuar aceptás recibir un llamado del equipo de Sufix
                 para coordinar la entrevista.
               </p>
             </form>
@@ -285,7 +285,7 @@ function PreviewCard() {
             </div>
           </div>
           <div className="rounded-lg bg-ink-800 p-2">
-            <div className="text-ink-400">Comisión SolvIT</div>
+            <div className="text-ink-400">Comisión Sufix</div>
             <div className="text-base font-semibold text-zap-300">$0</div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-# SECURITY_NOTES — SolvIT
+# SECURITY_NOTES — Sufix
 
 ## Auditoría RLS (Tarea 3, 2026-06-09)
 

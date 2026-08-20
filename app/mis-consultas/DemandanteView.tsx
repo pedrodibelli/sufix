@@ -105,7 +105,7 @@ function CodigoOTPBlock({ codigo }: { codigo: string }) {
       </p>
       <p className="mt-1.5 text-[12.5px] leading-relaxed text-amber-900">
         Entregáselo al técnico <strong>solo cuando el trabajo esté completo</strong>, para que pueda
-        cerrarlo en SolvIT. No lo compartas antes.
+        cerrarlo en Sufix. No lo compartas antes.
       </p>
       <div className="mt-3 flex items-center justify-center rounded-xl border border-amber-300 bg-white py-4">
         <span className="font-display text-4xl font-bold tracking-[0.35em] text-amber-800">
@@ -258,7 +258,7 @@ function InteresadoRow({
 
   const cat = CATEGORIES.find((c) => c.slug === publicacion.category_slug);
   const mensaje = encodeURIComponent(
-    `Hola ${primerNombre}! Te contacto por SolvIT por mi consulta: "${publicacion.title}" (${cat?.name ?? publicacion.category_slug} · ${publicacion.zone}). ¿Podemos hablar?`
+    `Hola ${primerNombre}! Te contacto por Sufix por mi consulta: "${publicacion.title}" (${cat?.name ?? publicacion.category_slug} · ${publicacion.zone}). ¿Podemos hablar?`
   );
   const waLink = telefono ? `https://wa.me/${telefono.replace(/\D/g, "")}?text=${mensaje}` : null;
 
@@ -423,7 +423,7 @@ function TecnicosInteresadosModal({
             {interesados.length !== 1 ? "n" : ""} hacer tu trabajo
           </h2>
           <p className="mt-2 text-[13px] text-white/80">
-            Sos de los primeros usuarios de SolvIT — por eso conectar es
+            Sos de los primeros usuarios de Sufix — por eso conectar es
           </p>
           <div className="mt-1.5 flex items-center justify-center gap-2.5">
             <span className="text-lg font-medium text-white/50 line-through">
@@ -473,7 +473,7 @@ function ProfesionalContacto({
   const telefono = perfil?.telefono ?? propuesta.profesional_telefono ?? null;
   const emailPro = perfil?.email ?? propuesta.profesional_email ?? null;
   const mensaje = encodeURIComponent(
-    `Hola ${nombre.split(" ")[0]}! Te contacto por SolvIT, acepté tu propuesta para el trabajo: "${pubTitle}". ¿Cuándo podemos coordinar la primera consulta?`
+    `Hola ${nombre.split(" ")[0]}! Te contacto por Sufix, acepté tu propuesta para el trabajo: "${pubTitle}". ¿Cuándo podemos coordinar la primera consulta?`
   );
   const waLink = telefono
     ? `https://wa.me/${telefono.replace(/\D/g, "")}?text=${mensaje}`
@@ -492,7 +492,7 @@ function ProfesionalContacto({
         </span>
         <div>
           <p className="text-sm font-semibold text-sv-dark">{nombre}</p>
-          <p className="text-[11px] text-ink-400">Profesional verificado en SolvIT</p>
+          <p className="text-[11px] text-ink-400">Profesional verificado en Sufix</p>
         </div>
       </div>
 
@@ -889,7 +889,7 @@ function MiConsultaCard({
             ⚠️ Consulta en disputa
           </p>
           <p className="mt-1.5 text-[12.5px] leading-relaxed text-rose-900">
-            Se reportó un problema con este trabajo. El equipo de SolvIT está revisando el caso y te
+            Se reportó un problema con este trabajo. El equipo de Sufix está revisando el caso y te
             va a contactar para resolverlo. <strong>No entregues el código</strong> hasta que se resuelva.
           </p>
         </div>

@@ -62,16 +62,16 @@ async function enviarAvisoPublicacion(
   // "Missing API key" si se instancia sin key, así que nunca a nivel de módulo.
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://solvit.homes";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://sufix.com.ar";
 
   const urgencyLabel = data.urgency === "hoy" ? "Hoy mismo"
     : data.urgency === "esta_semana" ? "Esta semana"
     : "Flexible";
 
   await resend.emails.send({
-    from: "SolvIT <noreply@solvit.homes>",
+    from: "Sufix <noreply@sufix.com.ar>",
     to: email,
-    subject: "Publicamos tu pedido en SolvIT",
+    subject: "Publicamos tu pedido en Sufix",
     html: `
 <!DOCTYPE html>
 <html lang="es">
@@ -89,7 +89,7 @@ async function enviarAvisoPublicacion(
           <!-- Logo -->
           <tr>
             <td align="center" style="padding-bottom:32px;">
-              <span style="font-size:22px;font-weight:700;color:#1a2e1e;letter-spacing:-0.5px;">Solv<span style="color:#3d9b5e;">IT</span></span>
+              <span style="font-size:22px;font-weight:700;color:#1a2e1e;letter-spacing:-0.5px;">Su<span style="color:#3d9b5e;">Fix</span></span>
             </td>
           </tr>
 
@@ -131,7 +131,7 @@ async function enviarAvisoPublicacion(
           <tr>
             <td align="center" style="padding-top:24px;">
               <p style="margin:0;font-size:12px;color:#94a3b8;">
-                SolvIT · solvit.homes
+                Sufix · sufix.com.ar
               </p>
             </td>
           </tr>

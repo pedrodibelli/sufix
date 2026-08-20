@@ -134,7 +134,7 @@ function PublicarInner() {
     <main>
       <div className="container-pad py-10">
         <div className="mb-8 flex flex-wrap items-center gap-2 text-xs text-ink-500">
-          <Link href="/" className="hover:text-ink-900">SolvIT</Link>
+          <Link href="/" className="hover:text-ink-900">Sufix</Link>
           <span>/</span>
           <span>Publicar problema</span>
         </div>
@@ -292,7 +292,7 @@ function StepZona({
                 Todavía no llegamos a tu zona
               </p>
               <p className="mt-1 text-sm text-amber-700">
-                Por ahora SolvIT opera en zonas seleccionadas de CABA y GBA Norte. Si publicás en &quot;Otro&quot;, no vas a recibir propuestas porque ningún técnico de la plataforma opera ahí todavía.
+                Por ahora Sufix opera en zonas seleccionadas de CABA y GBA Norte. Si publicás en &quot;Otro&quot;, no vas a recibir propuestas porque ningún técnico de la plataforma opera ahí todavía.
               </p>
             </div>
           </div>

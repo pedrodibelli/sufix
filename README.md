@@ -1,6 +1,6 @@
-# SolvIT — Marketplace de servicios para el hogar
+# Sufix — Marketplace de servicios para el hogar
 
-SolvIT conecta personas con problemas en el hogar (demandantes) con profesionales verificados (oferentes) en Buenos Aires. El demandante publica su problema, los profesionales compiten con propuestas de precio, y el demandante elige y paga la consulta inicial directamente en la plataforma.
+Sufix conecta personas con problemas en el hogar (demandantes) con profesionales verificados (oferentes) en Buenos Aires. El demandante publica su problema, los profesionales compiten con propuestas de precio, y el demandante elige y paga la consulta inicial directamente en la plataforma.
 
 ---
 
@@ -67,14 +67,14 @@ El rol se guarda en `user_metadata.es_profesional` (boolean) de Supabase Auth. E
 4. ACEPTAR PROPUESTA → FLUJO DE PAGO
    └─ Abre AceptarModal (3 pasos):
       ├─ Paso 1 — Resumen: ve precio + comisión fija $4.500 + total
-      ├─ Paso 2 — Transferencia: datos bancarios de SolvIT (CVU, alias, mail)
+      ├─ Paso 2 — Transferencia: datos bancarios de Sufix (CVU, alias, mail)
       └─ Paso 3 — Confirmado: datos del profesional desbloqueados
 
 5. CONSULTA CERRADA
    └─ /mis-consultas (tab "Cerradas")
       └─ ve nombre, teléfono (Llamar / WhatsApp), email y zona del profesional
       └─ ve aviso IMPORTANTE con código de 4 dígitos que el profesional le enviará
-      └─ debe reenviar ese código al WhatsApp de SolvIT (+54 11 5798 0934)
+      └─ debe reenviar ese código al WhatsApp de Sufix (+54 11 5798 0934)
       └─ la publicación desaparece del marketplace automáticamente
 ```
 
@@ -176,7 +176,7 @@ USING (user_id = auth.uid());
 
 ## Flujo de pago
 
-El pago se realiza por **transferencia bancaria** a la cuenta de SolvIT:
+El pago se realiza por **transferencia bancaria** a la cuenta de Sufix:
 
 | Dato | Valor |
 |---|---|
@@ -190,7 +190,7 @@ La comisión de plataforma es **$4.500 fijos** por consulta (se suma al precio d
 Verificación del pago:
 1. Al aceptarse una propuesta se genera un `codigo_pago` de 4 dígitos.
 2. El oferente lo envía al demandante por WhatsApp.
-3. El demandante reenvía ese código al WhatsApp de SolvIT (+54 11 5798 0934) para confirmar que el contacto ocurrió.
+3. El demandante reenvía ese código al WhatsApp de Sufix (+54 11 5798 0934) para confirmar que el contacto ocurrió.
 
 ---
 

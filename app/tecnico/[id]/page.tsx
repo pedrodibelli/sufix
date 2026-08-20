@@ -70,7 +70,7 @@ export default async function TecnicoPage({
                     <StarRating rating={promedio} reviews={total} size="md" />
                   ) : (
                     <span className="inline-flex items-center gap-1 rounded-full bg-zap-100 px-2 py-0.5 text-[12px] font-medium text-sv-olive">
-                      🆕 Nuevo en SolvIT
+                      🆕 Nuevo en Sufix
                     </span>
                   )}
                   {perfil.zona && <span>📍 {perfil.zona}</span>}

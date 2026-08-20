@@ -78,9 +78,9 @@ export async function Header() {
         {/* Logo */}
         <div className="flex flex-1 items-center">
           <Link href="/" className="flex shrink-0 items-center gap-2">
-            <Image src="/logo.png" alt="SolvIT" width={32} height={32} className="h-8 w-8 object-contain" />
+            <Image src="/logo.png" alt="Sufix" width={32} height={32} className="h-8 w-8 object-contain" />
             <span className={`font-display text-[17px] font-semibold tracking-tight ${dk ? "text-white" : "text-sv-dark"}`}>
-              Solv<span className={dk ? "text-zap-300" : "text-sv-primary"}>IT</span>
+              Su<span className={dk ? "text-zap-300" : "text-sv-primary"}>Fix</span>
             </span>
           </Link>
         </div>

@@ -49,7 +49,7 @@ export function ReportarProblemaModal({ propuestaId, publicacionId, rol, dark, o
             </div>
             <h2 className="display mt-4 text-xl text-sv-dark">Reporte enviado</h2>
             <p className="mt-2 text-sm leading-relaxed text-ink-400">
-              El equipo de SolvIT te va a contactar por WhatsApp en{" "}
+              El equipo de Sufix te va a contactar por WhatsApp en{" "}
               <strong className="text-sv-dark">menos de 24 hs</strong> para resolver la situación.
             </p>
             <button type="button" onClick={onClose} className="btn-primary mt-6 w-full">
@@ -70,7 +70,7 @@ export function ReportarProblemaModal({ propuestaId, publicacionId, rol, dark, o
             </div>
 
             <p className="mb-4 text-sm leading-relaxed text-ink-400">
-              Contanos qué pasó para que el equipo de SolvIT pueda ayudarte.
+              Contanos qué pasó para que el equipo de Sufix pueda ayudarte.
             </p>
 
             <textarea
