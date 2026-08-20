@@ -122,6 +122,7 @@ Vercel. El código usa:
 | `GMAIL_USER` | Para el mail | `solvithomes@gmail.com` — remitente del aviso de propuesta |
 | `GMAIL_APP_PASSWORD` | Para el mail | Contraseña de aplicación de Google (16 letras). Ver §15. |
 | `WEBHOOK_SECRET` | Para el mail | Protege `/api/propuesta-creada`. Va en el header `Authorization: Bearer <secret>` del webhook de Supabase. |
+| `ZAPIER_CONTACTO_WEBHOOK_URL` | No | Si está seteada, cada clic en "Contactar por WhatsApp" (`registrarContacto`, `app/tecnico/[id]/actions.ts`) además de guardarse en `contactos_tecnico` manda una copia a un Zap (Catch Hook → Create Spreadsheet Row) para verlo en un Google Sheet en vivo. Si falta, se saltea sin romper nada — Supabase sigue siendo la fuente de verdad. |
 
 ### ⚠️ Cuál clave de Supabase usar
 - Hay que usar la **anon key** (pública / "publishable" → `sb_publishable_...`).
