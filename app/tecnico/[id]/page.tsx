@@ -26,7 +26,7 @@ export default async function TecnicoPage({
 
   const { data: perfil } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado, foto_url")
+    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono")
     .eq("user_id", id)
     .maybeSingle();
 
@@ -46,6 +46,13 @@ export default async function TecnicoPage({
   const total = resumen ? Number(resumen.total) : 0;
   const lista = (resenas ?? []) as Resena[];
 
+  const telefonoLimpio = perfil.telefono?.replace(/\D/g, "") ?? "";
+  const primerRubroNombre = rubrosNombres[0] ?? "un servicio";
+  const mensajeWa = encodeURIComponent(
+    `Hola ${nombre.split(" ")[0]}! Te encontré en Sufix, me interesa tu servicio de ${primerRubroNombre}. ¿Estás disponible?`
+  );
+  const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensajeWa}` : null;
+
   return (
     <>
       <Header />
@@ -53,37 +60,50 @@ export default async function TecnicoPage({
         {/* Encabezado */}
         <section className="border-b border-ink-100 bg-white">
           <div className="container-pad py-10">
-            <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-              <Avatar url={perfil.foto_url} initials={initials} size={80} textClass="font-display text-2xl" />
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="display text-3xl text-sv-dark">{nombre}</h1>
-                  {perfil.verificado && (
-                    <span className="rounded-full bg-sv-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-sv-olive">
-                      ✓ Verificado
-                    </span>
-                  )}
-                </div>
-                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500">
-                  {total > 0 ? (
-                    <StarRating rating={promedio} reviews={total} size="md" />
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-zap-100 px-2 py-0.5 text-[12px] font-medium text-sv-olive">
-                      🆕 Nuevo en Sufix
-                    </span>
-                  )}
-                  {perfil.zona && <span>📍 {perfil.zona}</span>}
-                </div>
-                {rubrosNombres.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {rubrosNombres.map((n) => (
-                      <span key={n} className="rounded-full border border-ink-200 px-2.5 py-0.5 text-[12px] font-medium text-ink-600">
-                        🔧 {n}
+            <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+                <Avatar url={perfil.foto_url} initials={initials} size={80} textClass="font-display text-2xl" />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="display text-3xl text-sv-dark">{nombre}</h1>
+                    {perfil.verificado && (
+                      <span className="rounded-full bg-sv-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-sv-olive">
+                        ✓ Verificado
                       </span>
-                    ))}
+                    )}
                   </div>
-                )}
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500">
+                    {total > 0 ? (
+                      <StarRating rating={promedio} reviews={total} size="md" />
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-zap-100 px-2 py-0.5 text-[12px] font-medium text-sv-olive">
+                        🆕 Nuevo en Sufix
+                      </span>
+                    )}
+                    {perfil.zona && <span>📍 {perfil.zona}</span>}
+                  </div>
+                  {rubrosNombres.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {rubrosNombres.map((n) => (
+                        <span key={n} className="rounded-full border border-ink-200 px-2.5 py-0.5 text-[12px] font-medium text-ink-600">
+                          🔧 {n}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {waLink && (
+                <a
+                  href={waLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary w-full py-3.5 text-base sm:w-auto sm:px-8"
+                >
+                  💬 Contactar por WhatsApp
+                </a>
+              )}
             </div>
 
             {/* Stats */}

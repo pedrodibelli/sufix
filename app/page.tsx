@@ -3,6 +3,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { FilterDropdown } from "@/components/FilterDropdown";
 import { MarketplaceGrid } from "@/components/MarketplaceGrid";
+import { TecnicosGrid } from "@/components/TecnicosGrid";
+import { type TecnicoPublico } from "@/components/TecnicoCard";
 import { CATEGORIES, ZONES, type PostedJob } from "@/lib/data";
 import { type Publicacion } from "@/lib/supabase";
 import { createSupabaseServer } from "@/lib/supabase-server";
@@ -24,6 +26,32 @@ export default async function HomePage({
   const { data: { user } } = await supabaseServer.auth.getUser();
   const esProfesional = user?.user_metadata?.es_profesional === true;
   const sinSesion = !user;
+
+  // Directorio de técnicos (PoC 2026-08, ver CLAUDE.md): visible para
+  // demandantes y visitantes sin sesión. No se lo mostramos al técnico
+  // logueado — a él le interesan los trabajos, no ver a otros colegas.
+  let tecnicos: TecnicoPublico[] = [];
+  let resumenMapTecnicos: Record<string, { promedio: number; total: number }> = {};
+  if (!esProfesional) {
+    const { data: tecnicosRaw } = await supabaseServer
+      .from("perfiles_publicos")
+      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono")
+      .not("rubro", "is", null)
+      .not("telefono", "is", null)
+      .order("creado_at", { ascending: false });
+
+    tecnicos = ((tecnicosRaw ?? []) as TecnicoPublico[]).filter(
+      (t) => Array.isArray(t.rubro) && t.rubro.length > 0
+    );
+
+    const tecnicoIds = tecnicos.map((t) => t.user_id);
+    const { data: resumenRows } = tecnicoIds.length > 0
+      ? await supabaseServer.from("resenas_resumen").select("tecnico_id, promedio, total").in("tecnico_id", tecnicoIds)
+      : { data: [] as { tecnico_id: string; promedio: number; total: number }[] };
+    resumenMapTecnicos = Object.fromEntries(
+      (resumenRows ?? []).map((r) => [r.tecnico_id, { promedio: Number(r.promedio), total: Number(r.total) }])
+    );
+  }
 
   // Publicaciones de Supabase
   const { data: dbJobs } = await supabaseServer
@@ -147,6 +175,27 @@ export default async function HomePage({
                   <span>✓ Respuesta en minutos</span>
                 </div>
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* Directorio de técnicos — para demandantes y visitantes, no técnicos */}
+        {!esProfesional && (
+          <section className={`py-10 sm:py-14 ${sinSesion ? "bg-[#f5fdf9]" : ""}`}>
+            <div className="container-pad">
+              <div className="mb-6">
+                <div className="flex items-center gap-2 text-xs text-ink-400">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-sv-primary" />
+                  <span className="font-medium uppercase tracking-widest">Técnicos disponibles</span>
+                </div>
+                <h1 className="display mt-1.5 text-3xl text-sv-dark md:text-4xl">
+                  Encontrá tu técnico
+                </h1>
+                <p className="mt-1 text-sm text-ink-400">
+                  Mirá su perfil, sus reseñas y escribile por WhatsApp directo — sin costo, sin esperar propuestas.
+                </p>
+              </div>
+              <TecnicosGrid tecnicos={tecnicos} resumenMap={resumenMapTecnicos} />
             </div>
           </section>
         )}
