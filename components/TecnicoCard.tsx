@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconCheckBadge, IconWhatsApp } from "@/components/icons";
+import { IconMapPin, IconCheckBadge, IconWhatsApp, IconSparkle } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 
@@ -44,55 +44,63 @@ export function TecnicoCard({
   );
   const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensaje}` : null;
 
+  const sinResenas = !resumen || resumen.total === 0;
+
   return (
-    <div className="card flex flex-col overflow-hidden p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
-      <Link href={`/tecnico/${tecnico.user_id}`} className="flex flex-1 items-start gap-3.5">
-        <Avatar
-          url={tecnico.foto_url}
-          initials={initials}
-          size={60}
-          fallbackColor={avatarColorFor(tecnico.user_id)}
-          textClass="font-display text-base"
-        />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="truncate text-[15px] font-semibold text-sv-dark">{nombre}</span>
-            {tecnico.verificado && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2 py-0.5 text-[10px] font-semibold text-sv-olive">
-                <IconCheckBadge className="h-3 w-3" /> Verificado
-              </span>
-            )}
-          </div>
+    <div className="card relative flex flex-col overflow-hidden p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
+      {/* Badge "Nuevo" como cartel en la esquina, no metido en el flujo del
+          contenido — antes se confundía con el fondo y apretaba el resto. */}
+      {sinResenas && (
+        <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+          <IconSparkle className="h-3 w-3" /> Nuevo en Sufix
+        </span>
+      )}
 
-          {subtitulo && <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-ink-500">{subtitulo}</p>}
-
-          <div className="mt-1.5">
-            {resumen && resumen.total > 0 ? (
-              <StarRating rating={resumen.promedio} reviews={resumen.total} />
-            ) : (
-              <span className="inline-flex items-center rounded-full bg-zap-100 px-2 py-0.5 text-[11px] font-medium text-sv-olive">
-                Nuevo en Sufix
-              </span>
-            )}
-          </div>
-
-          {tecnico.zona && (
-            <p className="mt-1.5 flex items-center gap-1 truncate text-xs text-ink-400">
-              <IconMapPin className="h-3.5 w-3.5 shrink-0" /> {tecnico.zona}
-            </p>
-          )}
-
-          {rubroCats.length > 0 && (
-            <div className="mt-2.5 flex flex-wrap gap-1">
-              {rubroCats.slice(0, 3).map((c) => (
-                <span key={c.slug} className="chip px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
-              ))}
-              {rubroCats.length > 3 && (
-                <span className="chip px-2 py-0.5 text-[11px]">+{rubroCats.length - 3} más</span>
+      <Link href={`/tecnico/${tecnico.user_id}`} className="block">
+        <div className={`flex items-start gap-3.5 ${sinResenas ? "mt-8" : ""}`}>
+          <Avatar
+            url={tecnico.foto_url}
+            initials={initials}
+            size={60}
+            fallbackColor={avatarColorFor(tecnico.user_id)}
+            textClass="font-display text-base"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="truncate text-[15px] font-semibold text-sv-dark">{nombre}</span>
+              {tecnico.verificado && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2 py-0.5 text-[10px] font-semibold text-sv-olive">
+                  <IconCheckBadge className="h-3 w-3" /> Verificado
+                </span>
               )}
             </div>
-          )}
+
+            {subtitulo && <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-ink-500">{subtitulo}</p>}
+
+            {!sinResenas && (
+              <div className="mt-1.5">
+                <StarRating rating={resumen.promedio} reviews={resumen.total} />
+              </div>
+            )}
+
+            {tecnico.zona && (
+              <p className="mt-1.5 flex items-center gap-1 truncate text-xs text-ink-400">
+                <IconMapPin className="h-3.5 w-3.5 shrink-0" /> {tecnico.zona}
+              </p>
+            )}
+          </div>
         </div>
+
+        {/* Chips de rubro a todo el ancho de la tarjeta (no metidos en la
+            columna angosta al lado del avatar) — con 3+ rubros entraban mal
+            y el "+2" quedaba apretado. */}
+        {rubroCats.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {rubroCats.map((c) => (
+              <span key={c.slug} className="chip px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
+            ))}
+          </div>
+        )}
       </Link>
 
       {modoPreview ? (

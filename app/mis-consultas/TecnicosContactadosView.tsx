@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconCheckBadge, IconWhatsApp } from "@/components/icons";
+import { IconMapPin, IconCheckBadge, IconWhatsApp, IconSparkle } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { type TecnicoPublico } from "@/components/TecnicoCard";
@@ -55,9 +55,17 @@ export function TecnicosContactadosView({ items }: { items: ContactoItem[] }) {
           );
           const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensaje}` : null;
 
+          const sinResenas = !resumen || resumen.total === 0;
+
           return (
-            <div key={perfil.user_id} className="card p-5">
-              <div className="flex items-start gap-3.5">
+            <div key={perfil.user_id} className="card relative p-5">
+              {sinResenas && (
+                <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+                  <IconSparkle className="h-3 w-3" /> Nuevo en Sufix
+                </span>
+              )}
+
+              <div className={`flex items-start gap-3.5 ${sinResenas ? "mt-8" : ""}`}>
                 <Link href={`/tecnico/${perfil.user_id}`} className="shrink-0">
                   <Avatar url={perfil.foto_url} initials={initials} size={56} fallbackColor={avatarColorFor(perfil.user_id)} textClass="font-display text-base" />
                 </Link>
@@ -73,28 +81,16 @@ export function TecnicosContactadosView({ items }: { items: ContactoItem[] }) {
                     )}
                   </div>
 
-                  <div className="mt-1">
-                    {resumen && resumen.total > 0 ? (
+                  {!sinResenas && (
+                    <div className="mt-1">
                       <StarRating rating={resumen.promedio} reviews={resumen.total} />
-                    ) : (
-                      <span className="inline-flex items-center rounded-full bg-zap-100 px-2 py-0.5 text-[11px] font-medium text-sv-olive">
-                        Nuevo en Sufix
-                      </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {perfil.zona && (
                     <p className="mt-1.5 flex items-center gap-1 truncate text-xs text-ink-400">
                       <IconMapPin className="h-3.5 w-3.5 shrink-0" /> {perfil.zona}
                     </p>
-                  )}
-
-                  {rubroCats.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {rubroCats.map((c) => (
-                        <span key={c.slug} className="chip px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
-                      ))}
-                    </div>
                   )}
 
                   <p className="mt-2 text-[11.5px] text-ink-400">
@@ -103,6 +99,14 @@ export function TecnicosContactadosView({ items }: { items: ContactoItem[] }) {
                   </p>
                 </div>
               </div>
+
+              {rubroCats.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {rubroCats.map((c) => (
+                    <span key={c.slug} className="chip px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
+                  ))}
+                </div>
+              )}
 
               <ContactarWhatsAppButton
                 tecnicoId={perfil.user_id}

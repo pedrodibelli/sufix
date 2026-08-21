@@ -38,6 +38,16 @@ export function IconWhatsApp({ className = "h-4 w-4" }: IconProps) {
   );
 }
 
+// Estrellita de "nuevo" — para el badge "Nuevo en Sufix", sin usar el emoji ✨.
+export function IconSparkle({ className = "h-3 w-3" }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden>
+      <path d="M10 2l1.4 4.6L16 8l-4.6 1.4L10 14l-1.4-4.6L4 8l4.6-1.4L10 2z" />
+      <path d="M16.5 13l.6 2 2 .6-2 .6-.6 2-.6-2-2-.6 2-.6.6-2z" />
+    </svg>
+  );
+}
+
 export function IconCheckBadge({ className = "h-3.5 w-3.5" }: IconProps) {
   return (
     <svg viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden>
