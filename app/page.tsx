@@ -4,6 +4,9 @@ import { Footer } from "@/components/Footer";
 import { FilterDropdown } from "@/components/FilterDropdown";
 import { MarketplaceGrid } from "@/components/MarketplaceGrid";
 import { TecnicosGrid } from "@/components/TecnicosGrid";
+import { TecnicosSearchBar } from "@/components/TecnicosSearchBar";
+import { TecnicosCategoryFilter } from "@/components/TecnicosCategoryFilter";
+import { TecnicosSortBar } from "@/components/TecnicosSortBar";
 import { type TecnicoPublico } from "@/components/TecnicoCard";
 import { CATEGORIES, ZONES, type PostedJob } from "@/lib/data";
 import { type Publicacion } from "@/lib/supabase";
@@ -14,12 +17,23 @@ export const revalidate = 0; // siempre datos frescos
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; cat?: string; zona?: string }>;
+  searchParams: Promise<{
+    q?: string; cat?: string; zona?: string;
+    tecQ?: string; tecZona?: string; tecCat?: string; tecSort?: string;
+  }>;
 }) {
   const params = await searchParams;
   const q = params.q?.toLowerCase().trim() ?? "";
   const cat = params.cat ?? "";
   const zona = params.zona ?? "";
+
+  // Filtros del directorio de técnicos (independientes de los de "Consultas
+  // activas" de arriba, con prefijo "tec" para no pisarse si ambas secciones
+  // conviven en la misma URL).
+  const tecQ = params.tecQ?.toLowerCase().trim() ?? "";
+  const tecZona = params.tecZona ?? "";
+  const tecCat = params.tecCat ?? "";
+  const tecSort = params.tecSort ?? "recomendados";
 
   // Rol del usuario actual
   const supabaseServer = await createSupabaseServer();
@@ -35,7 +49,7 @@ export default async function HomePage({
   if (!esProfesional) {
     const { data: tecnicosRaw } = await supabaseServer
       .from("perfiles_publicos")
-      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono")
+      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at")
       .not("rubro", "is", null)
       .not("telefono", "is", null)
       .order("creado_at", { ascending: false });
@@ -52,6 +66,34 @@ export default async function HomePage({
       (resumenRows ?? []).map((r) => [r.tecnico_id, { promedio: Number(r.promedio), total: Number(r.total) }])
     );
   }
+
+  // Filtro del directorio: texto libre (nombre, titular o rubro), zona y rubro.
+  const tecnicosFiltrados = tecnicos.filter((t) => {
+    if (tecCat && !(t.rubro ?? []).includes(tecCat)) return false;
+    if (tecZona && t.zona !== tecZona) return false;
+    if (tecQ) {
+      const rubrosNombres = (t.rubro ?? []).map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name ?? slug);
+      const hay = `${t.nombre ?? ""} ${t.titular ?? ""} ${rubrosNombres.join(" ")}`.toLowerCase();
+      if (!hay.includes(tecQ)) return false;
+    }
+    return true;
+  });
+
+  // Orden: "recomendados" respeta el orden por defecto (más nuevos primero,
+  // ya viene así de la query); "rating" y "nuevos" reordenan explícito.
+  const tecnicosOrdenados = (() => {
+    if (tecSort === "rating") {
+      return [...tecnicosFiltrados].sort(
+        (a, b) => (resumenMapTecnicos[b.user_id]?.promedio ?? 0) - (resumenMapTecnicos[a.user_id]?.promedio ?? 0)
+      );
+    }
+    if (tecSort === "nuevos") {
+      return [...tecnicosFiltrados].sort(
+        (a, b) => new Date(b.creado_at ?? 0).getTime() - new Date(a.creado_at ?? 0).getTime()
+      );
+    }
+    return tecnicosFiltrados;
+  })();
 
   // Publicaciones de Supabase
   const { data: dbJobs } = await supabaseServer
@@ -195,7 +237,28 @@ export default async function HomePage({
                   Mirá su perfil, sus reseñas y escribile por WhatsApp directo — sin costo, sin esperar propuestas.
                 </p>
               </div>
-              <TecnicosGrid tecnicos={tecnicos} resumenMap={resumenMapTecnicos} />
+
+              <div className="card mb-5 p-4 sm:p-5">
+                <TecnicosSearchBar tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
+              </div>
+
+              <div className="mb-5">
+                <TecnicosCategoryFilter tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
+              </div>
+
+              <TecnicosSortBar
+                total={tecnicosOrdenados.length}
+                tecQ={tecQ}
+                tecZona={tecZona}
+                tecCat={tecCat}
+                tecSort={tecSort}
+              />
+
+              <TecnicosGrid
+                tecnicos={tecnicosOrdenados}
+                resumenMap={resumenMapTecnicos}
+                hayFiltrosActivos={!!(tecQ || tecZona || tecCat)}
+              />
             </div>
           </section>
         )}

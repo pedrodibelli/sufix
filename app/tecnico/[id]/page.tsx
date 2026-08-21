@@ -30,7 +30,7 @@ export default async function TecnicoPage({
 
   const { data: perfil } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono")
+    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular")
     .eq("user_id", id)
     .maybeSingle();
 
@@ -76,6 +76,9 @@ export default async function TecnicoPage({
                       </span>
                     )}
                   </div>
+                  {perfil.titular?.trim() && (
+                    <p className="mt-0.5 text-sm text-ink-500">{perfil.titular}</p>
+                  )}
                   <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500">
                     {total > 0 ? (
                       <StarRating rating={promedio} reviews={total} size="md" />

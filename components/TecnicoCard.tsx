@@ -12,7 +12,11 @@ export type TecnicoPublico = {
   verificado: boolean;
   foto_url: string | null;
   telefono: string | null;
+  titular: string | null;
+  creado_at?: string;
 };
+
+const DIAS_NUEVO = 30;
 
 export function TecnicoCard({
   tecnico,
@@ -26,6 +30,11 @@ export function TecnicoCard({
   const rubros = tecnico.rubro ?? [];
   const rubrosNombres = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name ?? slug);
   const primerRubro = rubrosNombres[0] ?? "un servicio";
+  const subtitulo = tecnico.titular?.trim() || rubrosNombres.join(" · ");
+
+  const esNuevo = tecnico.creado_at
+    ? (Date.now() - new Date(tecnico.creado_at).getTime()) / 86_400_000 <= DIAS_NUEVO
+    : false;
 
   const telefonoLimpio = tecnico.telefono?.replace(/\D/g, "") ?? "";
   const mensaje = encodeURIComponent(
@@ -45,14 +54,21 @@ export function TecnicoCard({
                 ✓ Verificado
               </span>
             )}
+            {esNuevo && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                🆕 Nuevo
+              </span>
+            )}
           </div>
 
-          <div className="mt-1">
+          {subtitulo && <p className="mt-0.5 truncate text-xs text-ink-500">{subtitulo}</p>}
+
+          <div className="mt-1.5">
             {resumen && resumen.total > 0 ? (
               <StarRating rating={resumen.promedio} reviews={resumen.total} />
             ) : (
               <span className="inline-flex items-center gap-1 rounded-full bg-zap-100 px-2 py-0.5 text-[11px] font-medium text-sv-olive">
-                🆕 Nuevo en Sufix
+                ✨ Nuevo en Sufix
               </span>
             )}
           </div>
@@ -61,11 +77,11 @@ export function TecnicoCard({
 
           {rubrosNombres.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
-              {rubrosNombres.slice(0, 2).map((n) => (
+              {rubrosNombres.slice(0, 3).map((n) => (
                 <span key={n} className="chip px-2 py-0.5 text-[11px]">🔧 {n}</span>
               ))}
-              {rubrosNombres.length > 2 && (
-                <span className="chip px-2 py-0.5 text-[11px]">+{rubrosNombres.length - 2} más</span>
+              {rubrosNombres.length > 3 && (
+                <span className="chip px-2 py-0.5 text-[11px]">+{rubrosNombres.length - 3} más</span>
               )}
             </div>
           )}
