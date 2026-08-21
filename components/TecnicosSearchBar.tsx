@@ -1,4 +1,5 @@
 import { ZONES } from "@/lib/data";
+import { IconSearch, IconMapPin } from "@/components/icons";
 
 // Buscador del directorio: texto libre + zona, en un form GET plano (sin JS,
 // funciona server-rendered). Preserva rubro/orden activos vía inputs ocultos
@@ -20,7 +21,7 @@ export function TecnicosSearchBar({
       {tecSort && tecSort !== "recomendados" && <input type="hidden" name="tecSort" value={tecSort} />}
 
       <div className="relative flex-1">
-        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300">🔍</span>
+        <IconSearch className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-300" />
         <input
           type="text"
           name="tecQ"
@@ -31,7 +32,7 @@ export function TecnicosSearchBar({
       </div>
 
       <div className="relative sm:w-56">
-        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300">📍</span>
+        <IconMapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-300" />
         <select name="tecZona" defaultValue={tecZona} className="field w-full appearance-none pl-10">
           <option value="">Todas las zonas</option>
           {ZONES.map((z) => (

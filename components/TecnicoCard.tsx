@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
+import { IconMapPin, IconCheckBadge } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 
 export type TecnicoPublico = {
@@ -16,8 +17,6 @@ export type TecnicoPublico = {
   creado_at?: string;
 };
 
-const DIAS_NUEVO = 30;
-
 export function TecnicoCard({
   tecnico,
   resumen,
@@ -28,13 +27,10 @@ export function TecnicoCard({
   const nombre = tecnico.nombre ?? "Profesional";
   const initials = nombre.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
   const rubros = tecnico.rubro ?? [];
-  const rubrosNombres = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name ?? slug);
+  const rubroCats = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
+  const rubrosNombres = rubroCats.length > 0 ? rubroCats.map((c) => c.name) : rubros;
   const primerRubro = rubrosNombres[0] ?? "un servicio";
   const subtitulo = tecnico.titular?.trim() || rubrosNombres.join(" · ");
-
-  const esNuevo = tecnico.creado_at
-    ? (Date.now() - new Date(tecnico.creado_at).getTime()) / 86_400_000 <= DIAS_NUEVO
-    : false;
 
   const telefonoLimpio = tecnico.telefono?.replace(/\D/g, "") ?? "";
   const mensaje = encodeURIComponent(
@@ -43,20 +39,15 @@ export function TecnicoCard({
   const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensaje}` : null;
 
   return (
-    <div className="card flex flex-col overflow-hidden p-4 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
-      <Link href={`/tecnico/${tecnico.user_id}`} className="flex flex-1 items-start gap-3">
-        <Avatar url={tecnico.foto_url} initials={initials} size={56} textClass="font-display text-base" />
+    <div className="card flex flex-col overflow-hidden p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
+      <Link href={`/tecnico/${tecnico.user_id}`} className="flex flex-1 items-start gap-3.5">
+        <Avatar url={tecnico.foto_url} initials={initials} size={60} textClass="font-display text-base" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="truncate text-[15px] font-semibold text-sv-dark">{nombre}</span>
             {tecnico.verificado && (
-              <span className="rounded-full bg-sv-primary/15 px-2 py-0.5 text-[10px] font-semibold text-sv-olive">
-                ✓ Verificado
-              </span>
-            )}
-            {esNuevo && (
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                🆕 Nuevo
+              <span className="inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2 py-0.5 text-[10px] font-semibold text-sv-olive">
+                <IconCheckBadge className="h-3 w-3" /> Verificado
               </span>
             )}
           </div>
@@ -67,21 +58,25 @@ export function TecnicoCard({
             {resumen && resumen.total > 0 ? (
               <StarRating rating={resumen.promedio} reviews={resumen.total} />
             ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-zap-100 px-2 py-0.5 text-[11px] font-medium text-sv-olive">
-                ✨ Nuevo en Sufix
+              <span className="inline-flex items-center rounded-full bg-zap-100 px-2 py-0.5 text-[11px] font-medium text-sv-olive">
+                Nuevo en Sufix
               </span>
             )}
           </div>
 
-          {tecnico.zona && <p className="mt-1 truncate text-xs text-ink-400">📍 {tecnico.zona}</p>}
+          {tecnico.zona && (
+            <p className="mt-1.5 flex items-center gap-1 truncate text-xs text-ink-400">
+              <IconMapPin className="h-3.5 w-3.5 shrink-0" /> {tecnico.zona}
+            </p>
+          )}
 
-          {rubrosNombres.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1">
-              {rubrosNombres.slice(0, 3).map((n) => (
-                <span key={n} className="chip px-2 py-0.5 text-[11px]">🔧 {n}</span>
+          {rubroCats.length > 0 && (
+            <div className="mt-2.5 flex flex-wrap gap-1">
+              {rubroCats.slice(0, 3).map((c) => (
+                <span key={c.slug} className="chip px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
               ))}
-              {rubrosNombres.length > 3 && (
-                <span className="chip px-2 py-0.5 text-[11px]">+{rubrosNombres.length - 3} más</span>
+              {rubroCats.length > 3 && (
+                <span className="chip px-2 py-0.5 text-[11px]">+{rubroCats.length - 3} más</span>
               )}
             </div>
           )}
@@ -92,9 +87,9 @@ export function TecnicoCard({
         tecnicoId={tecnico.user_id}
         waLink={waLink}
         origen="home"
-        className={`btn-primary mt-3 block w-full text-center text-sm ${!waLink ? "pointer-events-none opacity-50" : ""}`}
+        className={`btn-primary mt-4 block w-full text-center text-sm ${!waLink ? "pointer-events-none opacity-50" : ""}`}
       >
-        💬 Contactar por WhatsApp
+        Contactar por WhatsApp
       </ContactarWhatsAppButton>
     </div>
   );

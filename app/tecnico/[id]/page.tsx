@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
 import { Avatar } from "@/components/Avatar";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
+import { IconMapPin, IconCheckBadge } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { DejarResenaForm } from "./DejarResenaForm";
@@ -45,7 +46,8 @@ export default async function TecnicoPage({
   const nombre = perfil.nombre ?? "Profesional";
   const initials = nombre.split(" ").filter(Boolean).map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
   const rubros: string[] = Array.isArray(perfil.rubro) ? perfil.rubro : perfil.rubro ? [perfil.rubro] : [];
-  const rubrosNombres = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name ?? slug);
+  const rubroCats = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
+  const rubrosNombres = rubroCats.length > 0 ? rubroCats.map((c) => c.name) : rubros;
   const promedio = resumen ? Number(resumen.promedio) : 0;
   const total = resumen ? Number(resumen.total) : 0;
   const lista = (resenas ?? []) as Resena[];
@@ -71,8 +73,8 @@ export default async function TecnicoPage({
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="display text-3xl text-sv-dark">{nombre}</h1>
                     {perfil.verificado && (
-                      <span className="rounded-full bg-sv-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-sv-olive">
-                        ✓ Verificado
+                      <span className="inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-sv-olive">
+                        <IconCheckBadge className="h-3 w-3" /> Verificado
                       </span>
                     )}
                   </div>
@@ -83,17 +85,21 @@ export default async function TecnicoPage({
                     {total > 0 ? (
                       <StarRating rating={promedio} reviews={total} size="md" />
                     ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-zap-100 px-2 py-0.5 text-[12px] font-medium text-sv-olive">
-                        🆕 Nuevo en Sufix
+                      <span className="inline-flex items-center rounded-full bg-zap-100 px-2 py-0.5 text-[12px] font-medium text-sv-olive">
+                        Nuevo en Sufix
                       </span>
                     )}
-                    {perfil.zona && <span>📍 {perfil.zona}</span>}
+                    {perfil.zona && (
+                      <span className="inline-flex items-center gap-1">
+                        <IconMapPin className="h-3.5 w-3.5" /> {perfil.zona}
+                      </span>
+                    )}
                   </div>
-                  {rubrosNombres.length > 0 && (
+                  {rubroCats.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                      {rubrosNombres.map((n) => (
-                        <span key={n} className="rounded-full border border-ink-200 px-2.5 py-0.5 text-[12px] font-medium text-ink-600">
-                          🔧 {n}
+                      {rubroCats.map((c) => (
+                        <span key={c.slug} className="rounded-full border border-ink-200 px-2.5 py-0.5 text-[12px] font-medium text-ink-600">
+                          {c.icon} {c.name}
                         </span>
                       ))}
                     </div>
@@ -108,7 +114,7 @@ export default async function TecnicoPage({
                   origen="perfil"
                   className="btn-primary w-full py-3.5 text-base sm:w-auto sm:px-8"
                 >
-                  💬 Contactar por WhatsApp
+                  Contactar por WhatsApp
                 </ContactarWhatsAppButton>
               )}
             </div>

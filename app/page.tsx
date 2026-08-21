@@ -191,74 +191,75 @@ export default async function HomePage({
       <Header />
       <main className={`overflow-x-hidden ${esProfesional ? "bg-[#0e1a17]" : ""}`}>
 
-        {/* Hero — solo para visitantes sin sesión */}
-        {sinSesion && (
-          <section className="border-b border-ink-100/60 bg-white py-14 sm:py-20 lg:py-28">
-            <div className="container-pad">
-              <div className="mx-auto max-w-2xl text-center">
-                <h1 className="display text-4xl leading-[1.12] text-sv-dark sm:text-5xl lg:text-6xl">
-                  Tu técnico ideal,<br />a un mensaje de distancia.
-                </h1>
-                <p className="mt-4 text-base leading-relaxed text-ink-500 sm:text-lg lg:text-xl">
-                  Mirá perfiles verificados, sus reseñas y su zona, y escribile
-                  directo por WhatsApp — sin publicar nada, sin esperar propuestas.
-                </p>
-                <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
-                  <a href="#tecnicos" className="btn-primary w-full py-4 text-base sm:w-auto sm:px-10">
-                    Ver técnicos ↓
-                  </a>
-                  <Link href="/registrar" className="btn-ghost w-full py-4 text-base text-ink-500 sm:w-auto sm:px-10">
-                    Soy técnico, quiero aparecer acá →
-                  </Link>
+        {/* Directorio de técnicos — para demandantes y visitantes, no técnicos.
+            Hero verde con el buscador adentro (inspirado en solvitapp.com.ar/
+            professionals) + grilla en fondo claro debajo. */}
+        {!esProfesional && (
+          <section id="tecnicos">
+            <div className="bg-gradient-to-br from-sv-dark to-sv-primary py-14 sm:py-20">
+              <div className="container-pad">
+                <div className="mx-auto max-w-2xl text-center">
+                  {sinSesion ? (
+                    <>
+                      <h1 className="display text-4xl leading-[1.12] text-white sm:text-5xl">
+                        Tu técnico ideal,<br />a un mensaje de distancia.
+                      </h1>
+                      <p className="mt-4 text-base leading-relaxed text-white/80 sm:text-lg">
+                        Mirá perfiles verificados, sus reseñas y su zona, y escribile
+                        directo por WhatsApp — sin publicar nada, sin esperar propuestas.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h1 className="display text-3xl text-white sm:text-4xl">Encontrá tu técnico</h1>
+                      <p className="mt-2 text-base text-white/80">
+                        Mirá su perfil, sus reseñas y escribile por WhatsApp directo.
+                      </p>
+                    </>
+                  )}
                 </div>
-                <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ink-400">
-                  <span>✓ Sin costo</span>
-                  <span>✓ Técnicos verificados</span>
-                  <span>✓ Contacto directo por WhatsApp</span>
+
+                <div className="mx-auto mt-8 max-w-3xl rounded-2xl bg-white/10 p-2.5 backdrop-blur-sm sm:p-3">
+                  <TecnicosSearchBar tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
                 </div>
+
+                {sinSesion && (
+                  <>
+                    <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-white/70">
+                      <span>Sin costo</span>
+                      <span>Técnicos verificados</span>
+                      <span>Contacto directo por WhatsApp</span>
+                    </div>
+                    <div className="mt-5 text-center">
+                      <Link href="/registrar" className="text-sm font-medium text-white underline underline-offset-4 hover:text-white/80">
+                        Soy técnico, quiero aparecer acá →
+                      </Link>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-          </section>
-        )}
 
-        {/* Directorio de técnicos — para demandantes y visitantes, no técnicos */}
-        {!esProfesional && (
-          <section id="tecnicos" className={`py-10 sm:py-14 ${sinSesion ? "bg-[#f5fdf9]" : ""}`}>
-            <div className="container-pad">
-              <div className="mb-6">
-                <div className="flex items-center gap-2 text-xs text-ink-400">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-sv-primary" />
-                  <span className="font-medium uppercase tracking-widest">Técnicos disponibles</span>
+            <div className="bg-[#f5fdf9] py-10 sm:py-14">
+              <div className="container-pad">
+                <div className="mb-5">
+                  <TecnicosCategoryFilter tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
                 </div>
-                <h2 className="display mt-1.5 text-3xl text-sv-dark md:text-4xl">
-                  Encontrá tu técnico
-                </h2>
-                <p className="mt-1 text-sm text-ink-400">
-                  Mirá su perfil, sus reseñas y escribile por WhatsApp directo — sin costo, sin esperar propuestas.
-                </p>
+
+                <TecnicosSortBar
+                  total={tecnicosOrdenados.length}
+                  tecQ={tecQ}
+                  tecZona={tecZona}
+                  tecCat={tecCat}
+                  tecSort={tecSort}
+                />
+
+                <TecnicosGrid
+                  tecnicos={tecnicosOrdenados}
+                  resumenMap={resumenMapTecnicos}
+                  hayFiltrosActivos={!!(tecQ || tecZona || tecCat)}
+                />
               </div>
-
-              <div className="card mb-5 p-4 sm:p-5">
-                <TecnicosSearchBar tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
-              </div>
-
-              <div className="mb-5">
-                <TecnicosCategoryFilter tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
-              </div>
-
-              <TecnicosSortBar
-                total={tecnicosOrdenados.length}
-                tecQ={tecQ}
-                tecZona={tecZona}
-                tecCat={tecCat}
-                tecSort={tecSort}
-              />
-
-              <TecnicosGrid
-                tecnicos={tecnicosOrdenados}
-                resumenMap={resumenMapTecnicos}
-                hayFiltrosActivos={!!(tecQ || tecZona || tecCat)}
-              />
             </div>
           </section>
         )}
