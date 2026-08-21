@@ -131,114 +131,106 @@ export default async function HomePage({
       <main className={`overflow-x-hidden ${esProfesional ? "bg-[#0e1a17]" : ""}`}>
 
         {/* Directorio de técnicos — para demandantes y visitantes, no técnicos.
-            Ritmo de fondos blanco → verde oscuro degradado → blanco (pedido
-            2026-08-21): las tarjetitas blancas (stats, chips, cards) tenían
-            muy poco contraste sobre el beige clarito de antes — ahora resaltan
-            solas sobre el verde oscuro, sin tocar el color de cada una. */}
+            Un solo fondo verde oscuro degradado para toda la sección (pedido
+            2026-08-21, segunda vuelta): la primera versión cortaba en franjas
+            blanco/verde/blanco y no convenció — ahora es continuo de punta a
+            punta. Las tarjetitas (stats, chips, técnicos) son blancas y
+            resaltan solas contra el verde, sin tener que tocar su color. */}
         {!esProfesional && (
-          <section id="tecnicos">
-            {/* Blanco: hero + buscador */}
-            <div className="bg-white py-14 sm:py-20">
-              <div className="container-pad">
-                <div className="mx-auto max-w-2xl text-center">
-                  {sinSesion ? (
-                    <>
-                      <h1 className="display text-4xl leading-[1.12] text-sv-dark sm:text-5xl">
-                        Tu técnico ideal,<br />a un mensaje de distancia.
-                      </h1>
-                      <p className="mt-4 text-base leading-relaxed text-ink-500 sm:text-lg">
-                        Mirá perfiles verificados, sus reseñas y su zona, y escribile
-                        directo por WhatsApp — sin publicar nada, sin esperar propuestas.
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <h1 className="display text-3xl text-sv-dark sm:text-4xl">Encontrá tu técnico</h1>
-                      <p className="mt-2 text-base text-ink-500">
-                        Mirá su perfil, sus reseñas y escribile por WhatsApp directo.
-                      </p>
-                    </>
-                  )}
-                </div>
-
-                <div className="mx-auto mt-8 max-w-3xl">
-                  <TecnicosSearchBar tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
-                </div>
-
-                {sinSesion && (
+          <section id="tecnicos" className="bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] py-14 sm:py-20">
+            <div className="container-pad">
+              <div className="mx-auto max-w-2xl text-center">
+                {sinSesion ? (
                   <>
-                    <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ink-400">
-                      <span>Sin costo</span>
-                      <span>Técnicos verificados</span>
-                      <span>Contacto directo por WhatsApp</span>
-                    </div>
-                    <div className="mt-5 text-center">
-                      <Link href="/registrar" className="text-sm font-medium text-sv-primary underline underline-offset-4 hover:text-sv-olive">
-                        Soy técnico, quiero aparecer acá →
-                      </Link>
-                    </div>
+                    <h1 className="display text-4xl leading-[1.12] text-white sm:text-5xl">
+                      Tu técnico ideal,<br />a un mensaje de distancia.
+                    </h1>
+                    <p className="mt-4 text-base leading-relaxed text-white/80 sm:text-lg">
+                      Mirá perfiles verificados, sus reseñas y su zona, y escribile
+                      directo por WhatsApp — sin publicar nada, sin esperar propuestas.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h1 className="display text-3xl text-white sm:text-4xl">Encontrá tu técnico</h1>
+                    <p className="mt-2 text-base text-white/80">
+                      Mirá su perfil, sus reseñas y escribile por WhatsApp directo.
+                    </p>
                   </>
                 )}
               </div>
-            </div>
 
-            {/* Verde oscuro degradado: stats, filtros y grilla */}
-            <div className="bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] py-10 sm:py-14">
-              <div className="container-pad">
-                {/* Stats reales — nada inventado: cuenta de técnicos actual,
-                    cantidad de rubros/zonas que ya manejamos. Inspirado en el
-                    mockup de Claude Design (ver charla del 2026-08-21). */}
-                <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {[
-                    { value: String(tecnicos.length), label: tecnicos.length === 1 ? "Técnico activo" : "Técnicos activos" },
-                    { value: String(CATEGORIES.length), label: "Oficios" },
-                    { value: String(ZONES.length), label: "Zonas en CABA" },
-                    { value: "$0", label: "Siempre gratis" },
-                  ].map((s) => (
-                    <div key={s.label} className="card p-4">
-                      <div className="display text-2xl text-sv-dark">{s.value}</div>
-                      <div className="mt-0.5 text-xs text-ink-500">{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mb-5">
-                  <TecnicosCategoryFilter tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
-                </div>
-
-                <TecnicosSortBar
-                  total={tecnicosOrdenados.length}
-                  tecQ={tecQ}
-                  tecZona={tecZona}
-                  tecCat={tecCat}
-                  tecSort={tecSort}
-                />
-
-                <TecnicosGrid
-                  tecnicos={tecnicosOrdenados}
-                  resumenMap={resumenMapTecnicos}
-                  hayFiltrosActivos={!!(tecQ || tecZona || tecCat)}
-                />
+              <div className="mx-auto mt-8 max-w-3xl">
+                <TecnicosSearchBar tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
               </div>
-            </div>
 
-            {/* Blanco de nuevo: cartel de reclutamiento + 3 pasos — solo para
-                visitantes sin cuenta (mismo criterio que el link "Soy técnico"
-                del hero). Copy propio, no el genérico que puso la IA sin
-                contexto del producto. */}
-            {sinSesion && (
-              <div className="bg-white py-14 sm:py-20">
-                <div className="container-pad">
-                  <div className="rounded-2xl bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] p-8 sm:p-12">
+              {sinSesion && (
+                <>
+                  <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-white/70">
+                    <span>Sin costo</span>
+                    <span>Técnicos verificados</span>
+                    <span>Contacto directo por WhatsApp</span>
+                  </div>
+                  <div className="mt-5 text-center">
+                    <Link href="/registrar" className="text-sm font-medium text-white underline underline-offset-4 hover:text-white/80">
+                      Soy técnico, quiero aparecer acá →
+                    </Link>
+                  </div>
+                </>
+              )}
+
+              {/* Stats reales — nada inventado: cuenta de técnicos actual,
+                  cantidad de rubros/zonas que ya manejamos. Inspirado en el
+                  mockup de Claude Design (ver charla del 2026-08-21). */}
+              <div className="mb-8 mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[
+                  { value: String(tecnicos.length), label: tecnicos.length === 1 ? "Técnico activo" : "Técnicos activos" },
+                  { value: String(CATEGORIES.length), label: "Oficios" },
+                  { value: String(ZONES.length), label: "Zonas en CABA" },
+                  { value: "$0", label: "Siempre gratis" },
+                ].map((s) => (
+                  <div key={s.label} className="card p-4">
+                    <div className="display text-2xl text-sv-dark">{s.value}</div>
+                    <div className="mt-0.5 text-xs text-ink-500">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mb-5">
+                <TecnicosCategoryFilter tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
+              </div>
+
+              <TecnicosSortBar
+                total={tecnicosOrdenados.length}
+                tecQ={tecQ}
+                tecZona={tecZona}
+                tecCat={tecCat}
+                tecSort={tecSort}
+              />
+
+              <TecnicosGrid
+                tecnicos={tecnicosOrdenados}
+                resumenMap={resumenMapTecnicos}
+                hayFiltrosActivos={!!(tecQ || tecZona || tecCat)}
+              />
+
+              {/* Cartel de reclutamiento + 3 pasos — solo para visitantes sin
+                  cuenta. Ahora en tarjeta blanca (no oscura) porque ya está
+                  todo sobre el mismo fondo verde — una tarjeta oscura acá se
+                  perdía contra el fondo. Copy propio, no el genérico que puso
+                  la IA sin contexto del producto. */}
+              {sinSesion && (
+                <>
+                  <div className="mt-12 rounded-2xl bg-white p-8 sm:p-12">
                     <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
                       <div>
-                        <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-zap-300">
+                        <span className="inline-block rounded-full bg-sv-primary/10 px-3 py-1 text-xs font-semibold text-sv-olive">
                           Para técnicos y profesionales
                         </span>
-                        <h2 className="display mt-4 text-3xl leading-tight text-white sm:text-4xl">
+                        <h2 className="display mt-4 text-3xl leading-tight text-sv-dark sm:text-4xl">
                           Aparecé gratis y que te encuentren tus próximos clientes.
                         </h2>
-                        <p className="mt-3 text-white/70">
+                        <p className="mt-3 text-ink-500">
                           Sin comisión por trabajo, sin intermediarios. Los clientes te
                           escriben directo a tu WhatsApp — cobrás el 100% de cada servicio.
                         </p>
@@ -252,9 +244,9 @@ export default async function HomePage({
                           { title: "Clientes a tu WhatsApp", body: "Te escriben directo, sin intermediarios ni esperas." },
                           { title: "Sumá reputación", body: "Reseñas reales que te consiguen los próximos trabajos." },
                         ].map((b) => (
-                          <div key={b.title} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                            <p className="text-sm font-semibold text-white">{b.title}</p>
-                            <p className="mt-0.5 text-xs text-white/60">{b.body}</p>
+                          <div key={b.title} className="rounded-xl border border-ink-100 bg-[#f5fdf9] p-4">
+                            <p className="text-sm font-semibold text-sv-dark">{b.title}</p>
+                            <p className="mt-0.5 text-xs text-ink-500">{b.body}</p>
                           </div>
                         ))}
                       </div>
@@ -262,10 +254,10 @@ export default async function HomePage({
                   </div>
 
                   <div className="mt-14 text-center">
-                    <h2 className="display text-2xl text-sv-dark sm:text-3xl">
+                    <h2 className="display text-2xl text-white sm:text-3xl">
                       Encontrá y contactá en 3 pasos
                     </h2>
-                    <p className="mt-1 text-sm text-ink-400">Sin registros obligatorios ni esperas.</p>
+                    <p className="mt-1 text-sm text-white/60">Sin registros obligatorios ni esperas.</p>
                   </div>
                   <div className="mt-8 grid gap-4 sm:grid-cols-3">
                     {[
@@ -282,9 +274,9 @@ export default async function HomePage({
                       </div>
                     ))}
                   </div>
-                </div>
-              </div>
-            )}
+                </>
+              )}
+            </div>
           </section>
         )}
 
