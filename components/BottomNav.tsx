@@ -29,7 +29,7 @@ export function BottomNav({ dark = false, novedades = 0 }: { dark?: boolean; nov
 
   const items = [
     { href: "/", label: "Inicio", Icon: HomeIcon },
-    { href: "/mis-consultas", label: "Mis consultas", Icon: ListIcon },
+    { href: "/mis-consultas", label: "Contactos", Icon: ListIcon },
   ];
 
   const barCls = dark ? "border-white/10 bg-[#0e1a17]/95" : "border-ink-100 bg-white/95";

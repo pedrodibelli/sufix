@@ -1,11 +1,17 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { createSupabaseServer } from "@/lib/supabase-server";
-import { DemandanteView } from "./DemandanteView";
-import { OferenteView } from "./OferenteView";
+import { TecnicosContactadosView, type ContactoItem } from "./TecnicosContactadosView";
+import { QuienTeContactoView } from "./QuienTeContactoView";
+import { type TecnicoPublico } from "@/components/TecnicoCard";
 
 export const revalidate = 0;
 
+// "Mis consultas" pasó de ser el tablero del flujo viejo (publicar problema →
+// propuestas) a un historial de contactos — ver CLAUDE.md "Pivot 2026-08-2x".
+// El código viejo (DemandanteView.tsx, OferenteView.tsx) sigue completo en el
+// repo sin usarse, y en el tag de git idea-publicar-problema-2026-08-20 con
+// el resto del flujo si hiciera falta volver.
 export default async function MisConsultasPage() {
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
@@ -13,20 +19,13 @@ export default async function MisConsultasPage() {
   if (!user) return null;
 
   const esProfesional = user.user_metadata?.es_profesional === true;
-  const nombre = user.user_metadata?.nombre as string | undefined;
-  const apellido = user.user_metadata?.apellido as string | undefined;
-  const email = user.email;
 
   return (
     <>
       <Header />
       <main className={`min-h-screen ${esProfesional ? "bg-[#0e1a17]" : "bg-[#f5fdf9]"}`}>
         <div className="container-pad py-10">
-          {esProfesional ? (
-            <OferenteData userId={user.id} nombre={nombre} apellido={apellido} email={email} />
-          ) : (
-            <DemandanteData userId={user.id} nombre={nombre} apellido={apellido} email={email} />
-          )}
+          {esProfesional ? <QuienTeContactoData userId={user.id} /> : <TecnicosContactadosData userId={user.id} />}
         </div>
       </main>
       <Footer />
@@ -34,141 +33,64 @@ export default async function MisConsultasPage() {
   );
 }
 
-async function DemandanteData({
-  userId,
-  nombre,
-  apellido,
-  email,
-}: {
-  userId: string;
-  nombre?: string;
-  apellido?: string;
-  email?: string;
-}) {
+async function TecnicosContactadosData({ userId }: { userId: string }) {
   const supabase = await createSupabaseServer();
 
-  const { data: publicaciones } = await supabase
-    .from("publicaciones")
-    .select("id, title, description, category_slug, zone, status, created_at, photo, photos")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+  const { data: contactos } = await supabase
+    .from("contactos_tecnico")
+    .select("id, tecnico_id, creado_at")
+    .eq("contactado_por", userId)
+    .order("creado_at", { ascending: false });
 
-  const pubIds = (publicaciones ?? []).map((p) => p.id);
+  // Agrupar por técnico: cuántas veces + primera/última vez.
+  const porTecnico = new Map<string, { veces: number; ultimaFecha: string }>();
+  for (const c of contactos ?? []) {
+    const prev = porTecnico.get(c.tecnico_id);
+    if (!prev) porTecnico.set(c.tecnico_id, { veces: 1, ultimaFecha: c.creado_at });
+    else prev.veces += 1;
+  }
+  const tecnicoIds = [...porTecnico.keys()];
 
-  const { data: propuestas, error: propError } =
-    pubIds.length > 0
-      ? await supabase
-          .from("propuestas")
-          .select("*")
-          .in("publicacion_id", pubIds)
-          .order("precio", { ascending: true })
-      : { data: [], error: null };
+  const [{ data: perfiles }, { data: resumenRows }, { data: misResenas }] = await Promise.all([
+    tecnicoIds.length > 0
+      ? supabase.from("perfiles_publicos").select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at").in("user_id", tecnicoIds)
+      : Promise.resolve({ data: [] as TecnicoPublico[] }),
+    tecnicoIds.length > 0
+      ? supabase.from("resenas_resumen").select("tecnico_id, promedio, total").in("tecnico_id", tecnicoIds)
+      : Promise.resolve({ data: [] as { tecnico_id: string; promedio: number; total: number }[] }),
+    supabase.from("resenas").select("tecnico_id").eq("autor_id", userId).is("publicacion_id", null),
+  ]);
 
-  if (propError) console.error("[mis-consultas] propuestas fetch error:", propError.message);
-
-  const publicacionesConPropuestas = (publicaciones ?? []).map((pub) => ({
-    ...pub,
-    propuestas: (propuestas ?? []).filter((p) => p.publicacion_id === pub.id),
-  }));
-
-  // Fetch perfiles para propuestas aceptadas/completadas (el RLS solo devuelve los
-  // autorizados) y también para los "interesados" del flujo de contacto directo
-  // gratis: ahí el teléfono se muestra apenas el técnico avisa, sin esperar a que
-  // el demandante elija a nadie.
-  const proIdsConContacto = [
-    ...new Set(
-      (propuestas ?? [])
-        .filter((p) =>
-          p.estado === "aceptada" || p.estado === "completada" ||
-          (p.contacto_directo && p.estado === "interesado")
-        )
-        .map((p) => p.profesional_id)
-        .filter(Boolean)
-    ),
-  ];
-  const { data: perfiles } =
-    proIdsConContacto.length > 0
-      ? await supabase
-          .from("perfiles_profesionales")
-          .select("user_id, nombre, telefono, email, zona, foto_url")
-          .in("user_id", proIdsConContacto)
-      : { data: [] };
-
-  const perfilMap: Record<string, { user_id: string; nombre: string | null; telefono: string | null; email: string | null; zona: string | null; foto_url: string | null }> =
-    Object.fromEntries((perfiles ?? []).map((p) => [p.user_id, p]));
-
-  // Reputación de los técnicos que ofertaron + qué trabajos ya calificó el usuario
-  const proIds = [...new Set((propuestas ?? []).map((p) => p.profesional_id).filter(Boolean))];
-  const { data: resumenRows } =
-    proIds.length > 0
-      ? await supabase.from("resenas_resumen").select("tecnico_id, promedio, total").in("tecnico_id", proIds)
-      : { data: [] as { tecnico_id: string; promedio: number; total: number }[] };
-  const resumenMap: Record<string, { promedio: number; total: number }> = Object.fromEntries(
+  const resumenMap = Object.fromEntries(
     (resumenRows ?? []).map((r) => [r.tecnico_id, { promedio: Number(r.promedio), total: Number(r.total) }])
   );
-  const { data: misResenas } = await supabase
-    .from("resenas")
-    .select("publicacion_id")
-    .eq("autor_id", userId);
-  const resenadasIds = [...new Set((misResenas ?? []).map((r) => r.publicacion_id as string))];
+  const yaResenados = new Set((misResenas ?? []).map((r) => r.tecnico_id as string));
 
-  return (
-    <DemandanteView
-      publicaciones={publicacionesConPropuestas}
-      perfilMap={perfilMap}
-      resumenMap={resumenMap}
-      resenadasIds={resenadasIds}
-      nombre={nombre}
-      apellido={apellido}
-      email={email}
-    />
-  );
+  const items: ContactoItem[] = (perfiles ?? [])
+    .map((p) => {
+      const meta = porTecnico.get(p.user_id)!;
+      return {
+        perfil: p as TecnicoPublico,
+        resumen: resumenMap[p.user_id],
+        veces: meta.veces,
+        ultimaFecha: meta.ultimaFecha,
+        yaResenado: yaResenados.has(p.user_id),
+      };
+    })
+    .sort((a, b) => new Date(b.ultimaFecha).getTime() - new Date(a.ultimaFecha).getTime());
+
+  return <TecnicosContactadosView items={items} />;
 }
 
-async function OferenteData({
-  userId,
-  nombre,
-  apellido,
-  email,
-}: {
-  userId: string;
-  nombre?: string;
-  apellido?: string;
-  email?: string;
-}) {
+async function QuienTeContactoData({ userId }: { userId: string }) {
   const supabase = await createSupabaseServer();
 
-  const { data: propuestas, error: propError } = await supabase
-    .from("propuestas")
-    // Columnas mínimas para la vista del oferente. NO traer codigo_pago: el técnico
-    // debe pedírselo al demandante para cerrar el trabajo (no leerlo de los datos).
-    .select("id, publicacion_id, precio, titulo, zona, categoria, demandante, estado, created_at, contacto_directo")
-    .eq("profesional_id", userId)
-    .order("created_at", { ascending: false });
+  const { data: contactos } = await supabase
+    .from("contactos_tecnico")
+    .select("id, contactado_por, origen, creado_at")
+    .eq("tecnico_id", userId)
+    .order("creado_at", { ascending: false })
+    .limit(100);
 
-  if (propError) console.error("[mis-consultas] oferente propuestas error:", propError.message);
-
-  // Obtener fotos de las publicaciones relacionadas
-  const pubIds = [...new Set((propuestas ?? []).map((p) => p.publicacion_id).filter(Boolean))];
-  const { data: pubFotos } = pubIds.length > 0
-    ? await supabase.from("publicaciones").select("id, photo").in("id", pubIds)
-    : { data: [] };
-
-  const photoMap: Record<string, string | null> = Object.fromEntries(
-    (pubFotos ?? []).map((p) => [p.id, p.photo ?? null])
-  );
-
-  const propuestasConFoto = (propuestas ?? []).map((p) => ({
-    ...p,
-    photo: photoMap[p.publicacion_id] ?? null,
-  }));
-
-  return (
-    <OferenteView
-      propuestas={propuestasConFoto}
-      nombre={nombre}
-      apellido={apellido}
-      email={email}
-    />
-  );
+  return <QuienTeContactoView contactos={contactos ?? []} />;
 }

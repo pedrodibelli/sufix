@@ -2,8 +2,9 @@ import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconCheckBadge } from "@/components/icons";
+import { IconMapPin, IconCheckBadge, IconWhatsApp } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
+import { avatarColorFor } from "@/lib/avatarColors";
 
 export type TecnicoPublico = {
   user_id: string;
@@ -20,9 +21,14 @@ export type TecnicoPublico = {
 export function TecnicoCard({
   tecnico,
   resumen,
+  modoPreview = false,
 }: {
   tecnico: TecnicoPublico;
   resumen?: { promedio: number; total: number };
+  // Para cuando el técnico ve SU PROPIA tarjeta (home) — no tiene sentido
+  // que se contacte a sí mismo por WhatsApp, así que el botón cambia por
+  // un link para editar el perfil.
+  modoPreview?: boolean;
 }) {
   const nombre = tecnico.nombre ?? "Profesional";
   const initials = nombre.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
@@ -41,7 +47,13 @@ export function TecnicoCard({
   return (
     <div className="card flex flex-col overflow-hidden p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
       <Link href={`/tecnico/${tecnico.user_id}`} className="flex flex-1 items-start gap-3.5">
-        <Avatar url={tecnico.foto_url} initials={initials} size={60} textClass="font-display text-base" />
+        <Avatar
+          url={tecnico.foto_url}
+          initials={initials}
+          size={60}
+          fallbackColor={avatarColorFor(tecnico.user_id)}
+          textClass="font-display text-base"
+        />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="truncate text-[15px] font-semibold text-sv-dark">{nombre}</span>
@@ -52,7 +64,7 @@ export function TecnicoCard({
             )}
           </div>
 
-          {subtitulo && <p className="mt-0.5 truncate text-xs text-ink-500">{subtitulo}</p>}
+          {subtitulo && <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-ink-500">{subtitulo}</p>}
 
           <div className="mt-1.5">
             {resumen && resumen.total > 0 ? (
@@ -83,14 +95,20 @@ export function TecnicoCard({
         </div>
       </Link>
 
-      <ContactarWhatsAppButton
-        tecnicoId={tecnico.user_id}
-        waLink={waLink}
-        origen="home"
-        className={`btn-primary mt-4 block w-full text-center text-sm ${!waLink ? "pointer-events-none opacity-50" : ""}`}
-      >
-        Contactar por WhatsApp
-      </ContactarWhatsAppButton>
+      {modoPreview ? (
+        <Link href="/perfil" className="btn-outline mt-4 block w-full text-center text-sm">
+          Editar mi perfil
+        </Link>
+      ) : (
+        <ContactarWhatsAppButton
+          tecnicoId={tecnico.user_id}
+          waLink={waLink}
+          origen="home"
+          className={`btn mt-4 w-full bg-[#25D366] text-white hover:brightness-95 ${!waLink ? "pointer-events-none opacity-50" : ""}`}
+        >
+          <IconWhatsApp className="h-4 w-4" /> Contactar por WhatsApp
+        </ContactarWhatsAppButton>
+      )}
     </div>
   );
 }

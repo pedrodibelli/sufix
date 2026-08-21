@@ -14,7 +14,7 @@ export function ContactarWhatsAppButton({
 }: {
   tecnicoId: string;
   waLink: string | null;
-  origen: "home" | "perfil";
+  origen: "home" | "perfil" | "consultas";
   className?: string;
   children: React.ReactNode;
 }) {

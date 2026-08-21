@@ -23,37 +23,12 @@ export async function Header() {
   const isAdmin = isAdminEmail(user?.email);
   const dk = esProfesional;
 
-  // Punto rojo de novedades en "Mis consultas":
-  //  - Demandante: propuestas/presupuestos nuevos (flujo viejo) + técnicos
-  //    interesados nuevos (flujo de contacto directo gratis) sin responder,
-  //    en sus publicaciones abiertas.
-  //  - Oferente: propuestas suyas ya aceptadas (tiene que coordinar/cerrar).
-  let novedades = 0;
-  if (user) {
-    if (esProfesional) {
-      const { count } = await supabase
-        .from("propuestas")
-        .select("id", { count: "exact", head: true })
-        .eq("profesional_id", user.id)
-        .eq("estado", "aceptada");
-      novedades = count ?? 0;
-    } else {
-      const { data: pubs } = await supabase
-        .from("publicaciones")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("status", "abierto");
-      const ids = (pubs ?? []).map((p) => String(p.id));
-      if (ids.length > 0) {
-        const { count } = await supabase
-          .from("propuestas")
-          .select("id", { count: "exact", head: true })
-          .in("publicacion_id", ids)
-          .or("estado.is.null,estado.eq.pendiente,estado.eq.interesado");
-        novedades = count ?? 0;
-      }
-    }
-  }
+  // Punto rojo de novedades en "Contactos": pausado — dependía de propuestas
+  // sobre trabajos publicados, que ya no existen (ver CLAUDE.md "Pivot
+  // 2026-08-2x"). Para el técnico tendría sentido mostrar contactos nuevos
+  // sin ver, pero eso necesita trackear "última vez que entró", que todavía
+  // no tenemos. Queda en 0 (sin punto rojo) hasta que se arme eso.
+  const novedades = 0;
 
   const initials = nombre && apellido
     ? `${nombre[0]}${apellido[0]}`.toUpperCase()
@@ -92,7 +67,7 @@ export async function Header() {
           <Link href="/como-funciona" className={navLink}>Cómo funciona</Link>
           {user && (
             <Link href="/mis-consultas" className={`relative ${navLink}`}>
-              Mis consultas
+              Contactos
               {novedades > 0 && (
                 <span className="absolute right-1.5 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
               )}

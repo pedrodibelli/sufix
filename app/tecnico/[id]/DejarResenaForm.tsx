@@ -7,7 +7,7 @@ import { crearResenaDirecta } from "./actions";
 // Reseña directa: cualquier usuario logueado puede calificar a este técnico
 // sin depender de un trabajo publicado/cerrado. Mismo look que el viejo
 // CalificarBlock de mis-consultas, pero independiente.
-export function DejarResenaForm({ tecnicoId }: { tecnicoId: string }) {
+export function DejarResenaForm({ tecnicoId, compact = false }: { tecnicoId: string; compact?: boolean }) {
   const router = useRouter();
   const [estrellas, setEstrellas] = useState(0);
   const [hover, setHover] = useState(0);
@@ -18,7 +18,7 @@ export function DejarResenaForm({ tecnicoId }: { tecnicoId: string }) {
 
   if (listo) {
     return (
-      <div className="card mt-5 border-emerald-100 bg-emerald-50 p-5">
+      <div className={compact ? "mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4" : "card mt-5 border-emerald-100 bg-emerald-50 p-5"}>
         <p className="text-sm font-semibold text-emerald-700">⭐ ¡Gracias por tu reseña!</p>
       </div>
     );
@@ -42,7 +42,7 @@ export function DejarResenaForm({ tecnicoId }: { tecnicoId: string }) {
   }
 
   return (
-    <div className="card mt-5 p-5">
+    <div className={compact ? "mt-4 border-t border-ink-100 pt-4" : "card mt-5 p-5"}>
       <p className="text-sm font-semibold text-sv-dark">Dejá tu reseña</p>
       <p className="mt-1 text-xs text-ink-400">¿Ya lo contactaste? Contale a otros cómo te fue.</p>
       <div className="mt-3 flex gap-1">

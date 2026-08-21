@@ -1,15 +1,12 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { FilterDropdown } from "@/components/FilterDropdown";
-import { MarketplaceGrid } from "@/components/MarketplaceGrid";
 import { TecnicosGrid } from "@/components/TecnicosGrid";
 import { TecnicosSearchBar } from "@/components/TecnicosSearchBar";
 import { TecnicosCategoryFilter } from "@/components/TecnicosCategoryFilter";
 import { TecnicosSortBar } from "@/components/TecnicosSortBar";
-import { type TecnicoPublico } from "@/components/TecnicoCard";
-import { CATEGORIES, ZONES, type PostedJob } from "@/lib/data";
-import { type Publicacion } from "@/lib/supabase";
+import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
+import { CATEGORIES, ZONES } from "@/lib/data";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 export const revalidate = 0; // siempre datos frescos
@@ -18,18 +15,13 @@ export default async function HomePage({
   searchParams,
 }: {
   searchParams: Promise<{
-    q?: string; cat?: string; zona?: string;
     tecQ?: string; tecZona?: string; tecCat?: string; tecSort?: string;
   }>;
 }) {
   const params = await searchParams;
-  const q = params.q?.toLowerCase().trim() ?? "";
-  const cat = params.cat ?? "";
-  const zona = params.zona ?? "";
 
-  // Filtros del directorio de técnicos (independientes de los de "Consultas
-  // activas" de arriba, con prefijo "tec" para no pisarse si ambas secciones
-  // conviven en la misma URL).
+  // Filtros del directorio de técnicos, con prefijo "tec" (venían compartiendo
+  // URL con los filtros viejos de "Consultas activas", ya retirados).
   const tecQ = params.tecQ?.toLowerCase().trim() ?? "";
   const tecZona = params.tecZona ?? "";
   const tecCat = params.tecCat ?? "";
@@ -95,96 +87,43 @@ export default async function HomePage({
     return tecnicosFiltrados;
   })();
 
-  // Publicaciones de Supabase
-  const { data: dbJobs } = await supabaseServer
-    .from("publicaciones")
-    .select("*")
-    .neq("status", "cerrado")
-    .order("created_at", { ascending: false });
-
-  // Conteo real de propuestas por publicación (vista pública, no expone datos sensibles)
-  const pubIds = (dbJobs ?? []).map((p: Publicacion) => p.id);
-  const { data: bidCounts } = pubIds.length > 0
-    ? await supabaseServer
-        .from("propuestas_count_por_publicacion")
-        .select("publicacion_id, total")
-        .in("publicacion_id", pubIds)
-    : { data: [] };
-  const bidsMap: Record<string, number> = Object.fromEntries(
-    (bidCounts ?? []).map((c: { publicacion_id: string; total: number }) => [c.publicacion_id, Number(c.total)])
-  );
-
-  // IDs de publicaciones del usuario actual
-  const misPublicacionesIds = user
-    ? (dbJobs ?? []).filter((p: Publicacion) => p.user_id === user.id).map((p: Publicacion) => p.id)
-    : [];
-
-  // Convertir al formato interno para filtrar igual que los estáticos
-  const supabaseJobs: PostedJob[] = (dbJobs ?? []).map((p: Publicacion) => ({
-    id: p.id,
-    title: p.title,
-    description: p.description,
-    categorySlug: p.category_slug,
-    zone: p.zone,
-    urgency: p.urgency as PostedJob["urgency"],
-    photo: p.photo ?? null,
-    photos: p.photos ?? [],
-    postedBy: p.posted_by,
-    postedAgo: "reciente",
-    budget: { min: 0, max: 0 },
-    bidsCount: bidsMap[p.id] ?? 0,
-    status: p.status as PostedJob["status"],
-  }));
-
-  const allJobs = supabaseJobs;
-
-  const filtered = allJobs.filter((j) => {
-    if (cat && j.categorySlug !== cat) return false;
-    if (zona && !j.zone.toLowerCase().includes(zona.toLowerCase())) return false;
-    if (q) {
-      const hay = `${j.title} ${j.description}`.toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
-
-  // IDs de publicaciones donde el profesional ya tiene propuesta pendiente o ya
-  // avisó que quiere hacer el trabajo (flujo de contacto directo gratis).
-  let yaContactadoIds: string[] = [];
-  // Rubros del técnico (puede tener varios) — se leen de perfiles_profesionales,
-  // no de user_metadata: ese queda desactualizado en cuanto edita su perfil.
-  let misCategorias: string[] = [];
+  // Home del técnico (ver CLAUDE.md "Pivot 2026-08-2x"): antes mostraba el
+  // feed de "Consultas activas", que quedó muerto para siempre — ya no hay
+  // forma de publicar un problema nueva desde la web. Ahora muestra su propia
+  // tarjeta (así lo ven los clientes), un check de perfil incompleto, y un
+  // adelanto de quién lo contactó (usa contactos_tecnico, ya filtrado por
+  // RLS a lo suyo). El feed viejo sigue completo en el tag de git
+  // idea-publicar-problema-2026-08-20 si hiciera falta volver.
+  let miPerfil: TecnicoPublico | null = null;
+  let miResumen: { promedio: number; total: number } | undefined;
+  let contactosRecientes: { id: string; contactado_por: string | null; origen: string | null; creado_at: string }[] = [];
   if (esProfesional && user) {
-    const [{ data: propsPendientes }, { data: miPerfil }] = await Promise.all([
+    const [{ data: perfilRow }, { data: resumenRow }, { data: contactosRows }] = await Promise.all([
       supabaseServer
-        .from("propuestas")
-        .select("publicacion_id")
-        .eq("profesional_id", user.id)
-        .in("estado", ["pendiente", "interesado"]),
-      supabaseServer.from("perfiles_profesionales").select("rubro").eq("user_id", user.id).maybeSingle(),
+        .from("perfiles_publicos")
+        .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      supabaseServer.from("resenas_resumen").select("promedio, total").eq("tecnico_id", user.id).maybeSingle(),
+      supabaseServer
+        .from("contactos_tecnico")
+        .select("id, contactado_por, origen, creado_at")
+        .eq("tecnico_id", user.id)
+        .order("creado_at", { ascending: false })
+        .limit(5),
     ]);
-    yaContactadoIds = (propsPendientes ?? []).map((p: { publicacion_id: string }) => p.publicacion_id);
-    misCategorias = miPerfil?.rubro ?? [];
+    miPerfil = perfilRow as TecnicoPublico | null;
+    if (resumenRow) miResumen = { promedio: Number(resumenRow.promedio), total: Number(resumenRow.total) };
+    contactosRecientes = contactosRows ?? [];
   }
 
-  const activeCount = (cat ? 1 : 0) + (zona ? 1 : 0);
-  const supabaseJobIds = supabaseJobs.map((j) => j.id);
-
-  // Pedidos URGENTES (hoy) de los rubros del técnico, abiertos y sin propuesta suya
-  const esUrgenteDeMiRubro = (j: PostedJob) =>
-    j.urgency === "hoy" &&
-    misCategorias.includes(j.categorySlug) &&
-    j.status === "abierto" &&
-    !yaContactadoIds.includes(j.id);
-  const urgentesDeMiRubro = misCategorias.length > 0 ? allJobs.filter(esUrgenteDeMiRubro) : [];
-  const rubrosNombres = misCategorias
-    .map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name)
-    .filter((n): n is string => Boolean(n));
-
-  // Para el técnico, los urgentes de su rubro van primero en la grilla
-  const jobsParaGrid = esProfesional
-    ? [...filtered].sort((a, b) => Number(esUrgenteDeMiRubro(b)) - Number(esUrgenteDeMiRubro(a)))
-    : filtered;
+  const faltantes: string[] = [];
+  if (esProfesional && miPerfil) {
+    if (!miPerfil.foto_url) faltantes.push("Subí una foto de perfil");
+    if (!miPerfil.zona) faltantes.push("Completá tu zona");
+    if (!miPerfil.rubro || miPerfil.rubro.length === 0) faltantes.push("Elegí al menos un rubro");
+    if (!miPerfil.telefono) faltantes.push("Cargá tu teléfono de WhatsApp");
+  }
 
   return (
     <>
@@ -242,6 +181,23 @@ export default async function HomePage({
 
             <div className="bg-[#f5fdf9] py-10 sm:py-14">
               <div className="container-pad">
+                {/* Stats reales — nada inventado: cuenta de técnicos actual,
+                    cantidad de rubros/zonas que ya manejamos. Inspirado en el
+                    mockup de Claude Design (ver charla del 2026-08-21). */}
+                <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    { value: String(tecnicos.length), label: tecnicos.length === 1 ? "Técnico activo" : "Técnicos activos" },
+                    { value: String(CATEGORIES.length), label: "Oficios" },
+                    { value: String(ZONES.length), label: "Zonas en CABA" },
+                    { value: "$0", label: "Siempre gratis" },
+                  ].map((s) => (
+                    <div key={s.label} className="card p-4">
+                      <div className="display text-2xl text-sv-dark">{s.value}</div>
+                      <div className="mt-0.5 text-xs text-ink-500">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+
                 <div className="mb-5">
                   <TecnicosCategoryFilter tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
                 </div>
@@ -259,101 +215,152 @@ export default async function HomePage({
                   resumenMap={resumenMapTecnicos}
                   hayFiltrosActivos={!!(tecQ || tecZona || tecCat)}
                 />
+
+                {/* Cartel de reclutamiento + 3 pasos — solo para visitantes sin
+                    cuenta (mismo criterio que el link "Soy técnico" del hero).
+                    Adaptado del mockup de Claude Design, con nuestros propios
+                    números y copy en vez del texto genérico que puso sin
+                    contexto del producto. */}
+                {sinSesion && (
+                  <>
+                    <div className="mt-12 rounded-2xl bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] p-8 sm:p-12">
+                      <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+                        <div>
+                          <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-zap-300">
+                            Para técnicos y profesionales
+                          </span>
+                          <h2 className="display mt-4 text-3xl leading-tight text-white sm:text-4xl">
+                            Aparecé gratis y que te encuentren tus próximos clientes.
+                          </h2>
+                          <p className="mt-3 text-white/70">
+                            Sin comisión por trabajo, sin intermediarios. Los clientes te
+                            escriben directo a tu WhatsApp — cobrás el 100% de cada servicio.
+                          </p>
+                          <Link href="/registrar" className="btn-primary mt-6 inline-block">
+                            Crear mi perfil gratis →
+                          </Link>
+                        </div>
+                        <div className="space-y-3">
+                          {[
+                            { title: "Cobrás el 100%", body: "Sin comisión por trabajo. Lo que cobrás es tuyo." },
+                            { title: "Clientes a tu WhatsApp", body: "Te escriben directo, sin intermediarios ni esperas." },
+                            { title: "Sumá reputación", body: "Reseñas reales que te consiguen los próximos trabajos." },
+                          ].map((b) => (
+                            <div key={b.title} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                              <p className="text-sm font-semibold text-white">{b.title}</p>
+                              <p className="mt-0.5 text-xs text-white/60">{b.body}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-14 text-center">
+                      <h2 className="display text-2xl text-sv-dark sm:text-3xl">
+                        Encontrá y contactá en 3 pasos
+                      </h2>
+                      <p className="mt-1 text-sm text-ink-400">Sin registros obligatorios ni esperas.</p>
+                    </div>
+                    <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                      {[
+                        { n: 1, title: "Buscá por oficio y zona", body: "Filtrá entre técnicos verificados de tu barrio en segundos." },
+                        { n: 2, title: "Mirá su perfil y reseñas", body: "Comparás experiencia y opiniones reales de otros clientes." },
+                        { n: 3, title: "Escribí por WhatsApp", body: "Un clic y hablás directo con el técnico. Gratis, sin registro." },
+                      ].map((s) => (
+                        <div key={s.n} className="card p-5">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sv-primary/10 text-sm font-semibold text-sv-primary">
+                            {s.n}
+                          </span>
+                          <p className="mt-3 font-semibold text-sv-dark">{s.title}</p>
+                          <p className="mt-1 text-sm text-ink-500">{s.body}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </section>
         )}
 
-        {/* Consultas activas — flujo viejo (publicar problema), pausado para
-            demandantes/visitantes: ahora se contacta al técnico directo desde
-            el directorio de arriba. Se sigue mostrando al técnico logueado
-            (es su pantalla principal) y el código queda intacto para revertir
-            fácil — ver CLAUDE.md "Pivot 2026-08-20/21". */}
-        {esProfesional && (
-        <section className="min-h-screen py-10">
+        {/* Home del técnico — reemplaza al viejo feed de "Consultas activas"
+            (quedaba muerto para siempre, ver comentario arriba en el fetch de
+            datos). Muestra su propia tarjeta + checklist de perfil + un
+            adelanto de quién lo contactó. */}
+        {esProfesional && miPerfil && (
+        <section className="py-10">
           <div className="container-pad">
-
-            {/* Intro */}
             <div className="mb-8">
-              <div className="flex items-center gap-2 text-xs text-zap-500">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-sv-primary" />
-                <span className="font-medium uppercase tracking-widest">En vivo</span>
-              </div>
-              <h1 className="display mt-1.5 text-3xl md:text-4xl text-white">
-                Consultas activas
+              <h1 className="display text-3xl text-white md:text-4xl">
+                {miPerfil.nombre ? `Hola, ${miPerfil.nombre.split(" ")[0]}` : "Tu perfil"}
               </h1>
               <p className="mt-1 text-sm text-zap-400">
-                {allJobs.length === 0
-                  ? "Todavía no hay consultas publicadas."
-                  : `${allJobs.length} ${allJobs.length === 1 ? "problema esperando un técnico" : "problemas esperando un técnico"}`}
+                Así te ven los clientes que te buscan en el directorio.
               </p>
             </div>
 
-            {/* Banner: contacto gratis por lanzamiento */}
-            <div className="mb-6 flex items-center gap-3.5 rounded-2xl border border-sv-primary/25 bg-sv-primary/10 p-4 sm:p-5">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sv-primary/15 text-xl">
-                🎉
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-zap-50">
-                  Contactar clientes es gratis por lanzamiento
-                </p>
-                <p className="mt-0.5 text-[13px] text-zap-300">
-                  Sin comisión, sin cotizar nada — avisá que te interesa el trabajo y esperá que el cliente te elija.
-                </p>
-              </div>
-            </div>
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_1fr]">
+              {/* Mi tarjeta + checklist */}
+              <div className="space-y-5">
+                <div className="rounded-2xl border border-white/10 p-3">
+                  <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-zap-500">
+                    Vista previa
+                  </p>
+                  <TecnicoCard tecnico={miPerfil} resumen={miResumen} modoPreview />
+                </div>
 
-            {/* Cartel: pedidos urgentes del rubro del técnico */}
-            {esProfesional && urgentesDeMiRubro.length > 0 && (
-              <div className="mb-6 rounded-2xl border border-rose-400/30 bg-rose-500/10 p-4 sm:p-5">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">🔥</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-rose-200">
-                      {urgentesDeMiRubro.length} pedido{urgentesDeMiRubro.length !== 1 ? "s" : ""} urgente
-                      {urgentesDeMiRubro.length !== 1 ? "s" : ""}
-                      {rubrosNombres.length > 0 ? ` de ${rubrosNombres.join(" / ")}` : ""} para hoy
+                {faltantes.length > 0 && (
+                  <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 sm:p-5">
+                    <p className="text-sm font-semibold text-amber-200">
+                      Completá tu perfil para aparecer mejor
                     </p>
-                    <p className="mt-0.5 text-sm text-zap-300">
-                      Alguien necesita resolverlo hoy mismo. Mandá tu propuesta antes que otros técnicos.
-                    </p>
-                    <ul className="mt-2 space-y-1">
-                      {urgentesDeMiRubro.slice(0, 3).map((j) => (
-                        <li key={j.id} className="truncate text-sm text-zap-100">
-                          • {j.title} <span className="text-zap-500">· {j.zone}</span>
-                        </li>
+                    <ul className="mt-2 space-y-1 text-sm text-amber-100/80">
+                      {faltantes.map((f) => (
+                        <li key={f}>• {f}</li>
                       ))}
                     </ul>
+                    <Link href="/perfil" className="btn-primary mt-3 inline-block text-sm">
+                      Completar perfil
+                    </Link>
                   </div>
-                </div>
+                )}
               </div>
-            )}
 
-            <div className="mb-6 flex items-center gap-4">
-              <FilterDropdown
-                categories={CATEGORIES}
-                zones={ZONES}
-                cat={cat}
-                zona={zona}
-                q={q}
-                activeCount={activeCount}
-              />
-              {(cat || zona || q) && (
-                <span className="text-sm text-ink-400">
-                  {filtered.length} {filtered.length === 1 ? "resultado" : "resultados"}
-                </span>
-              )}
+              {/* Quién te contactó */}
+              <div>
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="display text-xl text-white">Quién te contactó</h2>
+                  {contactosRecientes.length > 0 && (
+                    <Link href="/mis-consultas" className="text-sm font-medium text-zap-300 hover:text-white">
+                      Ver todos →
+                    </Link>
+                  )}
+                </div>
+
+                {contactosRecientes.length === 0 ? (
+                  <div className="rounded-2xl border border-white/10 bg-[#162420] p-8 text-center text-sm text-zap-400">
+                    Todavía nadie te contactó. Completá tu perfil para aparecer mejor en las búsquedas.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {contactosRecientes.map((c) => (
+                      <div
+                        key={c.id}
+                        className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-[#162420] px-4 py-3 text-sm"
+                      >
+                        <span className="text-zap-100">
+                          {c.contactado_por ? "Un usuario registrado" : "Visitante sin cuenta"}
+                        </span>
+                        <span className="text-zap-500">
+                          {new Date(c.creado_at).toLocaleDateString("es-AR")} ·{" "}
+                          {c.origen === "perfil" ? "desde tu perfil" : "desde la home"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-
-            <MarketplaceGrid
-              jobs={jobsParaGrid}
-              supabaseJobIds={supabaseJobIds}
-              esProfesional={esProfesional}
-              sinSesion={sinSesion}
-              yaContactadoIds={yaContactadoIds}
-              misPublicacionesIds={misPublicacionesIds}
-            />
           </div>
         </section>
         )}

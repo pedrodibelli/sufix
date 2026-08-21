@@ -39,7 +39,7 @@ export async function crearResenaDirecta(
 // saltea sin romper nada — mismo patrón que RESEND_API_KEY/WEBHOOK_SECRET.
 export async function registrarContacto(
   tecnicoId: string,
-  origen: "home" | "perfil"
+  origen: "home" | "perfil" | "consultas"
 ): Promise<void> {
   try {
     const supabase = await createSupabaseServer();

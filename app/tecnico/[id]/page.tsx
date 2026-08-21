@@ -5,8 +5,9 @@ import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
 import { Avatar } from "@/components/Avatar";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconCheckBadge } from "@/components/icons";
+import { IconMapPin, IconCheckBadge, IconWhatsApp } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
+import { avatarColorFor } from "@/lib/avatarColors";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { DejarResenaForm } from "./DejarResenaForm";
 
@@ -68,7 +69,7 @@ export default async function TecnicoPage({
           <div className="container-pad py-10">
             <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-                <Avatar url={perfil.foto_url} initials={initials} size={80} textClass="font-display text-2xl" />
+                <Avatar url={perfil.foto_url} initials={initials} size={80} fallbackColor={avatarColorFor(id)} textClass="font-display text-2xl" />
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="display text-3xl text-sv-dark">{nombre}</h1>
@@ -112,9 +113,9 @@ export default async function TecnicoPage({
                   tecnicoId={id}
                   waLink={waLink}
                   origen="perfil"
-                  className="btn-primary w-full py-3.5 text-base sm:w-auto sm:px-8"
+                  className="btn w-full bg-[#25D366] py-3.5 text-base text-white hover:brightness-95 sm:w-auto sm:px-8"
                 >
-                  Contactar por WhatsApp
+                  <IconWhatsApp className="h-4 w-4" /> Contactar por WhatsApp
                 </ContactarWhatsAppButton>
               )}
             </div>
