@@ -30,7 +30,7 @@ export function TecnicosCategoryFilter({
       <Link
         href={buildQuery({ tecQ, tecZona, tecSort })}
         className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
-          !tecCat ? "border-sv-dark bg-sv-dark text-white" : "border-ink-200 text-ink-600 hover:bg-zap-50"
+          !tecCat ? "border-sv-primary bg-sv-primary text-white" : "border-white bg-white text-ink-600 hover:bg-zap-50"
         }`}
       >
         Todos
@@ -40,7 +40,7 @@ export function TecnicosCategoryFilter({
           key={c.slug}
           href={buildQuery({ tecQ, tecZona, tecSort, tecCat: tecCat === c.slug ? "" : c.slug })}
           className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
-            tecCat === c.slug ? "border-sv-dark bg-sv-dark text-white" : "border-ink-200 text-ink-600 hover:bg-zap-50"
+            tecCat === c.slug ? "border-sv-primary bg-sv-primary text-white" : "border-white bg-white text-ink-600 hover:bg-zap-50"
           }`}
         >
           {c.icon} {c.name}

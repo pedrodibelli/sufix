@@ -131,46 +131,49 @@ export default async function HomePage({
       <main className={`overflow-x-hidden ${esProfesional ? "bg-[#0e1a17]" : ""}`}>
 
         {/* Directorio de técnicos — para demandantes y visitantes, no técnicos.
-            Hero verde con el buscador adentro (inspirado en solvitapp.com.ar/
-            professionals) + grilla en fondo claro debajo. */}
+            Ritmo de fondos blanco → verde oscuro degradado → blanco (pedido
+            2026-08-21): las tarjetitas blancas (stats, chips, cards) tenían
+            muy poco contraste sobre el beige clarito de antes — ahora resaltan
+            solas sobre el verde oscuro, sin tocar el color de cada una. */}
         {!esProfesional && (
           <section id="tecnicos">
-            <div className="bg-gradient-to-br from-sv-dark to-sv-primary py-14 sm:py-20">
+            {/* Blanco: hero + buscador */}
+            <div className="bg-white py-14 sm:py-20">
               <div className="container-pad">
                 <div className="mx-auto max-w-2xl text-center">
                   {sinSesion ? (
                     <>
-                      <h1 className="display text-4xl leading-[1.12] text-white sm:text-5xl">
+                      <h1 className="display text-4xl leading-[1.12] text-sv-dark sm:text-5xl">
                         Tu técnico ideal,<br />a un mensaje de distancia.
                       </h1>
-                      <p className="mt-4 text-base leading-relaxed text-white/80 sm:text-lg">
+                      <p className="mt-4 text-base leading-relaxed text-ink-500 sm:text-lg">
                         Mirá perfiles verificados, sus reseñas y su zona, y escribile
                         directo por WhatsApp — sin publicar nada, sin esperar propuestas.
                       </p>
                     </>
                   ) : (
                     <>
-                      <h1 className="display text-3xl text-white sm:text-4xl">Encontrá tu técnico</h1>
-                      <p className="mt-2 text-base text-white/80">
+                      <h1 className="display text-3xl text-sv-dark sm:text-4xl">Encontrá tu técnico</h1>
+                      <p className="mt-2 text-base text-ink-500">
                         Mirá su perfil, sus reseñas y escribile por WhatsApp directo.
                       </p>
                     </>
                   )}
                 </div>
 
-                <div className="mx-auto mt-8 max-w-3xl rounded-2xl bg-white/10 p-2.5 backdrop-blur-sm sm:p-3">
+                <div className="mx-auto mt-8 max-w-3xl">
                   <TecnicosSearchBar tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
                 </div>
 
                 {sinSesion && (
                   <>
-                    <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-white/70">
+                    <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ink-400">
                       <span>Sin costo</span>
                       <span>Técnicos verificados</span>
                       <span>Contacto directo por WhatsApp</span>
                     </div>
                     <div className="mt-5 text-center">
-                      <Link href="/registrar" className="text-sm font-medium text-white underline underline-offset-4 hover:text-white/80">
+                      <Link href="/registrar" className="text-sm font-medium text-sv-primary underline underline-offset-4 hover:text-sv-olive">
                         Soy técnico, quiero aparecer acá →
                       </Link>
                     </div>
@@ -179,7 +182,8 @@ export default async function HomePage({
               </div>
             </div>
 
-            <div className="bg-[#f5fdf9] py-10 sm:py-14">
+            {/* Verde oscuro degradado: stats, filtros y grilla */}
+            <div className="bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] py-10 sm:py-14">
               <div className="container-pad">
                 {/* Stats reales — nada inventado: cuenta de técnicos actual,
                     cantidad de rubros/zonas que ya manejamos. Inspirado en el
@@ -215,71 +219,72 @@ export default async function HomePage({
                   resumenMap={resumenMapTecnicos}
                   hayFiltrosActivos={!!(tecQ || tecZona || tecCat)}
                 />
-
-                {/* Cartel de reclutamiento + 3 pasos — solo para visitantes sin
-                    cuenta (mismo criterio que el link "Soy técnico" del hero).
-                    Adaptado del mockup de Claude Design, con nuestros propios
-                    números y copy en vez del texto genérico que puso sin
-                    contexto del producto. */}
-                {sinSesion && (
-                  <>
-                    <div className="mt-12 rounded-2xl bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] p-8 sm:p-12">
-                      <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-                        <div>
-                          <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-zap-300">
-                            Para técnicos y profesionales
-                          </span>
-                          <h2 className="display mt-4 text-3xl leading-tight text-white sm:text-4xl">
-                            Aparecé gratis y que te encuentren tus próximos clientes.
-                          </h2>
-                          <p className="mt-3 text-white/70">
-                            Sin comisión por trabajo, sin intermediarios. Los clientes te
-                            escriben directo a tu WhatsApp — cobrás el 100% de cada servicio.
-                          </p>
-                          <Link href="/registrar" className="btn-primary mt-6 inline-block">
-                            Crear mi perfil gratis →
-                          </Link>
-                        </div>
-                        <div className="space-y-3">
-                          {[
-                            { title: "Cobrás el 100%", body: "Sin comisión por trabajo. Lo que cobrás es tuyo." },
-                            { title: "Clientes a tu WhatsApp", body: "Te escriben directo, sin intermediarios ni esperas." },
-                            { title: "Sumá reputación", body: "Reseñas reales que te consiguen los próximos trabajos." },
-                          ].map((b) => (
-                            <div key={b.title} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                              <p className="text-sm font-semibold text-white">{b.title}</p>
-                              <p className="mt-0.5 text-xs text-white/60">{b.body}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-14 text-center">
-                      <h2 className="display text-2xl text-sv-dark sm:text-3xl">
-                        Encontrá y contactá en 3 pasos
-                      </h2>
-                      <p className="mt-1 text-sm text-ink-400">Sin registros obligatorios ni esperas.</p>
-                    </div>
-                    <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                      {[
-                        { n: 1, title: "Buscá por oficio y zona", body: "Filtrá entre técnicos verificados de tu barrio en segundos." },
-                        { n: 2, title: "Mirá su perfil y reseñas", body: "Comparás experiencia y opiniones reales de otros clientes." },
-                        { n: 3, title: "Escribí por WhatsApp", body: "Un clic y hablás directo con el técnico. Gratis, sin registro." },
-                      ].map((s) => (
-                        <div key={s.n} className="card p-5">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sv-primary/10 text-sm font-semibold text-sv-primary">
-                            {s.n}
-                          </span>
-                          <p className="mt-3 font-semibold text-sv-dark">{s.title}</p>
-                          <p className="mt-1 text-sm text-ink-500">{s.body}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
               </div>
             </div>
+
+            {/* Blanco de nuevo: cartel de reclutamiento + 3 pasos — solo para
+                visitantes sin cuenta (mismo criterio que el link "Soy técnico"
+                del hero). Copy propio, no el genérico que puso la IA sin
+                contexto del producto. */}
+            {sinSesion && (
+              <div className="bg-white py-14 sm:py-20">
+                <div className="container-pad">
+                  <div className="rounded-2xl bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] p-8 sm:p-12">
+                    <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+                      <div>
+                        <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-zap-300">
+                          Para técnicos y profesionales
+                        </span>
+                        <h2 className="display mt-4 text-3xl leading-tight text-white sm:text-4xl">
+                          Aparecé gratis y que te encuentren tus próximos clientes.
+                        </h2>
+                        <p className="mt-3 text-white/70">
+                          Sin comisión por trabajo, sin intermediarios. Los clientes te
+                          escriben directo a tu WhatsApp — cobrás el 100% de cada servicio.
+                        </p>
+                        <Link href="/registrar" className="btn-primary mt-6 inline-block">
+                          Crear mi perfil gratis →
+                        </Link>
+                      </div>
+                      <div className="space-y-3">
+                        {[
+                          { title: "Cobrás el 100%", body: "Sin comisión por trabajo. Lo que cobrás es tuyo." },
+                          { title: "Clientes a tu WhatsApp", body: "Te escriben directo, sin intermediarios ni esperas." },
+                          { title: "Sumá reputación", body: "Reseñas reales que te consiguen los próximos trabajos." },
+                        ].map((b) => (
+                          <div key={b.title} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-sm font-semibold text-white">{b.title}</p>
+                            <p className="mt-0.5 text-xs text-white/60">{b.body}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-14 text-center">
+                    <h2 className="display text-2xl text-sv-dark sm:text-3xl">
+                      Encontrá y contactá en 3 pasos
+                    </h2>
+                    <p className="mt-1 text-sm text-ink-400">Sin registros obligatorios ni esperas.</p>
+                  </div>
+                  <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                    {[
+                      { n: 1, title: "Buscá por oficio y zona", body: "Filtrá entre técnicos verificados de tu barrio en segundos." },
+                      { n: 2, title: "Mirá su perfil y reseñas", body: "Comparás experiencia y opiniones reales de otros clientes." },
+                      { n: 3, title: "Escribí por WhatsApp", body: "Un clic y hablás directo con el técnico. Gratis, sin registro." },
+                    ].map((s) => (
+                      <div key={s.n} className="card p-5">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sv-primary/10 text-sm font-semibold text-sv-primary">
+                          {s.n}
+                        </span>
+                        <p className="mt-3 font-semibold text-sv-dark">{s.title}</p>
+                        <p className="mt-1 text-sm text-ink-500">{s.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
         )}
 

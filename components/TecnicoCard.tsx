@@ -51,12 +51,12 @@ export function TecnicoCard({
       {/* Badge "Nuevo" como cartel en la esquina, no metido en el flujo del
           contenido — antes se confundía con el fondo y apretaba el resto. */}
       {sinResenas && (
-        <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+        <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
           <IconSparkle className="h-3 w-3" /> Nuevo en Sufix
         </span>
       )}
 
-      <Link href={`/tecnico/${tecnico.user_id}`} className="block">
+      <Link href={`/tecnico/${tecnico.user_id}`} className="flex-1 block">
         <div className={`flex items-start gap-3.5 ${sinResenas ? "mt-8" : ""}`}>
           <Avatar
             url={tecnico.foto_url}

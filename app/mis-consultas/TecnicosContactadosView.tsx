@@ -60,7 +60,7 @@ export function TecnicosContactadosView({ items }: { items: ContactoItem[] }) {
           return (
             <div key={perfil.user_id} className="card relative p-5">
               {sinResenas && (
-                <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+                <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
                   <IconSparkle className="h-3 w-3" /> Nuevo en Sufix
                 </span>
               )}

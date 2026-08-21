@@ -86,7 +86,7 @@ export default async function TecnicoPage({
                     {total > 0 ? (
                       <StarRating rating={promedio} reviews={total} size="md" />
                     ) : (
-                      <span className="inline-flex items-center rounded-full bg-zap-100 px-2 py-0.5 text-[12px] font-medium text-sv-olive">
+                      <span className="inline-flex items-center rounded-full bg-blue-600 px-2.5 py-0.5 text-[12px] font-semibold text-white">
                         Nuevo en Sufix
                       </span>
                     )}

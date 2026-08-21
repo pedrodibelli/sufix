@@ -32,7 +32,7 @@ export function TecnicosSortBar({
   const sortActivo = tecSort || "recomendados";
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-ink-400">
+      <p className="text-sm text-white/70">
         {total} {total === 1 ? "técnico encontrado" : "técnicos encontrados"}
       </p>
       <div className="flex items-center gap-1 text-sm">
@@ -41,7 +41,7 @@ export function TecnicosSortBar({
             key={o.value}
             href={buildQuery({ tecQ, tecZona, tecCat, tecSort: o.value })}
             className={`rounded-full px-3 py-1.5 font-medium transition-colors ${
-              sortActivo === o.value ? "bg-zap-100 text-sv-dark" : "text-ink-400 hover:text-sv-dark"
+              sortActivo === o.value ? "bg-white text-sv-dark" : "text-white/60 hover:text-white"
             }`}
           >
             {o.label}
