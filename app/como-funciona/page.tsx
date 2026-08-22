@@ -87,7 +87,7 @@ export default async function ComoFuncionaPage() {
                 Cómo funciona
               </p>
               <h1 className="reveal delay-100 display mt-3 text-4xl leading-[1.1] text-sv-dark sm:text-5xl lg:text-6xl">
-                De la foto al técnico,{" "}
+                Del perfil al WhatsApp,{" "}
                 <em className="not-italic text-sv-primary">sin ruleta.</em>
               </h1>
               <p className="reveal delay-200 mt-5 text-base leading-relaxed text-ink-500 sm:text-lg">
@@ -117,7 +117,7 @@ export default async function ComoFuncionaPage() {
 
         {/* ── Flujo cliente ── */}
         {mostrarCliente && (
-        <section className="bg-zap-100">
+        <section className="bg-white">
           <div className="container-pad py-14 sm:py-20">
             <div className="mx-auto max-w-2xl text-center">
               <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-400">
@@ -139,7 +139,7 @@ export default async function ComoFuncionaPage() {
 
         {/* ── Flujo técnico ── */}
         {mostrarTecnico && (
-        <section className="bg-sv-dark">
+        <section className="bg-gradient-to-br from-[#0e1a17] to-[#1f4a34]">
           <div className="container-pad py-14 sm:py-20">
             <div className="mx-auto max-w-2xl text-center">
               <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary/70">
@@ -182,7 +182,7 @@ export default async function ComoFuncionaPage() {
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">
                     Para clientes
                   </p>
-                  <p className="display mt-2 text-[2.4rem] leading-none font-semibold text-emerald-600">
+                  <p className="display mt-2 text-[2.4rem] leading-none font-semibold text-sv-primary">
                     $0
                   </p>
                   <p className="mt-1 text-sm text-ink-400">buscar y contactar técnicos</p>
@@ -231,7 +231,7 @@ export default async function ComoFuncionaPage() {
         </section>
 
         {/* ── FAQ ── */}
-        <section className="bg-zap-100">
+        <section className="bg-white">
           <div className="container-pad py-14 sm:py-20">
             <div className="mx-auto max-w-2xl">
               <h2 className="reveal delay-0 display text-center text-2xl text-sv-dark sm:text-3xl">
@@ -257,7 +257,7 @@ export default async function ComoFuncionaPage() {
         {/* ── CTA final ── */}
         <section className="bg-white py-14 sm:py-20">
           <div className="container-pad">
-            <div className="reveal mx-auto max-w-3xl rounded-2xl bg-sv-dark px-7 py-10 text-center sm:px-12 sm:py-14">
+            <div className="reveal mx-auto max-w-3xl rounded-2xl bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] px-7 py-10 text-center sm:px-12 sm:py-14">
               {esTecnico ? (
                 <>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary">
