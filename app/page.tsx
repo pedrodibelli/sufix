@@ -3,8 +3,6 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { TecnicosGrid } from "@/components/TecnicosGrid";
 import { TecnicosSearchBar } from "@/components/TecnicosSearchBar";
-import { TecnicosCategoryFilter } from "@/components/TecnicosCategoryFilter";
-import { TecnicosSortBar } from "@/components/TecnicosSortBar";
 import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
 import { CATEGORIES, ZONES } from "@/lib/data";
 import { createSupabaseServer } from "@/lib/supabase-server";
@@ -15,17 +13,18 @@ export default async function HomePage({
   searchParams,
 }: {
   searchParams: Promise<{
-    tecQ?: string; tecZona?: string; tecCat?: string; tecSort?: string;
+    tecQ?: string; tecZona?: string;
   }>;
 }) {
   const params = await searchParams;
 
   // Filtros del directorio de técnicos, con prefijo "tec" (venían compartiendo
-  // URL con los filtros viejos de "Consultas activas", ya retirados).
+  // URL con los filtros viejos de "Consultas activas", ya retirados). Ya no
+  // hay chips de rubro ni toggle de orden (2026-08-21) — el buscador de texto
+  // ya matchea por rubro (ver tecnicosFiltrados) y el orden es siempre por
+  // mejor calificación.
   const tecQ = params.tecQ?.toLowerCase().trim() ?? "";
   const tecZona = params.tecZona ?? "";
-  const tecCat = params.tecCat ?? "";
-  const tecSort = params.tecSort ?? "recomendados";
 
   // Rol del usuario actual
   const supabaseServer = await createSupabaseServer();
@@ -59,9 +58,10 @@ export default async function HomePage({
     );
   }
 
-  // Filtro del directorio: texto libre (nombre, titular o rubro), zona y rubro.
+  // Filtro del directorio: texto libre (nombre, titular o rubro) y zona. El
+  // texto ya matchea por nombre del rubro, así que cubre lo que antes hacían
+  // los chips de categoría sin necesitar un filtro aparte.
   const tecnicosFiltrados = tecnicos.filter((t) => {
-    if (tecCat && !(t.rubro ?? []).includes(tecCat)) return false;
     if (tecZona && t.zona !== tecZona) return false;
     if (tecQ) {
       const rubrosNombres = (t.rubro ?? []).map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name ?? slug);
@@ -71,21 +71,18 @@ export default async function HomePage({
     return true;
   });
 
-  // Orden: "recomendados" respeta el orden por defecto (más nuevos primero,
-  // ya viene así de la query); "rating" y "nuevos" reordenan explícito.
-  const tecnicosOrdenados = (() => {
-    if (tecSort === "rating") {
-      return [...tecnicosFiltrados].sort(
-        (a, b) => (resumenMapTecnicos[b.user_id]?.promedio ?? 0) - (resumenMapTecnicos[a.user_id]?.promedio ?? 0)
-      );
-    }
-    if (tecSort === "nuevos") {
-      return [...tecnicosFiltrados].sort(
-        (a, b) => new Date(b.creado_at ?? 0).getTime() - new Date(a.creado_at ?? 0).getTime()
-      );
-    }
-    return tecnicosFiltrados;
-  })();
+  // Orden único (2026-08-21, ya no es elegible por el usuario): mejor
+  // calificación primero. Sin reseñas todavía = -1, así que un técnico recién
+  // registrado cae al final solo, y sube a medida que junta reseñas buenas —
+  // "automatizado" como pidió el usuario. Empate/sin reseñas: más nuevos primero.
+  const tecnicosOrdenados = [...tecnicosFiltrados].sort((a, b) => {
+    const ra = resumenMapTecnicos[a.user_id];
+    const rb = resumenMapTecnicos[b.user_id];
+    const pa = ra && ra.total > 0 ? ra.promedio : -1;
+    const pb = rb && rb.total > 0 ? rb.promedio : -1;
+    if (pb !== pa) return pb - pa;
+    return new Date(b.creado_at ?? 0).getTime() - new Date(a.creado_at ?? 0).getTime();
+  });
 
   // Home del técnico (ver CLAUDE.md "Pivot 2026-08-2x"): antes mostraba el
   // feed de "Consultas activas", que quedó muerto para siempre — ya no hay
@@ -161,7 +158,11 @@ export default async function HomePage({
               </div>
 
               <div className="mx-auto mt-8 max-w-3xl">
-                <TecnicosSearchBar tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
+                <TecnicosSearchBar
+                  tecQ={tecQ}
+                  tecZona={tecZona}
+                  tecnicos={tecnicos.map((t) => ({ user_id: t.user_id, nombre: t.nombre }))}
+                />
               </div>
 
               {sinSesion && (
@@ -196,22 +197,17 @@ export default async function HomePage({
                 ))}
               </div>
 
-              <div className="mb-5">
-                <TecnicosCategoryFilter tecQ={tecQ} tecZona={tecZona} tecCat={tecCat} tecSort={tecSort} />
-              </div>
-
-              <TecnicosSortBar
-                total={tecnicosOrdenados.length}
-                tecQ={tecQ}
-                tecZona={tecZona}
-                tecCat={tecCat}
-                tecSort={tecSort}
-              />
+              {/* Sin chips de rubro ni toggle de orden (2026-08-21) — el
+                  buscador de arriba (con autocompletado) es el único filtro,
+                  y el orden es siempre por mejor calificación. */}
+              <p className="mb-4 text-sm text-white/70">
+                {tecnicosOrdenados.length} {tecnicosOrdenados.length === 1 ? "técnico encontrado" : "técnicos encontrados"}
+              </p>
 
               <TecnicosGrid
                 tecnicos={tecnicosOrdenados}
                 resumenMap={resumenMapTecnicos}
-                hayFiltrosActivos={!!(tecQ || tecZona || tecCat)}
+                hayFiltrosActivos={!!(tecQ || tecZona)}
               />
 
               {/* Cartel de reclutamiento + 3 pasos — solo para visitantes sin
