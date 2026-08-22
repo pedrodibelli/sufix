@@ -117,20 +117,20 @@ export default async function ComoFuncionaPage() {
 
         {/* ── Flujo cliente ── */}
         {mostrarCliente && (
-        <section className="bg-white">
+        <section className="bg-gradient-to-br from-[#0e1a17] to-[#1f4a34]">
           <div className="container-pad py-14 sm:py-20">
             <div className="mx-auto max-w-2xl text-center">
-              <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-400">
+              <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary/70">
                 Para clientes
               </p>
-              <h2 className="reveal delay-100 display mt-1.5 text-2xl text-sv-dark sm:text-3xl">
+              <h2 className="reveal delay-100 display mt-1.5 text-2xl text-white sm:text-3xl">
                 Si necesitás resolver algo
               </h2>
             </div>
 
             <div className="mx-auto mt-10 grid max-w-5xl gap-5 sm:mt-14 sm:grid-cols-3 sm:gap-6">
               {PASOS_CLIENTE.map((paso, i) => (
-                <StepCard key={paso.title} n={i + 1} paso={paso} delay={STEP_DELAYS[i]} />
+                <StepCard key={paso.title} n={i + 1} paso={paso} delay={STEP_DELAYS[i]} dark />
               ))}
             </div>
           </div>
@@ -139,23 +139,23 @@ export default async function ComoFuncionaPage() {
 
         {/* ── Flujo técnico ── */}
         {mostrarTecnico && (
-        <section className="bg-gradient-to-br from-[#0e1a17] to-[#1f4a34]">
+        <section className="bg-white">
           <div className="container-pad py-14 sm:py-20">
             <div className="mx-auto max-w-2xl text-center">
-              <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary/70">
+              <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-400">
                 Para profesionales
               </p>
-              <h2 className="reveal delay-100 display mt-1.5 text-2xl text-white sm:text-3xl">
+              <h2 className="reveal delay-100 display mt-1.5 text-2xl text-sv-dark sm:text-3xl">
                 Si sos técnico
               </h2>
-              <p className="reveal delay-200 mt-2 text-sm text-white/50 sm:text-base">
+              <p className="reveal delay-200 mt-2 text-sm text-ink-500 sm:text-base">
                 Cero comisiones. Tu perfil es tu vidriera — el cliente te escribe directo.
               </p>
             </div>
 
             <div className="mx-auto mt-10 grid max-w-5xl gap-5 sm:mt-14 sm:grid-cols-3 sm:gap-6">
               {PASOS_TECNICO.map((paso, i) => (
-                <StepCard key={paso.title} n={i + 1} paso={paso} delay={STEP_DELAYS[i]} dark />
+                <StepCard key={paso.title} n={i + 1} paso={paso} delay={STEP_DELAYS[i]} />
               ))}
             </div>
           </div>
@@ -163,14 +163,14 @@ export default async function ComoFuncionaPage() {
         )}
 
         {/* ── Precios ── */}
-        <section className="bg-white py-14 sm:py-20">
+        <section className="bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] py-14 sm:py-20">
           <div className="container-pad">
             <div className="mx-auto max-w-4xl">
               <div className="text-center">
-                <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-400">
+                <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary/70">
                   Transparencia de precios
                 </p>
-                <h2 className="reveal delay-100 display mt-1.5 text-2xl text-sv-dark sm:text-3xl">
+                <h2 className="reveal delay-100 display mt-1.5 text-2xl text-white sm:text-3xl">
                   Sin sorpresas
                 </h2>
               </div>
@@ -203,7 +203,7 @@ export default async function ComoFuncionaPage() {
 
                 {/* Técnico */}
                 {mostrarTecnico && (
-                <div className="reveal delay-150 rounded-2xl border border-sv-primary/25 bg-sv-primary/5 p-6 sm:p-8">
+                <div className="reveal delay-150 rounded-2xl border border-sv-primary/30 bg-white p-6 sm:p-8">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-sv-olive">
                     Para técnicos
                   </p>
