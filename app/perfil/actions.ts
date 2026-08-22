@@ -77,10 +77,16 @@ export async function actualizarPerfil(data: {
   zona: string;
   rubro: string[];
   titular: string;
+  anosExperiencia: string;
 }): Promise<{ ok: true } | { error: string }> {
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "No autenticado" };
+
+  const anos = data.anosExperiencia.trim();
+  if (anos && (!/^\d+$/.test(anos) || Number(anos) > 80)) {
+    return { error: "Los años de experiencia tienen que ser un número (0-80)." };
+  }
 
   const { error } = await supabase
     .from("perfiles_profesionales")
@@ -89,6 +95,7 @@ export async function actualizarPerfil(data: {
       zona: data.zona || null,
       rubro: data.rubro.length > 0 ? data.rubro : null,
       titular: data.titular.trim() || null,
+      anos_experiencia: anos ? Number(anos) : null,
     })
     .eq("user_id", user.id);
 

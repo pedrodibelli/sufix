@@ -29,14 +29,14 @@ export default async function PerfilPage() {
       : (user.email?.[0]?.toUpperCase() ?? "U");
   const avatarUrl = (user.user_metadata?.avatar_url as string | undefined) ?? null;
 
-  let perfil: { telefono: string | null; zona: string | null; rubro: string[] | null; titular: string | null } | null = null;
+  let perfil: { telefono: string | null; zona: string | null; rubro: string[] | null; titular: string | null; anos_experiencia: number | null } | null = null;
   let promedio = 0;
   let total = 0;
   let resenas: Resena[] = [];
 
   if (esTecnico) {
     const [{ data: p }, { data: rs }, { data: rl }] = await Promise.all([
-      supabase.from("perfiles_profesionales").select("telefono, zona, rubro, titular").eq("user_id", user.id).maybeSingle(),
+      supabase.from("perfiles_profesionales").select("telefono, zona, rubro, titular, anos_experiencia").eq("user_id", user.id).maybeSingle(),
       supabase.from("resenas_resumen").select("promedio, total").eq("tecnico_id", user.id).maybeSingle(),
       supabase.from("resenas").select("id, estrellas, comentario, creado_at, autor_nombre").eq("tecnico_id", user.id).order("creado_at", { ascending: false }),
     ]);

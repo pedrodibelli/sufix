@@ -33,11 +33,24 @@ export default async function TecnicoPage({
 
   const { data: perfil } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular")
+    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, anos_experiencia")
     .eq("user_id", id)
     .maybeSingle();
 
   if (!perfil) notFound();
+
+  // Registro de vista (best-effort): no cuenta si el técnico mira su propio
+  // perfil. Se espera (no fire-and-forget) porque en un entorno serverless
+  // un insert sin await puede cortarse cuando termina la respuesta de la
+  // página — pero envuelto en try/catch para que un fallo acá nunca rompa
+  // la carga del perfil.
+  if (!user || user.id !== id) {
+    try {
+      await supabase.from("vistas_perfil_tecnico").insert({ tecnico_id: id, visitante: user?.id ?? null });
+    } catch {
+      // silencioso a propósito
+    }
+  }
 
   const [{ data: resumen }, { data: resenas }, { count: completados }] = await Promise.all([
     supabase.from("resenas_resumen").select("promedio, total").eq("tecnico_id", id).maybeSingle(),
@@ -122,7 +135,7 @@ export default async function TecnicoPage({
             </div>
 
             {/* Stats */}
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:max-w-md">
+            <div className="mt-8 grid grid-cols-3 gap-3 sm:max-w-md">
               <div className="card p-4">
                 <div className="text-xs uppercase tracking-wider text-ink-500">Trabajos completados</div>
                 <div className="display mt-1 text-2xl">{completados ?? 0}</div>
@@ -130,6 +143,12 @@ export default async function TecnicoPage({
               <div className="card p-4">
                 <div className="text-xs uppercase tracking-wider text-ink-500">Calificación</div>
                 <div className="display mt-1 text-2xl">{total > 0 ? promedio.toFixed(2) : "—"}</div>
+              </div>
+              <div className="card p-4">
+                <div className="text-xs uppercase tracking-wider text-ink-500">Experiencia</div>
+                <div className="display mt-1 text-2xl">
+                  {perfil.anos_experiencia ? `${perfil.anos_experiencia} años` : "—"}
+                </div>
               </div>
             </div>
           </div>

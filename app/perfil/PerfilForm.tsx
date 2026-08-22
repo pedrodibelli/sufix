@@ -10,7 +10,13 @@ export function PerfilForm({
   perfil,
   dark = false,
 }: {
-  perfil: { telefono: string | null; zona: string | null; rubro: string[] | null; titular: string | null } | null;
+  perfil: {
+    telefono: string | null;
+    zona: string | null;
+    rubro: string[] | null;
+    titular: string | null;
+    anos_experiencia: number | null;
+  } | null;
   dark?: boolean;
 }) {
   const router = useRouter();
@@ -19,13 +25,14 @@ export function PerfilForm({
   const [zona, setZona] = useState(perfil?.zona ?? "");
   const [rubro, setRubro] = useState<string[]>(perfil?.rubro ?? []);
   const [titular, setTitular] = useState(perfil?.titular ?? "");
+  const [anosExperiencia, setAnosExperiencia] = useState(perfil?.anos_experiencia?.toString() ?? "");
   const [pending, startT] = useTransition();
   const [msg, setMsg] = useState<{ ok?: boolean; text: string } | null>(null);
 
   function guardar() {
     setMsg(null);
     startT(async () => {
-      const r = await actualizarPerfil({ telefono, zona, rubro, titular });
+      const r = await actualizarPerfil({ telefono, zona, rubro, titular, anosExperiencia });
       if ("error" in r) {
         setMsg({ text: r.error });
         return;
@@ -41,6 +48,7 @@ export function PerfilForm({
     setZona(perfil?.zona ?? "");
     setRubro(perfil?.rubro ?? []);
     setTitular(perfil?.titular ?? "");
+    setAnosExperiencia(perfil?.anos_experiencia?.toString() ?? "");
     setMsg(null);
     setEditando(false);
   }
@@ -93,6 +101,21 @@ export function PerfilForm({
         <p className={helpCls}>
           Se muestra debajo de tu nombre en el directorio. Si la dejás vacía, mostramos tus rubros.
         </p>
+      </div>
+
+      <div>
+        <label className={labelCls}>Años de experiencia</label>
+        <input
+          type="number"
+          min={0}
+          max={80}
+          className={inputCls}
+          disabled={!editando}
+          value={anosExperiencia}
+          onChange={(e) => setAnosExperiencia(e.target.value)}
+          placeholder="Ej: 12"
+        />
+        <p className={helpCls}>Se muestra en tu perfil público. Opcional.</p>
       </div>
 
       <div>
