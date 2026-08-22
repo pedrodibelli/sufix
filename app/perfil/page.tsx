@@ -29,7 +29,7 @@ export default async function PerfilPage() {
       : (user.email?.[0]?.toUpperCase() ?? "U");
   const avatarUrl = (user.user_metadata?.avatar_url as string | undefined) ?? null;
 
-  let perfil: { telefono: string | null; zona: string | null; rubro: string[] | null; titular: string | null; anos_experiencia: number | null } | null = null;
+  let perfil: { telefono: string | null; zona: string[] | null; rubro: string[] | null; titular: string | null; anos_experiencia: number | null } | null = null;
   let promedio = 0;
   let total = 0;
   let resenas: Resena[] = [];

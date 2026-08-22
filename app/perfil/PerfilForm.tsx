@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ZONES, CATEGORIES } from "@/lib/data";
+import { CATEGORIES } from "@/lib/data";
 import { RubroChips } from "@/components/RubroChips";
+import { ZonaChips } from "@/components/ZonaChips";
 import { actualizarPerfil } from "./actions";
 
 export function PerfilForm({
@@ -12,7 +13,7 @@ export function PerfilForm({
 }: {
   perfil: {
     telefono: string | null;
-    zona: string | null;
+    zona: string[] | null;
     rubro: string[] | null;
     titular: string | null;
     anos_experiencia: number | null;
@@ -22,7 +23,7 @@ export function PerfilForm({
   const router = useRouter();
   const [editando, setEditando] = useState(false);
   const [telefono, setTelefono] = useState(perfil?.telefono ?? "");
-  const [zona, setZona] = useState(perfil?.zona ?? "");
+  const [zona, setZona] = useState<string[]>(perfil?.zona ?? []);
   const [rubro, setRubro] = useState<string[]>(perfil?.rubro ?? []);
   const [titular, setTitular] = useState(perfil?.titular ?? "");
   const [anosExperiencia, setAnosExperiencia] = useState(perfil?.anos_experiencia?.toString() ?? "");
@@ -45,7 +46,7 @@ export function PerfilForm({
 
   function cancelar() {
     setTelefono(perfil?.telefono ?? "");
-    setZona(perfil?.zona ?? "");
+    setZona(perfil?.zona ?? []);
     setRubro(perfil?.rubro ?? []);
     setTitular(perfil?.titular ?? "");
     setAnosExperiencia(perfil?.anos_experiencia?.toString() ?? "");
@@ -133,13 +134,12 @@ export function PerfilForm({
       </div>
 
       <div>
-        <label className={labelCls}>Zona</label>
-        <select className={inputCls} disabled={!editando} value={zona} onChange={(e) => setZona(e.target.value)}>
-          <option value="">Elegí una zona</option>
-          {ZONES.map((z) => (
-            <option key={z} value={z}>{z}</option>
-          ))}
-        </select>
+        <label className={labelCls}>Zona(s) — podés elegir más de una</label>
+        {editando ? (
+          <ZonaChips selected={zona} onChange={setZona} dark={dark} />
+        ) : (
+          <div className={inputCls}>{zona.length > 0 ? zona.join(", ") : "—"}</div>
+        )}
       </div>
 
       <div>

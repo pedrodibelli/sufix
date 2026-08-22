@@ -74,7 +74,7 @@ export async function eliminarAvatar(): Promise<{ ok: true } | { error: string }
 
 export async function actualizarPerfil(data: {
   telefono: string;
-  zona: string;
+  zona: string[];
   rubro: string[];
   titular: string;
   anosExperiencia: string;
@@ -92,7 +92,7 @@ export async function actualizarPerfil(data: {
     .from("perfiles_profesionales")
     .update({
       telefono: data.telefono.trim() || null,
-      zona: data.zona || null,
+      zona: data.zona.length > 0 ? data.zona : null,
       rubro: data.rubro.length > 0 ? data.rubro : null,
       titular: data.titular.trim() || null,
       anos_experiencia: anos ? Number(anos) : null,

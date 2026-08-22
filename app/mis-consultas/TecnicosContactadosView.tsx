@@ -87,9 +87,9 @@ export function TecnicosContactadosView({ items }: { items: ContactoItem[] }) {
                     </div>
                   )}
 
-                  {perfil.zona && (
+                  {perfil.zona && perfil.zona.length > 0 && (
                     <p className="mt-1.5 flex items-center gap-1 truncate text-xs text-ink-400">
-                      <IconMapPin className="h-3.5 w-3.5 shrink-0" /> {perfil.zona}
+                      <IconMapPin className="h-3.5 w-3.5 shrink-0" /> {perfil.zona.join(", ")}
                     </p>
                   )}
 

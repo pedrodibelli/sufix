@@ -10,7 +10,7 @@ import { toTitleCase } from "@/lib/format";
 export type TecnicoPublico = {
   user_id: string;
   nombre: string | null;
-  zona: string | null;
+  zona: string[] | null;
   rubro: string[] | null;
   verificado: boolean;
   foto_url: string | null;
@@ -36,6 +36,13 @@ export function TecnicoCard({
 }) {
   const nombre = toTitleCase(tecnico.nombre ?? "Profesional");
   const initials = nombre.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const zonas = tecnico.zona ?? [];
+  // En la tarjeta chica se muestra solo la primera zona + "+N más" (mismo
+  // truco que los chips de rubro) — un técnico puede cubrir 6 barrios, pero
+  // listarlos todos acá rompería el alto parejo de las tarjetas. La lista
+  // completa se ve en el perfil (/tecnico/[id]).
+  const zonaPrincipal = zonas[0] ?? null;
+  const zonasRestantes = zonas.length - 1;
   const rubros = tecnico.rubro ?? [];
   const rubroCats = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
   const rubrosNombres = rubroCats.length > 0 ? rubroCats.map((c) => c.name) : rubros;
@@ -91,9 +98,11 @@ export function TecnicoCard({
                   nombre de 3+ palabras se desbordaba hacia la insignia. */}
               <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-sv-dark">{nombre}</span>
             </div>
-            {tecnico.zona && (
+            {zonaPrincipal && (
               <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-ink-400">
-                <IconMapPin className="h-3.5 w-3.5 shrink-0" /> {tecnico.zona}
+                <IconMapPin className="h-3.5 w-3.5 shrink-0" />
+                {zonaPrincipal}
+                {zonasRestantes > 0 && ` +${zonasRestantes} más`}
               </p>
             )}
             {/* Tercera línea al lado de la foto, solo si está verificado —

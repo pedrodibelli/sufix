@@ -62,7 +62,7 @@ export default async function HomePage({
   // texto ya matchea por nombre del rubro, así que cubre lo que antes hacían
   // los chips de categoría sin necesitar un filtro aparte.
   const tecnicosFiltrados = tecnicos.filter((t) => {
-    if (tecZona && t.zona !== tecZona) return false;
+    if (tecZona && !(t.zona ?? []).includes(tecZona)) return false;
     if (tecQ) {
       const rubrosNombres = (t.rubro ?? []).map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name ?? slug);
       const hay = `${t.nombre ?? ""} ${t.titular ?? ""} ${rubrosNombres.join(" ")}`.toLowerCase();

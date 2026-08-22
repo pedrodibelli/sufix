@@ -104,9 +104,9 @@ export default async function TecnicoPage({
                         Nuevo en Sufix
                       </span>
                     )}
-                    {perfil.zona && (
+                    {perfil.zona && perfil.zona.length > 0 && (
                       <span className="inline-flex items-center gap-1">
-                        <IconMapPin className="h-3.5 w-3.5" /> {perfil.zona}
+                        <IconMapPin className="h-3.5 w-3.5" /> {perfil.zona.join(", ")}
                       </span>
                     )}
                   </div>

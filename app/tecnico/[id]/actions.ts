@@ -68,7 +68,7 @@ export async function registrarContacto(
       body: JSON.stringify({
         tecnico_nombre: perfil?.nombre ?? "Desconocido",
         tecnico_rubro: Array.isArray(perfil?.rubro) ? perfil.rubro.join(", ") : "",
-        tecnico_zona: perfil?.zona ?? "",
+        tecnico_zona: Array.isArray(perfil?.zona) ? perfil.zona.join(", ") : "",
         contactado_por: contactadoPor,
         origen,
         fecha: new Date().toISOString(),

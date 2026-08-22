@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { ZONES } from "@/lib/data";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { RubroChips } from "@/components/RubroChips";
+import { ZonaChips } from "@/components/ZonaChips";
 // import { GoogleButton } from "@/components/GoogleButton"; // pausado, ver CLAUDE.md
 
 export default function RegistrarPage() {
@@ -17,10 +17,9 @@ export default function RegistrarPage() {
   const [esProfesional, setEsProfesional] = useState<boolean | null>(null);
 
   // Campos solo para profesionales
-  const [dni, setDni] = useState("");
   const [telefono, setTelefono] = useState("");
   const [categorias, setCategorias] = useState<string[]>([]);
-  const [zona, setZona] = useState("");
+  const [zonas, setZonas] = useState<string[]>([]);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,10 +34,9 @@ export default function RegistrarPage() {
       return;
     }
     if (esProfesional) {
-      if (!dni.trim()) { setError("El DNI es obligatorio para profesionales."); return; }
       if (!telefono.trim()) { setError("El teléfono es obligatorio para profesionales."); return; }
       if (categorias.length === 0) { setError("Seleccioná al menos un rubro."); return; }
-      if (!zona) { setError("Seleccioná tu zona de trabajo."); return; }
+      if (zonas.length === 0) { setError("Seleccioná al menos una zona de trabajo."); return; }
     }
     if (password !== confirm) {
       setError("Las contraseñas no coinciden.");
@@ -58,10 +56,9 @@ export default function RegistrarPage() {
     };
 
     if (esProfesional) {
-      metadata.dni = dni.trim();
       metadata.telefono = telefono.trim();
       metadata.categorias = categorias;
-      metadata.zona = zona;
+      metadata.zonas = zonas;
     }
 
     const { error: signUpError } = await supabase.auth.signUp({
@@ -112,7 +109,7 @@ export default function RegistrarPage() {
         <div className="mt-6">
           <GoogleButton next="/" />
           <p className="mt-2 text-center text-xs text-ink-400">
-            ¿Sos técnico? Registrate con el formulario de abajo — necesitamos tu DNI y teléfono.
+            ¿Sos técnico? Registrate con el formulario de abajo — necesitamos tu teléfono, rubro y zona.
           </p>
         </div>
         <div className="my-6 flex items-center gap-3">
@@ -214,28 +211,15 @@ export default function RegistrarPage() {
                 Datos del profesional
               </p>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="DNI">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="12345678"
-                    value={dni}
-                    onChange={(e) => setDni(e.target.value.replace(/\D/g, ""))}
-                    maxLength={9}
-                    className="field"
-                  />
-                </Field>
-                <Field label="Teléfono">
-                  <input
-                    type="tel"
-                    placeholder="+54 9 11 ..."
-                    value={telefono}
-                    onChange={(e) => setTelefono(e.target.value)}
-                    className="field"
-                  />
-                </Field>
-              </div>
+              <Field label="Teléfono">
+                <input
+                  type="tel"
+                  placeholder="+54 9 11 ..."
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
+                  className="field"
+                />
+              </Field>
 
               <div>
                 <span className="label">Rubro(s) — podés elegir más de uno</span>
@@ -244,21 +228,12 @@ export default function RegistrarPage() {
                 </div>
               </div>
 
-              <Field label="Zona de trabajo">
-                <select
-                  title="Zona de trabajo"
-                  value={zona}
-                  onChange={(e) => setZona(e.target.value)}
-                  className="field"
-                >
-                  <option value="">Seleccioná tu zona</option>
-                  {ZONES.map((z) => (
-                    <option key={z} value={z}>
-                      {z}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+              <div>
+                <span className="label">Zona(s) de trabajo — podés elegir más de una</span>
+                <div className="mt-2">
+                  <ZonaChips selected={zonas} onChange={setZonas} />
+                </div>
+              </div>
             </div>
           )}
 
