@@ -8,6 +8,7 @@ import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
 import { IconMapPin, IconCheckBadge, IconWhatsApp } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
+import { toTitleCase } from "@/lib/format";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { DejarResenaForm } from "./DejarResenaForm";
 
@@ -44,7 +45,7 @@ export default async function TecnicoPage({
     supabase.from("propuestas").select("id", { count: "exact", head: true }).eq("profesional_id", id).eq("estado", "completada"),
   ]);
 
-  const nombre = perfil.nombre ?? "Profesional";
+  const nombre = toTitleCase(perfil.nombre ?? "Profesional");
   const initials = nombre.split(" ").filter(Boolean).map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
   const rubros: string[] = Array.isArray(perfil.rubro) ? perfil.rubro : perfil.rubro ? [perfil.rubro] : [];
   const rubroCats = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
@@ -152,7 +153,7 @@ export default async function TecnicoPage({
                   className={`card p-5 ${lista.length > 3 ? "min-w-[260px] max-w-[300px] shrink-0 sm:min-w-0 sm:max-w-none" : ""}`}
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-semibold text-sv-dark">{r.autor_nombre ?? "Cliente"}</span>
+                    <span className="text-sm font-semibold text-sv-dark">{r.autor_nombre ? toTitleCase(r.autor_nombre) : "Cliente"}</span>
                     <StarRating rating={r.estrellas} />
                   </div>
                   {r.comentario && <p className="mt-2 text-sm text-ink-700">{r.comentario}</p>}

@@ -5,6 +5,7 @@ import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
 import { IconMapPin, IconCheckBadge, IconWhatsApp, IconStampBadge } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
+import { toTitleCase } from "@/lib/format";
 
 export type TecnicoPublico = {
   user_id: string;
@@ -33,7 +34,7 @@ export function TecnicoCard({
   // un link para editar el perfil.
   modoPreview?: boolean;
 }) {
-  const nombre = tecnico.nombre ?? "Profesional";
+  const nombre = toTitleCase(tecnico.nombre ?? "Profesional");
   const initials = nombre.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
   const rubros = tecnico.rubro ?? [];
   const rubroCats = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
@@ -82,9 +83,13 @@ export function TecnicoCard({
             fallbackColor={avatarColorFor(tecnico.user_id)}
             textClass="font-display text-base"
           />
-          <div className="min-w-0 flex-1">
+          <div className={`min-w-0 flex-1 ${esNuevo ? "pr-6" : ""}`}>
             <div className="flex items-center gap-1.5">
-              <span className="truncate text-[15px] font-semibold text-sv-dark">{nombre}</span>
+              {/* min-w-0 es lo que hace que el truncate funcione de verdad:
+                  sin esto, un item de flex no se achica por debajo de su
+                  contenido y nunca llega a cortar con "..." — por eso un
+                  nombre de 3+ palabras se desbordaba hacia la insignia. */}
+              <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-sv-dark">{nombre}</span>
               {tecnico.verificado && <IconCheckBadge className="h-4 w-4 shrink-0 text-sv-primary" />}
             </div>
             {tecnico.zona && (
