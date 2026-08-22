@@ -36,7 +36,7 @@ export function TecnicoCard({
   const rubroCats = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
   const rubrosNombres = rubroCats.length > 0 ? rubroCats.map((c) => c.name) : rubros;
   const primerRubro = rubrosNombres[0] ?? "un servicio";
-  const subtitulo = tecnico.titular?.trim() || rubrosNombres.join(" · ");
+  const bio = tecnico.titular?.trim() || "";
 
   const telefonoLimpio = tecnico.telefono?.replace(/\D/g, "") ?? "";
   const mensaje = encodeURIComponent(
@@ -46,18 +46,17 @@ export function TecnicoCard({
 
   const sinResenas = !resumen || resumen.total === 0;
 
+  // Esquema fijo (2026-08-21, pedido de revisión): avatar+nombre → zona →
+  // [rating o "Nuevo en Sufix", siempre en el mismo renglón] → bio → chips →
+  // botón. Antes "Nuevo" era un cartel flotante que empujaba el avatar con un
+  // margen condicional (mt-8) — por eso las tarjetas con y sin reseñas
+  // quedaban a distinta altura. Ahora ese lugar SIEMPRE existe, solo cambia
+  // qué muestra adentro, así todas las tarjetas arrancan igual y solo varían
+  // donde falta contenido opcional (bio), como corresponde.
   return (
-    <div className="card relative flex flex-col overflow-hidden p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
-      {/* Badge "Nuevo" como cartel en la esquina, no metido en el flujo del
-          contenido — antes se confundía con el fondo y apretaba el resto. */}
-      {sinResenas && (
-        <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
-          <IconSparkle className="h-3 w-3" /> Nuevo en Sufix
-        </span>
-      )}
-
-      <Link href={`/tecnico/${tecnico.user_id}`} className="flex-1 block">
-        <div className={`flex items-start gap-3.5 ${sinResenas ? "mt-8" : ""}`}>
+    <div className="card flex flex-col p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
+      <Link href={`/tecnico/${tecnico.user_id}`} className="flex flex-1 flex-col">
+        <div className="flex items-start gap-3.5">
           <Avatar
             url={tecnico.foto_url}
             initials={initials}
@@ -66,34 +65,30 @@ export function TecnicoCard({
             textClass="font-display text-base"
           />
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-1.5">
               <span className="truncate text-[15px] font-semibold text-sv-dark">{nombre}</span>
-              {tecnico.verificado && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2 py-0.5 text-[10px] font-semibold text-sv-olive">
-                  <IconCheckBadge className="h-3 w-3" /> Verificado
-                </span>
-              )}
+              {tecnico.verificado && <IconCheckBadge className="h-4 w-4 shrink-0 text-sv-primary" />}
             </div>
-
-            {subtitulo && <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-ink-500">{subtitulo}</p>}
-
-            {!sinResenas && (
-              <div className="mt-1.5">
-                <StarRating rating={resumen.promedio} reviews={resumen.total} />
-              </div>
-            )}
-
             {tecnico.zona && (
-              <p className="mt-1.5 flex items-center gap-1 truncate text-xs text-ink-400">
+              <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-ink-400">
                 <IconMapPin className="h-3.5 w-3.5 shrink-0" /> {tecnico.zona}
               </p>
             )}
           </div>
         </div>
 
-        {/* Chips de rubro a todo el ancho de la tarjeta (no metidos en la
-            columna angosta al lado del avatar) — con 3+ rubros entraban mal
-            y el "+2" quedaba apretado. */}
+        <div className="mt-3">
+          {sinResenas ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600">
+              <IconSparkle className="h-3 w-3" /> Nuevo en Sufix
+            </span>
+          ) : (
+            <StarRating rating={resumen.promedio} reviews={resumen.total} />
+          )}
+        </div>
+
+        {bio && <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-ink-500">{bio}</p>}
+
         {rubroCats.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {rubroCats.map((c) => (
