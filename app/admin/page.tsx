@@ -3,7 +3,11 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { isAdminEmail } from "@/lib/admin";
-import { AdminClient, DisputasClient, type PagoEnRevision, type Disputa } from "./AdminClient";
+// AdminClient/DisputasClient (pagos en revisión y disputas) quedan sin usar
+// a propósito — ver comentario más abajo. No se borran, listos para
+// reactivar si se vuelve al flujo viejo (tag de git
+// idea-publicar-problema-2026-08-20).
+// import { AdminClient, DisputasClient, type PagoEnRevision, type Disputa } from "./AdminClient";
 
 export const revalidate = 0;
 
@@ -14,14 +18,14 @@ export default async function AdminPage() {
   // Solo el admin puede ver esta página. notFound() para no revelar que existe.
   if (!isAdminEmail(user?.email)) notFound();
 
-  const [{ data: pagosData, error: pagosError }, { data: disputasData, error: disputasError }] =
-    await Promise.all([
-      supabase.rpc("listar_pagos_en_revision"),
-      supabase.rpc("listar_disputas"),
-    ]);
-
-  const pagos = (pagosData ?? []) as PagoEnRevision[];
-  const disputas = (disputasData ?? []) as Disputa[];
+  // "Pagos en revisión" y "Disputas" dependían las dos del flujo viejo
+  // (publicar problema -> propuesta -> pago/en_curso -> reportar problema).
+  // Con el pivot a directorio de técnicos (ver CLAUDE.md) ese flujo dejó de
+  // ser alcanzable desde la web — DemandanteView.tsx/OferenteView.tsx (los
+  // únicos lugares con el botón de "Reportar un problema") ya no se
+  // renderizan en ningún lado. No tiene sentido dejar estas dos secciones
+  // activas si nadie puede generarles datos nuevos. Se pausan las dos juntas,
+  // no solo "pagos" — código y RPCs intactos, solo se dejó de llamarlos acá.
 
   return (
     <>
@@ -30,38 +34,12 @@ export default async function AdminPage() {
         <div className="container-pad py-10">
           <h1 className="display text-2xl">Panel de administración</h1>
 
-          {/* Pagos en revisión */}
-          <section className="mt-8">
-            <h2 className="display text-xl">Pagos en revisión</h2>
-            <p className="mt-1 text-sm text-ink-400">
-              Verificá el comprobante en WhatsApp y aprobá o rechazá cada pago. Al aprobar,
-              se desbloquea el contacto del profesional y se genera el código.
+          <div className="mt-8 rounded-2xl border border-dashed border-ink-200 p-10 text-center text-ink-400">
+            <p className="text-sm">
+              "Pagos en revisión" y "Disputas" están pausadas — dependían del flujo viejo de
+              publicar un problema, que ya no es alcanzable desde la web.
             </p>
-            {pagosError ? (
-              <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700">
-                No se pudo cargar la lista: {pagosError.message}. ¿Corriste la migración SQL
-                (<code>20260620_pago_en_revision.sql</code>)?
-              </div>
-            ) : (
-              <AdminClient pagos={pagos} />
-            )}
-          </section>
-
-          {/* Disputas */}
-          <section className="mt-12">
-            <h2 className="display text-xl">Disputas abiertas</h2>
-            <p className="mt-1 text-sm text-ink-400">
-              Problemas reportados por demandantes o técnicos. Resolvé la situación y marcala como resuelta.
-            </p>
-            {disputasError ? (
-              <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700">
-                No se pudo cargar la lista: {disputasError.message}. ¿Corriste la migración SQL
-                (<code>20260620_disputas_admin.sql</code>)?
-              </div>
-            ) : (
-              <DisputasClient disputas={disputas} />
-            )}
-          </section>
+          </div>
         </div>
       </main>
       <Footer />
