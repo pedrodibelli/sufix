@@ -6,7 +6,7 @@ import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
 
 type Resumen = { promedio: number; total: number };
 
-const TANDA = 8;
+const TANDA = 100;
 
 export function TecnicosGrid({
   tecnicos,
@@ -17,11 +17,15 @@ export function TecnicosGrid({
   resumenMap: Record<string, Resumen>;
   hayFiltrosActivos?: boolean;
 }) {
-  // "Ver más" real (no decorativo): ya tenemos todos los técnicos cargados
-  // de una (la query no pagina), así que mostrar más es solo revelar del
-  // array que ya está — sin ida y vuelta al servidor. Además de la función,
-  // le da a la sección un cierre visual antes del cartel de reclutamiento,
-  // que si no queda todo muy pegado (pedido 2026-08-21).
+  // Mostrar todos los técnicos de entrada (web pensada para ser bien
+  // scrolleable): el corte por tandas de TANDA es solo para cuando el
+  // directorio crezca mucho (a partir de ~100 técnicos), no una paginación
+  // temprana artificial. "Ver más" sigue siendo real (no decorativo): ya
+  // tenemos todos los técnicos cargados de una (la query no pagina), así
+  // que mostrar más es solo revelar del array que ya está — sin ida y
+  // vuelta al servidor. La línea divisoria (cuando no queda nada más por
+  // mostrar) le sigue dando a la sección un cierre visual antes del cartel
+  // de reclutamiento, para que no quede todo muy pegado (pedido 2026-08-21).
   const [visibles, setVisibles] = useState(TANDA);
 
   if (tecnicos.length === 0) {
