@@ -218,7 +218,7 @@ export default async function HomePage({
               {sinSesion && (
                 <>
                   <div className="mt-12 rounded-2xl bg-white p-8 sm:p-12">
-                    <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+                    <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-8">
                       <div>
                         <span className="inline-block rounded-full bg-sv-primary/10 px-3 py-1 text-xs font-semibold text-sv-olive">
                           Para técnicos y profesionales
@@ -226,7 +226,7 @@ export default async function HomePage({
                         <h2 className="display mt-4 text-3xl leading-tight text-sv-dark sm:text-4xl">
                           Aparecé gratis y que te encuentren tus próximos clientes.
                         </h2>
-                        <p className="mt-3 text-ink-500">
+                        <p className="mt-4 text-ink-500">
                           Sin comisión por trabajo, sin intermediarios. Los clientes te
                           escriben directo a tu WhatsApp — cobrás el 100% de cada servicio.
                         </p>
@@ -249,7 +249,7 @@ export default async function HomePage({
                     </div>
                   </div>
 
-                  <div className="mt-14 text-center">
+                  <div className="mt-20 text-center">
                     <h2 className="display text-2xl text-white sm:text-3xl">
                       Encontrá y contactá en 3 pasos
                     </h2>
