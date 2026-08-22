@@ -18,7 +18,7 @@ export type TecnicoPublico = {
   creado_at?: string;
 };
 
-const DIAS_NUEVO = 30;
+const DIAS_NUEVO = 20;
 const MAX_CHIPS = 3;
 
 export function TecnicoCard({
