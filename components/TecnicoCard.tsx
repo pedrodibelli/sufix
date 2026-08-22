@@ -90,11 +90,20 @@ export function TecnicoCard({
                   contenido y nunca llega a cortar con "..." — por eso un
                   nombre de 3+ palabras se desbordaba hacia la insignia. */}
               <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-sv-dark">{nombre}</span>
-              {tecnico.verificado && <IconCheckBadge className="h-4 w-4 shrink-0 text-sv-primary" />}
             </div>
             {tecnico.zona && (
               <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-ink-400">
                 <IconMapPin className="h-3.5 w-3.5 shrink-0" /> {tecnico.zona}
+              </p>
+            )}
+            {/* Tercera línea al lado de la foto, solo si está verificado —
+                reemplaza el ícono chiquito que antes iba pegado al nombre
+                (evita mostrar la misma señal dos veces). El avatar mide 60px
+                y 3 líneas cortas no llegan a esa altura, así que no rompe la
+                simetría entre tarjetas verificadas y no verificadas. */}
+            {tecnico.verificado && (
+              <p className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-sv-primary">
+                <IconCheckBadge className="h-3.5 w-3.5 shrink-0" /> Verificado
               </p>
             )}
           </div>
