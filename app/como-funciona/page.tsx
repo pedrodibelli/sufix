@@ -237,7 +237,7 @@ export default async function ComoFuncionaPage() {
               <h2 className="reveal delay-0 display text-center text-2xl text-sv-dark sm:text-3xl">
                 Preguntas frecuentes
               </h2>
-              <div className="mt-7 divide-y divide-ink-100 border-t border-ink-100 sm:mt-10">
+              <div className="mt-7 divide-y divide-ink-200 border-t border-ink-200 sm:mt-10">
                 {FAQ.map((f, i) => (
                   <details key={f.q} className={`reveal ${FAQ_DELAYS[i] ?? "delay-0"} group py-5`}>
                     <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-[15px] font-medium text-sv-dark sm:text-base">
@@ -317,7 +317,7 @@ function StepCard({
   return (
     <div
       className={`reveal ${delay} rounded-2xl border p-6 ${
-        dark ? "border-white/10 bg-white/[0.03]" : "border-ink-100 bg-[#fafcfa]"
+        dark ? "border-white/10 bg-white/[0.03]" : "border-ink-200 bg-[#fafcfa]"
       }`}
     >
       <div className="flex items-center gap-3">
