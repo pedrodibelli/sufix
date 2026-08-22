@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconCheckBadge, IconWhatsApp } from "@/components/icons";
+import { IconMapPin, IconCheckBadge, IconWhatsApp, IconStampBadge } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 
@@ -65,8 +65,11 @@ export function TecnicoCard({
   return (
     <div className="card relative flex flex-col p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
       {esNuevo && (
-        <span className="absolute -right-2.5 -top-2.5 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-[10px] font-extrabold uppercase leading-none tracking-wide text-white shadow-md">
-          Nuevo
+        <span className="absolute -right-3 -top-3 z-10 h-14 w-14 text-blue-600 drop-shadow-md">
+          <IconStampBadge />
+          <span className="absolute inset-0 flex items-center justify-center text-[9px] font-extrabold uppercase leading-none tracking-wide text-white">
+            Nuevo
+          </span>
         </span>
       )}
 

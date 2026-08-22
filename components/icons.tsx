@@ -60,3 +60,14 @@ export function IconCheckBadge({ className = "h-3.5 w-3.5" }: IconProps) {
     </svg>
   );
 }
+
+// Misma silueta festoneada (de medalla/estampilla) que IconCheckBadge, pero
+// vacía — para superponerle texto encima (el sello "Nuevo" de TecnicoCard).
+// Un círculo liso se veía demasiado genérico; esto lee más a sello/medalla.
+export function IconStampBadge({ className = "h-full w-full" }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden>
+      <path d="M10 1.5l1.98 1.14 2.28-.3 1.14 1.98 1.98 1.14-.3 2.28 1.14 1.98-1.98 1.14-.3 2.28-2.28-.3L10 14.32l-1.98 1.14-2.28-.3-1.14-1.98-1.98-1.14.3-2.28-1.14-1.98 1.98-1.14.3-2.28 2.28.3L10 1.5z" />
+    </svg>
+  );
+}
