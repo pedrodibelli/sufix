@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconCheckBadge, IconWhatsApp, IconStampBadge } from "@/components/icons";
+import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconStampBadge } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
@@ -103,7 +103,7 @@ export function TecnicoCard({
                 simetría entre tarjetas verificadas y no verificadas. */}
             {tecnico.verificado && (
               <p className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-sv-primary">
-                <IconCheckBadge className="h-3.5 w-3.5 shrink-0" /> Verificado
+                <IconVerifiedBadge className="h-3.5 w-3.5 shrink-0" /> Verificado
               </p>
             )}
           </div>

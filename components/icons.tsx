@@ -48,28 +48,28 @@ export function IconSparkle({ className = "h-3 w-3" }: IconProps) {
   );
 }
 
-export function IconCheckBadge({ className = "h-3.5 w-3.5" }: IconProps) {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden>
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M10 1.5l1.98 1.14 2.28-.3 1.14 1.98 1.98 1.14-.3 2.28 1.14 1.98-1.98 1.14-.3 2.28-2.28-.3L10 14.32l-1.98 1.14-2.28-.3-1.14-1.98-1.98-1.14.3-2.28-1.14-1.98 1.98-1.14.3-2.28 2.28.3L10 1.5z"
-      />
-      <path d="M7.3 10.2l1.7 1.7 3.3-3.7" stroke="white" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-    </svg>
-  );
-}
-
 // Sello tipo estampilla postal (28 dientes, generados por trigonometría —
 // no a mano — para que salga perfectamente simétrico) para el sello "Nuevo"
 // de TecnicoCard. El intento anterior (reusar la silueta festoneada de
 // IconCheckBadge a este tamaño) se veía como una mancha irregular; esta
 // forma está pensada para leerse bien de chica, como un sello de verdad.
+const SELLO_PATH = "M 50 3 Q 50 3 52.24 6.63 Q 54.48 10.25 57.47 7.21 Q 60.46 4.18 61.84 8.21 Q 63.21 12.24 66.8 9.95 Q 70.39 7.65 70.84 11.89 Q 71.28 16.13 75.29 14.69 Q 79.3 13.25 78.79 17.48 Q 78.28 21.72 82.52 21.21 Q 86.75 20.7 85.31 24.71 Q 83.87 28.72 88.11 29.16 Q 92.35 29.61 90.06 33.2 Q 87.76 36.79 91.79 38.16 Q 95.82 39.54 92.78 42.53 Q 89.75 45.52 93.38 47.76 Q 97 50 93.38 52.24 Q 89.75 54.48 92.78 57.47 Q 95.82 60.46 91.79 61.84 Q 87.76 63.21 90.06 66.8 Q 92.35 70.39 88.11 70.84 Q 83.87 71.28 85.31 75.29 Q 86.75 79.3 82.52 78.79 Q 78.28 78.28 78.79 82.52 Q 79.3 86.75 75.29 85.31 Q 71.28 83.87 70.84 88.11 Q 70.39 92.35 66.8 90.06 Q 63.21 87.76 61.84 91.79 Q 60.46 95.82 57.47 92.78 Q 54.48 89.75 52.24 93.38 Q 50 97 47.76 93.38 Q 45.52 89.75 42.53 92.78 Q 39.54 95.82 38.16 91.79 Q 36.79 87.76 33.2 90.06 Q 29.61 92.35 29.16 88.11 Q 28.72 83.87 24.71 85.31 Q 20.7 86.75 21.21 82.52 Q 21.72 78.28 17.48 78.79 Q 13.25 79.3 14.69 75.29 Q 16.13 71.28 11.89 70.84 Q 7.65 70.39 9.95 66.8 Q 12.24 63.21 8.21 61.84 Q 4.18 60.46 7.21 57.47 Q 10.25 54.48 6.63 52.24 Q 3 50 6.63 47.76 Q 10.25 45.52 7.21 42.53 Q 4.18 39.54 8.21 38.16 Q 12.24 36.79 9.95 33.2 Q 7.65 29.61 11.89 29.16 Q 16.13 28.72 14.69 24.71 Q 13.25 20.7 17.48 21.21 Q 21.72 21.72 21.21 17.48 Q 20.7 13.25 24.71 14.69 Q 28.72 16.13 29.16 11.89 Q 29.61 7.65 33.2 9.95 Q 36.79 12.24 38.16 8.21 Q 39.54 4.18 42.53 7.21 Q 45.52 10.25 47.76 6.63 Z";
+
 export function IconStampBadge({ className = "h-full w-full" }: IconProps) {
   return (
     <svg viewBox="0 0 100 100" fill="currentColor" className={className} aria-hidden>
-      <path d="M 50 3 Q 50 3 52.24 6.63 Q 54.48 10.25 57.47 7.21 Q 60.46 4.18 61.84 8.21 Q 63.21 12.24 66.8 9.95 Q 70.39 7.65 70.84 11.89 Q 71.28 16.13 75.29 14.69 Q 79.3 13.25 78.79 17.48 Q 78.28 21.72 82.52 21.21 Q 86.75 20.7 85.31 24.71 Q 83.87 28.72 88.11 29.16 Q 92.35 29.61 90.06 33.2 Q 87.76 36.79 91.79 38.16 Q 95.82 39.54 92.78 42.53 Q 89.75 45.52 93.38 47.76 Q 97 50 93.38 52.24 Q 89.75 54.48 92.78 57.47 Q 95.82 60.46 91.79 61.84 Q 87.76 63.21 90.06 66.8 Q 92.35 70.39 88.11 70.84 Q 83.87 71.28 85.31 75.29 Q 86.75 79.3 82.52 78.79 Q 78.28 78.28 78.79 82.52 Q 79.3 86.75 75.29 85.31 Q 71.28 83.87 70.84 88.11 Q 70.39 92.35 66.8 90.06 Q 63.21 87.76 61.84 91.79 Q 60.46 95.82 57.47 92.78 Q 54.48 89.75 52.24 93.38 Q 50 97 47.76 93.38 Q 45.52 89.75 42.53 92.78 Q 39.54 95.82 38.16 91.79 Q 36.79 87.76 33.2 90.06 Q 29.61 92.35 29.16 88.11 Q 28.72 83.87 24.71 85.31 Q 20.7 86.75 21.21 82.52 Q 21.72 78.28 17.48 78.79 Q 13.25 79.3 14.69 75.29 Q 16.13 71.28 11.89 70.84 Q 7.65 70.39 9.95 66.8 Q 12.24 63.21 8.21 61.84 Q 4.18 60.46 7.21 57.47 Q 10.25 54.48 6.63 52.24 Q 3 50 6.63 47.76 Q 10.25 45.52 7.21 42.53 Q 4.18 39.54 8.21 38.16 Q 12.24 36.79 9.95 33.2 Q 7.65 29.61 11.89 29.16 Q 16.13 28.72 14.69 24.71 Q 13.25 20.7 17.48 21.21 Q 21.72 21.72 21.21 17.48 Q 20.7 13.25 24.71 14.69 Q 28.72 16.13 29.16 11.89 Q 29.61 7.65 33.2 9.95 Q 36.79 12.24 38.16 8.21 Q 39.54 4.18 42.53 7.21 Q 45.52 10.25 47.76 6.63 Z" />
+      <path d={SELLO_PATH} />
+    </svg>
+  );
+}
+
+// Badge de "Verificado": mismo contorno de estampilla (simétrico de verdad,
+// no la mancha irregular del viejo IconCheckBadge) con un check adentro.
+export function IconVerifiedBadge({ className = "h-3.5 w-3.5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 100 100" fill="currentColor" className={className} aria-hidden>
+      <path d={SELLO_PATH} />
+      <path d="M 36.5 51 L 45 59.5 L 61.5 41" stroke="white" strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
   );
 }

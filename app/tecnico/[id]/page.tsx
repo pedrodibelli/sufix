@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
 import { Avatar } from "@/components/Avatar";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconCheckBadge, IconWhatsApp } from "@/components/icons";
+import { IconMapPin, IconVerifiedBadge, IconWhatsApp } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
@@ -76,7 +76,7 @@ export default async function TecnicoPage({
                     <h1 className="display text-3xl text-sv-dark">{nombre}</h1>
                     {perfil.verificado && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-sv-olive">
-                        <IconCheckBadge className="h-3 w-3" /> Verificado
+                        <IconVerifiedBadge className="h-3 w-3" /> Verificado
                       </span>
                     )}
                   </div>

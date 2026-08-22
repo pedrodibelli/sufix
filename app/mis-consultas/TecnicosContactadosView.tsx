@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconCheckBadge, IconWhatsApp, IconSparkle } from "@/components/icons";
+import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconSparkle } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { type TecnicoPublico } from "@/components/TecnicoCard";
@@ -76,7 +76,7 @@ export function TecnicosContactadosView({ items }: { items: ContactoItem[] }) {
                     </Link>
                     {perfil.verificado && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2 py-0.5 text-[10px] font-semibold text-sv-olive">
-                        <IconCheckBadge className="h-3 w-3" /> Verificado
+                        <IconVerifiedBadge className="h-3 w-3" /> Verificado
                       </span>
                     )}
                   </div>
