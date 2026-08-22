@@ -240,7 +240,7 @@ export default async function HomePage({
                           { title: "Clientes a tu WhatsApp", body: "Te escriben directo, sin intermediarios ni esperas." },
                           { title: "Sumá reputación", body: "Reseñas reales que te consiguen los próximos trabajos." },
                         ].map((b) => (
-                          <div key={b.title} className="rounded-xl border border-ink-100 bg-[#f5fdf9] p-4">
+                          <div key={b.title} className="rounded-xl border border-ink-200 bg-[#f5fdf9] p-4">
                             <p className="text-sm font-semibold text-sv-dark">{b.title}</p>
                             <p className="mt-0.5 text-xs text-ink-500">{b.body}</p>
                           </div>
