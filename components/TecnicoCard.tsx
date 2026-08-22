@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconCheckBadge, IconWhatsApp, IconSparkle } from "@/components/icons";
+import { IconMapPin, IconCheckBadge, IconWhatsApp } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 
@@ -17,6 +17,9 @@ export type TecnicoPublico = {
   titular: string | null;
   creado_at?: string;
 };
+
+const DIAS_NUEVO = 30;
+const MAX_CHIPS = 3;
 
 export function TecnicoCard({
   tecnico,
@@ -45,16 +48,28 @@ export function TecnicoCard({
   const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensaje}` : null;
 
   const sinResenas = !resumen || resumen.total === 0;
+  const esNuevo = tecnico.creado_at
+    ? (Date.now() - new Date(tecnico.creado_at).getTime()) / 86_400_000 <= DIAS_NUEVO
+    : false;
+  const chipsVisibles = rubroCats.slice(0, MAX_CHIPS);
+  const chipsRestantes = rubroCats.length - chipsVisibles.length;
 
-  // Esquema fijo (2026-08-21, pedido de revisión): avatar+nombre → zona →
-  // [rating o "Nuevo en Sufix", siempre en el mismo renglón] → bio → chips →
-  // botón. Antes "Nuevo" era un cartel flotante que empujaba el avatar con un
-  // margen condicional (mt-8) — por eso las tarjetas con y sin reseñas
-  // quedaban a distinta altura. Ahora ese lugar SIEMPRE existe, solo cambia
-  // qué muestra adentro, así todas las tarjetas arrancan igual y solo varían
-  // donde falta contenido opcional (bio), como corresponde.
+  // Esquema fijo (2026-08-21, segunda vuelta): "nuevo" y "calificación" son dos
+  // cosas independientes, no compiten por el mismo lugar. "Nuevo" es un sello
+  // flotante en la esquina (antigüedad de cuenta, no depende de si ya tiene
+  // reseñas) que no empuja nada — no reserva espacio, solo se superpone. El
+  // renglón de abajo de la zona SIEMPRE existe y SIEMPRE es sobre reseñas:
+  // la calificación si tiene, o "Sin reseñas aún" si no — así nunca cambia
+  // de alto según el caso. Los chips de rubro tienen tope (MAX_CHIPS) con
+  // "+N más" para que la tarjeta nunca crezca de más por tener muchos rubros.
   return (
-    <div className="card flex flex-col p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
+    <div className="card relative flex flex-col p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
+      {esNuevo && (
+        <span className="absolute -right-2.5 -top-2.5 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-[10px] font-extrabold uppercase leading-none tracking-wide text-white shadow-md">
+          Nuevo
+        </span>
+      )}
+
       <Link href={`/tecnico/${tecnico.user_id}`} className="flex flex-1 flex-col">
         <div className="flex items-start gap-3.5">
           <Avatar
@@ -79,9 +94,7 @@ export function TecnicoCard({
 
         <div className="mt-3">
           {sinResenas ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600">
-              <IconSparkle className="h-3 w-3" /> Nuevo en Sufix
-            </span>
+            <span className="text-xs text-ink-400">Sin reseñas aún</span>
           ) : (
             <StarRating rating={resumen.promedio} reviews={resumen.total} />
           )}
@@ -89,11 +102,14 @@ export function TecnicoCard({
 
         {bio && <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-ink-500">{bio}</p>}
 
-        {rubroCats.length > 0 && (
+        {chipsVisibles.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {rubroCats.map((c) => (
+            {chipsVisibles.map((c) => (
               <span key={c.slug} className="chip px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
             ))}
+            {chipsRestantes > 0 && (
+              <span className="chip px-2 py-0.5 text-[11px] text-ink-400">+{chipsRestantes} más</span>
+            )}
           </div>
         )}
       </Link>
