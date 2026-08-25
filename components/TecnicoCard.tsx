@@ -78,7 +78,7 @@ export function TecnicoCard({
   return (
     <div className="card relative flex flex-col p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
       {tecnico.verificado && (
-        <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-sv-primary shadow-sm">
+        <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-[#25D366]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#25D366] shadow-sm">
           <IconVerifiedBadge className="h-3 w-3" /> Verificado
         </span>
       )}
