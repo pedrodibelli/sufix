@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconStampBadge } from "@/components/icons";
+import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconSparkle } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
@@ -62,27 +62,29 @@ export function TecnicoCard({
   const chipsVisibles = rubroCats.slice(0, MAX_CHIPS);
   const chipsRestantes = rubroCats.length - chipsVisibles.length;
 
-  // Esquema fijo (2026-08-21, segunda vuelta): "nuevo" y "calificación" son dos
-  // cosas independientes, no compiten por el mismo lugar. "Nuevo" es un sello
-  // flotante en la esquina (antigüedad de cuenta, no depende de si ya tiene
-  // reseñas) que no empuja nada — no reserva espacio, solo se superpone. El
-  // renglón de abajo de la zona SIEMPRE existe y SIEMPRE es sobre reseñas:
-  // la calificación si tiene, o "Sin reseñas aún" si no — así nunca cambia
-  // de alto según el caso. Los chips de rubro tienen tope (MAX_CHIPS) con
+  // Esquema fijo (2026-08-24, tercera vuelta): "Verificado" pasó a ser el
+  // sello flotante en la esquina (antes lo era "Nuevo") — es la señal más
+  // fuerte de las dos, así que se gana el lugar más visible. "Nuevo en
+  // Sufix" bajó al renglón donde antes iba el texto de Verificado, ya sin
+  // forma de estampilla, solo texto — un técnico puede ser nuevo Y
+  // verificado a la vez (son independientes, cada uno en su lugar). Cuando
+  // hay sello arriba, se empuja todo el renglón de avatar+nombre hacia abajo
+  // (mt-6) en vez de recortar el ancho del nombre — mismo patrón que ya usa
+  // el sello "Nuevo en Sufix" de TecnicosContactadosView.tsx. El renglón de
+  // abajo de la zona SIEMPRE existe y SIEMPRE es sobre reseñas: la
+  // calificación si tiene, o "Sin reseñas aún" si no — así nunca cambia de
+  // alto según el caso. Los chips de rubro tienen tope (MAX_CHIPS) con
   // "+N más" para que la tarjeta nunca crezca de más por tener muchos rubros.
   return (
     <div className="card relative flex flex-col p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
-      {esNuevo && (
-        <span className="absolute -right-3 -top-3 z-10 h-14 w-14 text-blue-600 drop-shadow-md">
-          <IconStampBadge />
-          <span className="absolute inset-0 flex items-center justify-center text-[9px] font-extrabold uppercase leading-none tracking-wide text-white">
-            Nuevo
-          </span>
+      {tecnico.verificado && (
+        <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-sv-olive shadow-sm">
+          <IconVerifiedBadge className="h-3 w-3" /> Verificado
         </span>
       )}
 
       <Link href={`/tecnico/${tecnico.user_id}`} className="flex flex-1 flex-col">
-        <div className="flex items-start gap-3.5">
+        <div className={`flex items-start gap-3.5 ${tecnico.verificado ? "mt-6" : ""}`}>
           <Avatar
             url={tecnico.foto_url}
             initials={initials}
@@ -90,7 +92,7 @@ export function TecnicoCard({
             fallbackColor={avatarColorFor(tecnico.user_id)}
             textClass="font-display text-base"
           />
-          <div className={`min-w-0 flex-1 ${esNuevo ? "pr-6" : ""}`}>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               {/* min-w-0 es lo que hace que el truncate funcione de verdad:
                   sin esto, un item de flex no se achica por debajo de su
@@ -105,14 +107,12 @@ export function TecnicoCard({
                 {zonasRestantes > 0 && ` +${zonasRestantes} más`}
               </p>
             )}
-            {/* Tercera línea al lado de la foto, solo si está verificado —
-                reemplaza el ícono chiquito que antes iba pegado al nombre
-                (evita mostrar la misma señal dos veces). El avatar mide 60px
-                y 3 líneas cortas no llegan a esa altura, así que no rompe la
-                simetría entre tarjetas verificadas y no verificadas. */}
-            {tecnico.verificado && (
-              <p className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-sv-primary">
-                <IconVerifiedBadge className="h-3.5 w-3.5 shrink-0" /> Verificado
+            {/* Antes acá iba el texto de "Verificado" — ahora ese sello vive
+                arriba a la derecha (más visible), y este renglón quedó libre
+                para "Nuevo en Sufix" en su lugar. */}
+            {esNuevo && (
+              <p className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-blue-600">
+                <IconSparkle className="h-3.5 w-3.5 shrink-0" /> Nuevo en Sufix
               </p>
             )}
           </div>
