@@ -78,7 +78,7 @@ export function TecnicoCard({
   return (
     <div className="card relative flex flex-col p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
       {tecnico.verificado && (
-        <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-sv-olive shadow-sm">
+        <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-sv-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-sv-primary shadow-sm">
           <IconVerifiedBadge className="h-3 w-3" /> Verificado
         </span>
       )}
@@ -131,7 +131,7 @@ export function TecnicoCard({
         {chipsVisibles.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {chipsVisibles.map((c) => (
-              <span key={c.slug} className="chip px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
+              <span key={c.slug} className="chip border-sv-primary px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
             ))}
             {chipsRestantes > 0 && (
               <span className="chip px-2 py-0.5 text-[11px] text-ink-400">+{chipsRestantes} más</span>
