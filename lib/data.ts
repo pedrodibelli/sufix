@@ -599,6 +599,16 @@ export const ZONES = [
   "San Isidro",
 ];
 
+// Las primeras 9 son barrios de CABA propiamente dicha; las últimas 3
+// (Vicente López, Olivos, San Isidro) son Zona Norte del GBA. Se usa para
+// el botón "Toda CABA" (ZonaChips) y su equivalente en el buscador: en vez
+// de forzar a agregar cada barrio nuevo de Capital a mano (ej. Devoto), un
+// técnico que cubre "toda Capital" tilda un solo botón que selecciona estos
+// 9 de una — sigue siendo un array de barrios reales, no un valor mágico
+// nuevo, así que el resto de la app (filtros, tarjetas) no tiene que saber
+// que existe este atajo.
+export const ZONAS_CABA = ZONES.slice(0, 9);
+
 export const URGENCIES = [
   { value: "hoy", label: "Hoy mismo", note: "necesito que venga en el día" },
   {

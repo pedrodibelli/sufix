@@ -4,7 +4,7 @@ import { Footer } from "@/components/Footer";
 import { TecnicosGrid } from "@/components/TecnicosGrid";
 import { TecnicosSearchBar } from "@/components/TecnicosSearchBar";
 import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
-import { CATEGORIES, ZONES } from "@/lib/data";
+import { CATEGORIES, ZONES, ZONAS_CABA } from "@/lib/data";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 export const revalidate = 0; // siempre datos frescos
@@ -62,7 +62,12 @@ export default async function HomePage({
   // texto ya matchea por nombre del rubro, así que cubre lo que antes hacían
   // los chips de categoría sin necesitar un filtro aparte.
   const tecnicosFiltrados = tecnicos.filter((t) => {
-    if (tecZona && !(t.zona ?? []).includes(tecZona)) return false;
+    // "CABA" no es un barrio real, es el atajo que carga ZonaChips (ver
+    // ZONAS_CABA en lib/data.ts) — matchea si el técnico cubre cualquiera
+    // de los 9 barrios de Capital, no un string literal "CABA".
+    if (tecZona === "CABA") {
+      if (!(t.zona ?? []).some((z) => ZONAS_CABA.includes(z))) return false;
+    } else if (tecZona && !(t.zona ?? []).includes(tecZona)) return false;
     if (tecQ) {
       const rubrosNombres = (t.rubro ?? []).map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name ?? slug);
       const hay = `${t.nombre ?? ""} ${t.titular ?? ""} ${rubrosNombres.join(" ")}`.toLowerCase();

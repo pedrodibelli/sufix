@@ -92,6 +92,7 @@ export function TecnicosSearchBar({
           className="field w-full appearance-none pl-10"
         >
           <option value="">Todas las zonas</option>
+          <option value="CABA">CABA</option>
           {ZONES.map((z) => (
             <option key={z} value={z}>{z}</option>
           ))}

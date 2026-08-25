@@ -1,6 +1,6 @@
 "use client";
 
-import { ZONES } from "@/lib/data";
+import { ZONES, ZONAS_CABA } from "@/lib/data";
 
 // Selector de varias zonas a la vez (mismo patrón que RubroChips) — la
 // mayoría de los técnicos cubren bastante más que un solo barrio para tener
@@ -25,8 +25,38 @@ export function ZonaChips({
     );
   }
 
+  // "Toda CABA" no es una zona nueva — es un atajo que tilda las 9 de CABA
+  // de una (ver ZONAS_CABA en lib/data.ts). Sirve tanto para el técnico que
+  // realmente cubre toda la Capital como para el que es de un barrio que
+  // todavía no está en la lista (ej. Devoto): en vez de no poder anotar
+  // nada, marca este botón. Activo cuando las 9 ya están seleccionadas.
+  const todaCabaActiva = ZONAS_CABA.every((z) => selected.includes(z));
+  function toggleTodaCaba() {
+    if (disabled) return;
+    onChange(
+      todaCabaActiva
+        ? selected.filter((z) => !ZONAS_CABA.includes(z))
+        : [...new Set([...selected, ...ZONAS_CABA])]
+    );
+  }
+
   return (
     <div className="flex flex-wrap gap-2">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={toggleTodaCaba}
+        aria-pressed={todaCabaActiva}
+        className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition disabled:cursor-not-allowed ${
+          todaCabaActiva
+            ? "border-sv-olive bg-sv-olive text-white"
+            : dark
+            ? "border-dashed border-white/25 bg-white/5 text-zap-300 hover:border-sv-primary/60 hover:text-white"
+            : "border-dashed border-ink-300 bg-white text-ink-600 hover:border-sv-primary hover:text-sv-dark"
+        } ${disabled && !todaCabaActiva ? "opacity-50" : ""}`}
+      >
+        🏙️ CABA
+      </button>
       {ZONES.map((z) => {
         const active = selected.includes(z);
         return (
