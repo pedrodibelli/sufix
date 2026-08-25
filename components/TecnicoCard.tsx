@@ -84,7 +84,12 @@ export function TecnicoCard({
       )}
 
       <Link href={`/tecnico/${tecnico.user_id}`} className="flex flex-1 flex-col">
-        <div className={`flex items-start gap-3.5 ${tecnico.verificado ? "mt-6" : ""}`}>
+        {/* mt-6 fijo siempre (no solo si verificado): el sello ocupa ese
+            espacio arriba a la derecha para quien lo tiene, pero todas las
+            tarjetas necesitan el mismo aire reservado — si no, las que no
+            tienen Verificado quedan con la foto/nombre más arriba que las
+            que sí, y se nota feo la desalineación en la grilla. */}
+        <div className="mt-6 flex items-start gap-3.5">
           <Avatar
             url={tecnico.foto_url}
             initials={initials}
