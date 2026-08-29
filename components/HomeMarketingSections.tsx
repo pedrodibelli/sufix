@@ -173,17 +173,17 @@ export function WhatsAppMockupSection() {
           <div className="flex items-center gap-2.5 bg-sv-primary px-4 py-3.5 text-white">
             <div className="h-8 w-8 shrink-0 rounded-full bg-white/30" />
             <div>
-              <b className="block font-display text-sm">Un técnico de Sufix</b>
+              <b className="block font-display text-sm">Sergio Moro</b>
               <span className="block text-[11.5px] opacity-85">Plomero</span>
             </div>
           </div>
           <div className="flex min-h-[340px] flex-col gap-2.5 bg-[#EFEAD9] p-4">
             <div className="max-w-[78%] self-end rounded-2xl rounded-br-[4px] bg-[#DCF3D6] px-3 py-2.5 text-[13px] leading-snug">
-              Hola! Te encontré en Sufix, necesito ayuda con una pérdida de agua en la cocina.
+              Hola Sergio, necesito ayuda con una pérdida de agua en la cocina.
               <time className="mt-0.5 block text-right text-[9.5px] text-ink-500">10:30</time>
             </div>
             <div className="max-w-[78%] self-start rounded-2xl rounded-bl-[4px] bg-white px-3 py-2.5 text-[13px] leading-snug">
-              ¡Hola! ¿En qué puedo ayudarte?
+              ¡Hola! Soy Sergio, plomero. ¿En qué puedo ayudarte?
               <time className="mt-0.5 block text-right text-[9.5px] text-ink-500">10:31</time>
             </div>
             <div className="max-w-[78%] self-end rounded-2xl rounded-br-[4px] bg-[#DCF3D6] px-3 py-2.5 text-[13px] leading-snug">
@@ -191,8 +191,16 @@ export function WhatsAppMockupSection() {
               <time className="mt-0.5 block text-right text-[9.5px] text-ink-500">10:32</time>
             </div>
             <div className="max-w-[78%] self-start rounded-2xl rounded-bl-[4px] bg-white px-3 py-2.5 text-[13px] leading-snug">
-              Dale, ¿tenés disponibilidad mañana por la tarde?
+              De acuerdo, ¿tenés disponibilidad mañana por la tarde?
               <time className="mt-0.5 block text-right text-[9.5px] text-ink-500">10:33</time>
+            </div>
+            <div className="max-w-[78%] self-end rounded-2xl rounded-br-[4px] bg-[#DCF3D6] px-3 py-2.5 text-[13px] leading-snug">
+              Sí, a las 16 hs estaría bien.
+              <time className="mt-0.5 block text-right text-[9.5px] text-ink-500">10:34</time>
+            </div>
+            <div className="max-w-[78%] self-start rounded-2xl rounded-bl-[4px] bg-white px-3 py-2.5 text-[13px] leading-snug">
+              Perfecto, nos vemos mañana a las 16 hs. Llevo todo lo necesario.
+              <time className="mt-0.5 block text-right text-[9.5px] text-ink-500">10:35</time>
             </div>
           </div>
         </div>

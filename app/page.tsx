@@ -223,8 +223,8 @@ export default async function HomePage({
             {/* ── Resto de la landing — solo primer contacto (sin sesión) ── */}
             {sinSesion && (
               <>
-                <ProblemStrip />
                 <SeguridadSection />
+                <ProblemStrip />
                 <OficiosGrid />
                 <ComoFuncionaPasos />
                 <WhatsAppMockupSection />
