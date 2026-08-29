@@ -76,7 +76,9 @@ export function TecnicoCard({
   // alto según el caso. Los chips de rubro tienen tope (MAX_CHIPS) con
   // "+N más" para que la tarjeta nunca crezca de más por tener muchos rubros.
   return (
-    <div className="card relative flex flex-col p-5 transition hover:-translate-y-0.5 hover:border-sv-dark/15 hover:shadow-[0_16px_36px_-20px_rgba(29,46,32,0.28)]">
+    // border-sv-dark/[0.09] pisa el borde casi invisible de .card (zap-100)
+    // para que coincida con el mockup — ahí sv-dark es literalmente rgb(29,46,32).
+    <div className="card relative flex flex-col border-sv-dark/[0.09] p-5 transition hover:-translate-y-0.5 hover:border-sv-dark/15 hover:shadow-[0_16px_36px_-20px_rgba(29,46,32,0.28)]">
       {tecnico.verificado && (
         <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-[#25D366]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#25D366] shadow-sm">
           <IconVerifiedBadge className="h-3 w-3" /> Verificado

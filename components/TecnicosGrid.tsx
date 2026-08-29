@@ -54,7 +54,9 @@ export function TecnicosGrid({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {/* Tope de 3 columnas (no 4) — así lo tiene el mockup; con 4 las
+          tarjetas quedaban más angostas/apretadas que la referencia. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {mostrados.map((t) => (
           <TecnicoCard key={t.user_id} tecnico={t} resumen={resumenMap[t.user_id]} />
         ))}
