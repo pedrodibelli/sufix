@@ -15,7 +15,10 @@ const ListIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export function BottomNav({ dark = false, novedades = 0 }: { dark?: boolean; novedades?: number }) {
+// El prop "dark" queda en la firma solo para no romper los call sites que
+// todavía lo pasan (Header, etc.) — desde el rediseño 2026-08-28 se unificó
+// todo a un solo tema claro, así que ya no cambia nada visualmente.
+export function BottomNav({ novedades = 0 }: { dark?: boolean; novedades?: number }) {
   const pathname = usePathname();
 
   // Se oculta donde estorbaría o no aplica
@@ -32,19 +35,11 @@ export function BottomNav({ dark = false, novedades = 0 }: { dark?: boolean; nov
     { href: "/mis-consultas", label: "Contactos", Icon: ListIcon },
   ];
 
-  const barCls = dark ? "border-white/10 bg-[#0e1a17]/95" : "border-ink-100 bg-white/95";
-
   return (
-    <nav className={`fixed inset-x-0 bottom-0 z-40 flex border-t pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden ${barCls}`}>
+    <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-ink-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden">
       {items.map(({ href, label, Icon }) => {
         const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
-        const cls = dark
-          ? active
-            ? "text-zap-300"
-            : "text-zap-500"
-          : active
-          ? "text-sv-primary"
-          : "text-ink-400";
+        const cls = active ? "text-sv-primary" : "text-ink-400";
         return (
           <Link
             key={href}
@@ -54,7 +49,7 @@ export function BottomNav({ dark = false, novedades = 0 }: { dark?: boolean; nov
             <span className="relative">
               <Icon className="h-6 w-6" />
               {href === "/mis-consultas" && novedades > 0 && (
-                <span className={`absolute -right-1.5 -top-1 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ${dark ? "ring-[#0e1a17]" : "ring-white"}`} />
+                <span className="absolute -right-1.5 -top-1 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
               )}
             </span>
             {label}

@@ -80,8 +80,8 @@ async function enviarAvisoPublicacion(
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tu publicación está activa</title>
 </head>
-<body style="margin:0;padding:0;background:#f5fdf9;font-family:system-ui,-apple-system,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;padding:40px 16px;">
+<body style="margin:0;padding:0;background:#FBF8EF;font-family:system-ui,-apple-system,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FBF8EF;padding:40px 16px;">
     <tr>
       <td align="center">
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
@@ -104,7 +104,7 @@ async function enviarAvisoPublicacion(
               </p>
 
               <!-- Detalle de la publicación -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;border-radius:12px;padding:16px;margin-bottom:28px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#FBF8EF;border-radius:12px;padding:16px;margin-bottom:28px;">
                 <tr>
                   <td style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;padding-bottom:10px;">Tu publicación</td>
                 </tr>

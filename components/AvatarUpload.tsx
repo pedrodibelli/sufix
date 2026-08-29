@@ -13,13 +13,11 @@ export function AvatarUpload({
   initials,
   avatarUrl,
   size = 64,
-  dark = false,
 }: {
   userId: string;
   initials: string;
   avatarUrl: string | null;
   size?: number;
-  dark?: boolean;
 }) {
   const router = useRouter();
   const camaraRef = useRef<HTMLInputElement>(null);
@@ -113,9 +111,7 @@ export function AvatarUpload({
     ref.current?.click();
   }
 
-  const editBtnCls = dark
-    ? "border-white/20 bg-[#0e1a17] text-zap-100 group-hover:bg-white/10"
-    : "border-white bg-white text-ink-600 group-hover:bg-ink-50";
+  const editBtnCls = "border-white bg-white text-ink-600 group-hover:bg-ink-50";
 
   return (
     <div className="relative inline-flex shrink-0">

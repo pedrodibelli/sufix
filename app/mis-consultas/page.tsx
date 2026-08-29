@@ -23,7 +23,7 @@ export default async function MisConsultasPage() {
   return (
     <>
       <Header />
-      <main className={`min-h-screen ${esProfesional ? "bg-[#0e1a17]" : "bg-[#f5fdf9]"}`}>
+      <main className="min-h-screen bg-[#FBF8EF]">
         <div className="container-pad py-10">
           {esProfesional ? <QuienTeContactoData userId={user.id} /> : <TecnicosContactadosData userId={user.id} />}
         </div>

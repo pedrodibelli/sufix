@@ -30,7 +30,7 @@ export default async function AdminPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#f5fdf9]">
+      <main className="min-h-screen bg-[#FBF8EF]">
         <div className="container-pad py-10">
           <h1 className="display text-2xl">Panel de administración</h1>
 

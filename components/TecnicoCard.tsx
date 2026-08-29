@@ -76,7 +76,7 @@ export function TecnicoCard({
   // alto según el caso. Los chips de rubro tienen tope (MAX_CHIPS) con
   // "+N más" para que la tarjeta nunca crezca de más por tener muchos rubros.
   return (
-    <div className="card relative flex flex-col p-5 transition hover:border-ink-300 hover:shadow-[0_8px_30px_rgba(14,17,13,0.10)]">
+    <div className="card relative flex flex-col p-5 transition hover:-translate-y-0.5 hover:border-sv-dark/15 hover:shadow-[0_16px_36px_-20px_rgba(29,46,32,0.28)]">
       {tecnico.verificado && (
         <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-[#25D366]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#25D366] shadow-sm">
           <IconVerifiedBadge className="h-3 w-3" /> Verificado
@@ -134,14 +134,18 @@ export function TecnicoCard({
         {bio && <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-ink-500">{bio}</p>}
 
         {chipsVisibles.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {chipsVisibles.map((c) => (
-              <span key={c.slug} className="chip border-sv-primary px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
-            ))}
-            {chipsRestantes > 0 && (
-              <span className="chip px-2 py-0.5 text-[11px] text-ink-400">+{chipsRestantes} más</span>
-            )}
-          </div>
+          <>
+            {/* Separador punteado (look nuevo 2026-08-28) antes de los rubros */}
+            <div className="mt-3.5 border-t border-dashed border-ink-200" />
+            <div className="mt-3.5 flex flex-wrap gap-1.5">
+              {chipsVisibles.map((c) => (
+                <span key={c.slug} className="chip border-sv-primary px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
+              ))}
+              {chipsRestantes > 0 && (
+                <span className="chip px-2 py-0.5 text-[11px] text-ink-400">+{chipsRestantes} más</span>
+              )}
+            </div>
+          </>
         )}
       </Link>
 
@@ -150,11 +154,13 @@ export function TecnicoCard({
           Editar mi perfil
         </Link>
       ) : (
+        // Botón con contorno (look nuevo 2026-08-28): antes era verde relleno,
+        // ahora fondo claro + borde/texto verde WhatsApp, se rellena al hover.
         <ContactarWhatsAppButton
           tecnicoId={tecnico.user_id}
           waLink={waLink}
           origen="home"
-          className={`btn mt-4 w-full bg-[#25D366] text-white hover:brightness-95 ${!waLink ? "pointer-events-none opacity-50" : ""}`}
+          className={`btn mt-4 w-full border-[1.5px] border-[#25D366] bg-[#FBF8EF] text-[#1a9e4d] transition hover:bg-[#25D366] hover:text-white ${!waLink ? "pointer-events-none opacity-50" : ""}`}
         >
           <IconWhatsApp className="h-4 w-4" /> Contactar por WhatsApp
         </ContactarWhatsAppButton>

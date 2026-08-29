@@ -2,7 +2,7 @@
 
 export function LoadingScreen({ message = "Cargando…" }: { message?: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#f5fdf9] animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FBF8EF] animate-in fade-in duration-200">
       {/* Wordmark */}
       <div className="mb-10">
         <span className="font-display text-[32px] font-semibold tracking-tight text-sv-dark">Sufix</span>

@@ -84,8 +84,8 @@ export async function POST(req: NextRequest) {
           html: `
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
-<body style="margin:0;padding:0;background:#f5fdf9;font-family:system-ui,-apple-system,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;padding:40px 16px;"><tr><td align="center">
+<body style="margin:0;padding:0;background:#FBF8EF;font-family:system-ui,-apple-system,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FBF8EF;padding:40px 16px;"><tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
       <tr><td align="center" style="padding-bottom:32px;">
         <span style="font-size:22px;font-weight:700;color:#1a2e1e;">Su<span style="color:#3d9b5e;">Fix</span></span>
@@ -127,8 +127,8 @@ export async function POST(req: NextRequest) {
         html: `
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
-<body style="margin:0;padding:0;background:#f5fdf9;font-family:system-ui,-apple-system,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;padding:40px 16px;"><tr><td align="center">
+<body style="margin:0;padding:0;background:#FBF8EF;font-family:system-ui,-apple-system,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FBF8EF;padding:40px 16px;"><tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
       <tr><td align="center" style="padding-bottom:32px;">
         <span style="font-size:22px;font-weight:700;color:#1a2e1e;">Su<span style="color:#3d9b5e;">Fix</span></span>

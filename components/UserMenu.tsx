@@ -16,6 +16,9 @@ interface Props {
   dark?: boolean;
 }
 
+// El prop "dark" queda en la firma solo para no romper los call sites que
+// todavía lo pasan (Header, etc.) — desde el rediseño 2026-08-28 se unificó
+// todo a un solo tema claro, así que ya no cambia nada visualmente.
 export function UserMenu({
   displayName,
   email,
@@ -23,7 +26,6 @@ export function UserMenu({
   avatarUrl = null,
   esProfesional,
   isAdmin,
-  dark = false,
 }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -38,20 +40,14 @@ export function UserMenu({
 
   const roleLabel = esProfesional ? "Técnico" : "Cliente";
 
-  const avatarCls = dark ? "bg-zap-500" : "bg-sv-dark";
-  const nameCls = dark ? "text-zap-50" : "text-sv-dark";
-  const roleBadgeCls = dark
-    ? "bg-zap-500/20 text-zap-300"
-    : esProfesional
-    ? "bg-sv-primary/15 text-sv-olive"
-    : "bg-amber-100 text-amber-700";
+  const avatarCls = "bg-sv-dark";
+  const nameCls = "text-sv-dark";
+  const roleBadgeCls = esProfesional ? "bg-sv-primary/15 text-sv-olive" : "bg-amber-100 text-amber-700";
 
-  const dropBg = dark ? "bg-[#0e1a17] border-white/10" : "bg-white border-ink-100";
-  const itemCls = dark
-    ? "text-zap-100/80 hover:bg-white/10 hover:text-white"
-    : "text-sv-dark hover:bg-zap-100";
-  const dividerCls = dark ? "border-white/10" : "border-ink-100";
-  const subtleCls = dark ? "text-zap-400" : "text-ink-400";
+  const dropBg = "bg-white border-ink-100";
+  const itemCls = "text-sv-dark hover:bg-zap-100";
+  const dividerCls = "border-ink-100";
+  const subtleCls = "text-ink-400";
 
   return (
     <div className="relative">
@@ -60,11 +56,7 @@ export function UserMenu({
         onClick={() => setOpen((v) => !v)}
         aria-label="Menú de usuario"
         aria-expanded={open}
-        className={`flex items-center gap-2.5 rounded-full transition sm:border sm:py-1 sm:pl-1.5 sm:pr-2.5 ${
-          dark
-            ? "sm:border-white/15 sm:bg-white/10 sm:hover:bg-white/15"
-            : "sm:border-ink-100 sm:bg-ink-50/60 sm:hover:bg-ink-100"
-        }`}
+        className="flex items-center gap-2.5 rounded-full transition sm:border sm:border-ink-100 sm:bg-ink-50/60 sm:py-1 sm:pl-1.5 sm:pr-2.5 sm:hover:bg-ink-100"
       >
         <Avatar
           url={avatarUrl}
@@ -72,9 +64,7 @@ export function UserMenu({
           size={28}
           fallbackClass={avatarCls}
           textClass="text-[10px]"
-          className={`ring-2 ring-offset-1 sm:ring-0 ${
-            dark ? "ring-zap-400/60 ring-offset-[#0e1a17]" : "ring-sv-primary/50 ring-offset-white"
-          }`}
+          className="ring-2 ring-sv-primary/50 ring-offset-1 ring-offset-white sm:ring-0"
         />
         <span className={`hidden text-sm font-medium sm:inline ${nameCls}`}>{displayName}</span>
         <span className={`hidden rounded-full px-1.5 py-px text-[10px] font-semibold sm:inline ${roleBadgeCls}`}>
@@ -131,9 +121,7 @@ export function UserMenu({
               <button
                 type="button"
                 onClick={handleLogout}
-                className={`w-full rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
-                  dark ? "text-rose-300 hover:bg-rose-500/10" : "text-rose-600 hover:bg-rose-50"
-                }`}
+                className="w-full rounded-xl px-3 py-2 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50"
               >
                 Cerrar sesión
               </button>

@@ -4,12 +4,13 @@ import { CATEGORIES } from "@/lib/data";
 
 // Selector de varios rubros a la vez (chips que se prenden/apagan). Un
 // técnico puede hacer más de un tipo de trabajo — antes solo se podía elegir
-// uno. Se usa en /registrar y /perfil.
+// uno. Se usa en /registrar y /perfil. El prop "dark" queda en la firma
+// solo para no romper call sites viejos — desde el rediseño 2026-08-28 es
+// un solo tema claro, así que no cambia nada visualmente.
 export function RubroChips({
   selected,
   onChange,
   disabled = false,
-  dark = false,
 }: {
   selected: string[];
   onChange: (next: string[]) => void;
@@ -39,8 +40,6 @@ export function RubroChips({
             className={`rounded-full border px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed ${
               active
                 ? "border-sv-primary bg-sv-primary text-white"
-                : dark
-                ? "border-white/15 bg-white/5 text-zap-300 hover:border-sv-primary/60 hover:text-white"
                 : "border-ink-200 bg-white text-ink-500 hover:border-sv-primary hover:text-sv-dark"
             } ${disabled && !active ? "opacity-50" : ""}`}
           >

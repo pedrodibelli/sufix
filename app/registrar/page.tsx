@@ -95,7 +95,7 @@ export default function RegistrarPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f5fdf9] p-8">
+    <main className="flex min-h-screen items-center justify-center bg-[#FBF8EF] p-8">
       <div className="w-full max-w-sm">
         <h1 className="display text-4xl leading-tight">Crear cuenta</h1>
         <p className="mt-2 text-sm text-ink-400">

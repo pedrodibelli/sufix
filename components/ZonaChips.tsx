@@ -5,11 +5,12 @@ import { ZONES, ZONAS_CABA } from "@/lib/data";
 // Selector de varias zonas a la vez (mismo patrón que RubroChips) — la
 // mayoría de los técnicos cubren bastante más que un solo barrio para tener
 // trabajo suficiente. Se usa en /registrar y /perfil.
+// El prop "dark" queda en la firma solo para no romper call sites viejos —
+// desde el rediseño 2026-08-28 es un solo tema claro, no cambia nada visualmente.
 export function ZonaChips({
   selected,
   onChange,
   disabled = false,
-  dark = false,
 }: {
   selected: string[];
   onChange: (next: string[]) => void;
@@ -50,8 +51,6 @@ export function ZonaChips({
         className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition disabled:cursor-not-allowed ${
           todaCabaActiva
             ? "border-sv-olive bg-sv-olive text-white"
-            : dark
-            ? "border-dashed border-white/25 bg-white/5 text-zap-300 hover:border-sv-primary/60 hover:text-white"
             : "border-dashed border-ink-300 bg-white text-ink-600 hover:border-sv-primary hover:text-sv-dark"
         } ${disabled && !todaCabaActiva ? "opacity-50" : ""}`}
       >
@@ -69,8 +68,6 @@ export function ZonaChips({
             className={`rounded-full border px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed ${
               active
                 ? "border-sv-primary bg-sv-primary text-white"
-                : dark
-                ? "border-white/15 bg-white/5 text-zap-300 hover:border-sv-primary/60 hover:text-white"
                 : "border-ink-200 bg-white text-ink-500 hover:border-sv-primary hover:text-sv-dark"
             } ${disabled && !active ? "opacity-50" : ""}`}
           >

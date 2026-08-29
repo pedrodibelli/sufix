@@ -21,7 +21,6 @@ export async function Header() {
   const avatarUrl = (user?.user_metadata?.avatar_url as string | undefined) ?? null;
   const esProfesional = user?.user_metadata?.es_profesional === true;
   const isAdmin = isAdminEmail(user?.email);
-  const dk = esProfesional;
 
   // Punto rojo de novedades en "Contactos": pausado — dependía de propuestas
   // sobre trabajos publicados, que ya no existen (ver CLAUDE.md "Pivot
@@ -40,23 +39,19 @@ export async function Header() {
     ? `${nombre}${apellido ? ` ${apellido.charAt(0)}.` : ""}`
     : user?.email?.split("@")[0] ?? "";
 
-  const navLink = dk
-    ? "rounded-lg px-3.5 py-2 text-sm font-medium text-zap-100/70 transition-colors hover:bg-white/10 hover:text-white"
-    : "rounded-lg px-3.5 py-2 text-sm font-medium text-ink-500 transition-colors hover:bg-zap-100 hover:text-sv-dark";
+  const navLink = "rounded-lg px-3.5 py-2 text-sm font-medium text-ink-500 transition-colors hover:bg-zap-100 hover:text-sv-dark";
 
   return (
     <>
-    <header className={`relative sticky top-0 z-40 border-b backdrop-blur-lg ${
-      dk ? "border-white/10 bg-[#0e1a17]/95" : "border-ink-100/80 bg-white/90"
-    }`}>
+    <header className="relative sticky top-0 z-40 border-b border-ink-100/80 bg-white/90 backdrop-blur-lg">
       <div className="flex h-14 w-full items-center gap-4 px-5 sm:px-8 lg:px-12">
 
         {/* Logo */}
         <div className="flex flex-1 items-center">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <Image src="/logo.png" alt="Sufix" width={32} height={32} className="h-8 w-8 object-contain" />
-            <span className={`font-display text-[17px] font-semibold tracking-tight ${dk ? "text-white" : "text-sv-dark"}`}>
-              Su<span className={dk ? "text-zap-300" : "text-sv-primary"}>Fix</span>
+            <span className="font-display text-[17px] font-semibold tracking-tight text-sv-dark">
+              Su<span className="text-sv-primary">Fix</span>
             </span>
           </Link>
         </div>
@@ -85,7 +80,6 @@ export async function Header() {
               avatarUrl={avatarUrl}
               esProfesional={esProfesional}
               isAdmin={isAdmin}
-              dark={dk}
             />
           ) : (
             <>
@@ -98,12 +92,12 @@ export async function Header() {
             </>
           )}
           {/* Hamburguesa solo para visitantes; logueado alcanza con el menú del perfil */}
-          {!user && <MobileMenu hasUser={false} dark={dk} />}
+          {!user && <MobileMenu hasUser={false} />}
         </div>
 
       </div>
     </header>
-    {user && <BottomNav dark={dk} novedades={novedades} />}
+    {user && <BottomNav novedades={novedades} />}
     {user && <RealtimeRefresh />}
     </>
   );

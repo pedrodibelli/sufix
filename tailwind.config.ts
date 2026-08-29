@@ -23,41 +23,48 @@ export default {
           900: "#1e221c",
           950: "#0e110d",
         },
-        // Paleta de marca Sufix (informe de diseño)
+        // Paleta de marca Sufix (rediseño 2026-08-28: landing "crema/salvia"
+        // que armó el equipo de la facu, adoptada para toda la app — pidió
+        // sacar el tema oscuro del técnico y unificar todo en un look claro).
+        // Se mantienen los mismos NOMBRES de token (sv.primary, sv.olive,
+        // sv.dark, zap.*) para no tener que tocar cada className del código
+        // — solo cambian los valores hex, y el resto de la app hereda el
+        // look nuevo solo.
         sv: {
-          mint: "#99DDC8",      // Fondos y respiración visual
-          light: "#95BF74",     // Elementos amigables
-          primary: "#659B5E",   // Botones y acciones
-          olive: "#556F44",     // Títulos y navegación
-          dark: "#283F3B",      // Branding y confianza
+          mint: "#EEF1E5",      // Fondos y respiración visual (antes sage-soft)
+          light: "#E4EAD6",     // Elementos amigables (antes sage)
+          primary: "#4E7A3E",   // Botones y acciones (antes verde marca)
+          olive: "#3C6030",     // Títulos y navegación (verde oscuro)
+          dark: "#1D2E20",      // Branding y confianza (texto principal)
         },
         // Escala extendida para componentes (estados, badges, etc.)
         brand: {
-          50: "#f0f7ee",
-          100: "#d5edda",
-          200: "#add9b5",
-          300: "#95BF74",
-          400: "#7aac60",
-          500: "#659B5E",
-          600: "#556F44",
-          700: "#445937",
-          800: "#364829",
-          900: "#283F3B",
-          950: "#1a2b27",
+          50: "#f2f6ee",
+          100: "#e4ead6",
+          200: "#c9d6b0",
+          300: "#a8c187",
+          400: "#6d9856",
+          500: "#4E7A3E",
+          600: "#3C6030",
+          700: "#2f4d27",
+          800: "#263e20",
+          900: "#1D2E20",
+          950: "#131f16",
         },
-        // Mint como escala para acentos y highlights
+        // Crema/salvia como escala para acentos y fondos suaves (reemplaza
+        // el mint anterior — mismo rol, otra paleta).
         zap: {
-          DEFAULT: "#99DDC8",
-          50: "#f0faf7",
-          100: "#d5f0e7",
-          200: "#aadfd0",
-          300: "#99DDC8",
-          400: "#75c9af",
-          500: "#4dab8e",
-          600: "#3a8a71",
-          700: "#2e6e5a",
-          800: "#255847",
-          900: "#1c4537",
+          DEFAULT: "#EEF1E5",
+          50: "#FBF8EF",
+          100: "#F7F1E0",
+          200: "#EEF1E5",
+          300: "#E4EAD6",
+          400: "#c7d4b3",
+          500: "#a7bb8d",
+          600: "#87a06c",
+          700: "#6a8551",
+          800: "#526a3d",
+          900: "#3f532f",
         },
       },
       fontFamily: {

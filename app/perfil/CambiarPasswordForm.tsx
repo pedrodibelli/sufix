@@ -7,7 +7,7 @@ import { cambiarPassword } from "./actions";
 // demandante). Pensado sobre todo para el caso de cuentas creadas a mano por
 // el equipo con una contraseña temporal (mandada por WhatsApp) — el dueño
 // puede entrar y ponerse una propia.
-export function CambiarPasswordForm({ dark = false }: { dark?: boolean }) {
+export function CambiarPasswordForm() {
   const [editando, setEditando] = useState(false);
   const [actual, setActual] = useState("");
   const [nueva, setNueva] = useState("");
@@ -49,19 +49,12 @@ export function CambiarPasswordForm({ dark = false }: { dark?: boolean }) {
     });
   }
 
-  const cardCls = dark
-    ? "space-y-4 rounded-2xl border border-white/10 bg-[#162420] p-6"
-    : "card space-y-4 p-6";
-  const titleCls = dark ? "text-sm font-medium text-zap-200" : "text-sm font-medium text-ink-600";
-  const labelCls = dark ? "mb-1.5 block text-sm font-medium text-zap-300" : "label";
-  const editBtnCls = dark
-    ? "inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-1.5 text-xs font-medium text-zap-200 transition hover:bg-white/10"
-    : "inline-flex items-center gap-1.5 rounded-lg border border-ink-200 px-3 py-1.5 text-xs font-medium text-ink-600 transition hover:bg-ink-50";
-  const cancelBtnCls = dark
-    ? "rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-zap-200 transition hover:bg-white/10 disabled:opacity-50"
-    : "rounded-full border border-ink-200 px-4 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 disabled:opacity-50";
-  const msgCls = (ok?: boolean) =>
-    `text-sm font-medium ${ok ? (dark ? "text-emerald-400" : "text-emerald-600") : dark ? "text-rose-400" : "text-rose-600"}`;
+  const cardCls = "card space-y-4 p-6";
+  const titleCls = "text-sm font-medium text-ink-600";
+  const labelCls = "label";
+  const editBtnCls = "inline-flex items-center gap-1.5 rounded-lg border border-ink-200 px-3 py-1.5 text-xs font-medium text-ink-600 transition hover:bg-ink-50";
+  const cancelBtnCls = "rounded-full border border-ink-200 px-4 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 disabled:opacity-50";
+  const msgCls = (ok?: boolean) => `text-sm font-medium ${ok ? "text-emerald-600" : "text-rose-600"}`;
 
   if (!editando) {
     return (

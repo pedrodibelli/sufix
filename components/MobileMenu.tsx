@@ -3,16 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 
-export function MobileMenu({ hasUser, dark = false }: { hasUser: boolean; dark?: boolean }) {
+// El prop "dark" queda en la firma solo para no romper los call sites que
+// todavía lo pasan (Header, etc.) — desde el rediseño 2026-08-28 se unificó
+// todo a un solo tema claro, así que ya no cambia nada visualmente.
+export function MobileMenu({ hasUser }: { hasUser: boolean; dark?: boolean }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
-  const barColor = dark ? "bg-white" : "bg-sv-dark";
-  const btnHover = dark ? "hover:bg-white/10" : "hover:bg-zap-100";
-  const dropBg = dark ? "bg-[#0e1a17] border-white/10" : "bg-white border-ink-100";
-  const linkClass = dark
-    ? "rounded-xl px-4 py-3.5 text-sm font-medium text-zap-100/80 transition hover:bg-white/10 hover:text-white"
-    : "rounded-xl px-4 py-3.5 text-sm font-medium text-sv-dark transition hover:bg-zap-100";
+  const barColor = "bg-sv-dark";
+  const btnHover = "hover:bg-zap-100";
+  const dropBg = "bg-white border-ink-100";
+  const linkClass = "rounded-xl px-4 py-3.5 text-sm font-medium text-sv-dark transition hover:bg-zap-100";
 
   return (
     <>

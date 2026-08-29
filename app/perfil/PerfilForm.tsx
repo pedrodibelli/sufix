@@ -9,7 +9,6 @@ import { actualizarPerfil } from "./actions";
 
 export function PerfilForm({
   perfil,
-  dark = false,
 }: {
   perfil: {
     telefono: string | null;
@@ -18,7 +17,6 @@ export function PerfilForm({
     titular: string | null;
     anos_experiencia: number | null;
   } | null;
-  dark?: boolean;
 }) {
   const router = useRouter();
   const [editando, setEditando] = useState(false);
@@ -54,35 +52,27 @@ export function PerfilForm({
     setEditando(false);
   }
 
-  const cardCls = dark
-    ? "max-w-lg space-y-4 rounded-2xl border border-white/10 bg-[#162420] p-6"
-    : "card max-w-lg space-y-4 p-6";
-  const labelCls = dark ? "mb-1.5 block text-sm font-medium text-zap-300" : "label";
-  const helpCls = dark ? "mt-1 text-xs text-zap-500" : "mt-1 text-xs text-ink-400";
+  const cardCls = "card max-w-lg space-y-4 p-6";
+  const labelCls = "label";
+  const helpCls = "mt-1 text-xs text-ink-400";
 
-  // Campos: bloqueados (oscuros) por defecto; iluminados al editar.
+  // Campos: bloqueados por defecto; iluminados al editar.
   const inputCls = editando
     ? "field"
-    : dark
-    ? "w-full cursor-not-allowed rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-base text-zap-400"
     : "w-full cursor-not-allowed rounded-xl border border-ink-200 bg-ink-50 px-4 py-3 text-base text-ink-400";
 
   return (
     <div className={cardCls}>
       {/* Encabezado con lápiz */}
       <div className="flex items-center justify-between">
-        <span className={dark ? "text-sm font-medium text-zap-200" : "text-sm font-medium text-ink-600"}>
+        <span className="text-sm font-medium text-ink-600">
           {editando ? "Editando tus datos" : "Datos del perfil"}
         </span>
         {!editando && (
           <button
             type="button"
             onClick={() => setEditando(true)}
-            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-              dark
-                ? "border-white/15 text-zap-200 hover:bg-white/10"
-                : "border-ink-200 text-ink-600 hover:bg-ink-50"
-            }`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-ink-200 px-3 py-1.5 text-xs font-medium text-ink-600 transition hover:bg-ink-50"
           >
             ✏️ Editar
           </button>
@@ -136,7 +126,7 @@ export function PerfilForm({
       <div>
         <label className={labelCls}>Zona(s) — podés elegir más de una</label>
         {editando ? (
-          <ZonaChips selected={zona} onChange={setZona} dark={dark} />
+          <ZonaChips selected={zona} onChange={setZona} />
         ) : (
           <div className={inputCls}>{zona.length > 0 ? zona.join(", ") : "—"}</div>
         )}
@@ -145,7 +135,7 @@ export function PerfilForm({
       <div>
         <label className={labelCls}>Rubro(s) — podés elegir más de uno</label>
         {editando ? (
-          <RubroChips selected={rubro} onChange={setRubro} dark={dark} />
+          <RubroChips selected={rubro} onChange={setRubro} />
         ) : (
           <div className={inputCls}>
             {rubro.length > 0
@@ -158,13 +148,7 @@ export function PerfilForm({
       </div>
 
       {msg && (
-        <p
-          className={`text-sm font-medium ${
-            msg.ok
-              ? dark ? "text-emerald-400" : "text-emerald-600"
-              : dark ? "text-rose-400" : "text-rose-600"
-          }`}
-        >
+        <p className={`text-sm font-medium ${msg.ok ? "text-emerald-600" : "text-rose-600"}`}>
           {msg.text}
         </p>
       )}
@@ -175,9 +159,7 @@ export function PerfilForm({
             type="button"
             onClick={cancelar}
             disabled={pending}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition disabled:opacity-50 ${
-              dark ? "border-white/15 text-zap-200 hover:bg-white/10" : "border-ink-200 text-ink-600 hover:bg-ink-50"
-            }`}
+            className="rounded-full border border-ink-200 px-4 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-50 disabled:opacity-50"
           >
             Cancelar
           </button>

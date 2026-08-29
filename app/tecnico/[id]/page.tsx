@@ -77,7 +77,7 @@ export default async function TecnicoPage({
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#f5fdf9]">
+      <main className="min-h-screen bg-[#FBF8EF]">
         {/* Encabezado */}
         <section className="border-b border-ink-100 bg-white">
           <div className="container-pad py-10">

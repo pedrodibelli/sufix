@@ -67,7 +67,7 @@ export default async function PerfilPage() {
     return (
       <>
         <Header />
-        <main className="min-h-screen bg-[#f5fdf9]">
+        <main className="min-h-screen bg-[#FBF8EF]">
           <div className="container-pad py-10">
             <div className="mx-auto max-w-lg">
               <h1 className="display text-2xl">Mi perfil</h1>
@@ -137,69 +137,72 @@ export default async function PerfilPage() {
     );
   }
 
-  // Vista TÉCNICO (oscura)
+  // Vista TÉCNICO — mismo tema claro que la vista demandante desde el
+  // rediseño 2026-08-28 (antes era una versión oscura aparte).
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#0e1a17]">
+      <main className="min-h-screen bg-[#FBF8EF]">
         <div className="container-pad py-10">
-          <div className="flex items-center gap-4">
-            <AvatarUpload userId={user.id} initials={initials} avatarUrl={avatarUrl} size={64} dark />
-            <div>
-              <h1 className="display text-2xl text-zap-50">Mi perfil</h1>
-              <p className="mt-1 text-sm text-zap-400">{displayName} · Técnico</p>
-            </div>
-          </div>
-
-          {/* Reputación */}
-          <section className="mt-6">
-            <h2 className="display text-lg text-zap-50">Mi reputación</h2>
-            <div className="mt-3 rounded-2xl border border-white/10 bg-[#162420] p-5">
-              {total > 0 ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-xl text-amber-400">★</span>
-                  <span className="font-display text-2xl font-semibold text-zap-50">{promedio.toFixed(2)}</span>
-                  <span className="text-zap-400">· {total} reseña{total !== 1 ? "s" : ""}</span>
-                </div>
-              ) : (
-                <p className="text-sm text-zap-400">
-                  Todavía no tenés reseñas. Cuando completes trabajos, tus clientes van a poder calificarte.
-                </p>
-              )}
-            </div>
-
-            {resenas.length > 0 && (
-              <div className={`mt-3 ${resenas.length > 3 ? "flex gap-3 overflow-x-auto pb-2 no-scrollbar sm:block sm:space-y-3 sm:overflow-visible" : "space-y-3"}`}>
-                {resenas.map((r) => (
-                  <div
-                    key={r.id}
-                    className={`rounded-2xl border border-white/10 bg-[#162420] p-5 ${resenas.length > 3 ? "min-w-[260px] max-w-[280px] shrink-0 sm:min-w-0 sm:max-w-none" : ""}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-base text-amber-400">
-                        {"★".repeat(r.estrellas)}
-                        <span className="text-white/15">{"★".repeat(5 - r.estrellas)}</span>
-                      </span>
-                      <span className="text-[11.5px] text-zap-500">
-                        {new Date(r.creado_at).toLocaleDateString("es-AR")}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs font-medium text-zap-300">{r.autor_nombre ?? "Cliente"}</p>
-                    {r.comentario && <p className="mt-2 text-sm text-zap-100">{r.comentario}</p>}
-                  </div>
-                ))}
+          <div className="mx-auto max-w-lg">
+            <div className="flex items-center gap-4">
+              <AvatarUpload userId={user.id} initials={initials} avatarUrl={avatarUrl} size={64} />
+              <div>
+                <h1 className="display text-2xl">Mi perfil</h1>
+                <p className="mt-1 text-sm text-ink-400">{displayName} · Técnico</p>
               </div>
-            )}
-          </section>
-
-          {/* Datos editables */}
-          <section className="mt-8">
-            <h2 className="display text-lg text-zap-50">Mis datos</h2>
-            <div className="mt-3 space-y-3">
-              <PerfilForm perfil={perfil} dark />
-              <CambiarPasswordForm dark />
             </div>
-          </section>
+
+            {/* Reputación */}
+            <section className="mt-6">
+              <h2 className="display text-lg">Mi reputación</h2>
+              <div className="mt-3 card p-5">
+                {total > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl text-amber-400">★</span>
+                    <span className="font-display text-2xl font-semibold text-sv-dark">{promedio.toFixed(2)}</span>
+                    <span className="text-ink-400">· {total} reseña{total !== 1 ? "s" : ""}</span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-ink-400">
+                    Todavía no tenés reseñas. Cuando completes trabajos, tus clientes van a poder calificarte.
+                  </p>
+                )}
+              </div>
+
+              {resenas.length > 0 && (
+                <div className={`mt-3 ${resenas.length > 3 ? "flex gap-3 overflow-x-auto pb-2 no-scrollbar sm:block sm:space-y-3 sm:overflow-visible" : "space-y-3"}`}>
+                  {resenas.map((r) => (
+                    <div
+                      key={r.id}
+                      className={`card p-5 ${resenas.length > 3 ? "min-w-[260px] max-w-[280px] shrink-0 sm:min-w-0 sm:max-w-none" : ""}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-base text-amber-400">
+                          {"★".repeat(r.estrellas)}
+                          <span className="text-ink-200">{"★".repeat(5 - r.estrellas)}</span>
+                        </span>
+                        <span className="text-[11.5px] text-ink-400">
+                          {new Date(r.creado_at).toLocaleDateString("es-AR")}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs font-medium text-sv-olive">{r.autor_nombre ?? "Cliente"}</p>
+                      {r.comentario && <p className="mt-2 text-sm text-ink-700">{r.comentario}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Datos editables */}
+            <section className="mt-8">
+              <h2 className="display text-lg">Mis datos</h2>
+              <div className="mt-3 space-y-3">
+                <PerfilForm perfil={perfil} />
+                <CambiarPasswordForm />
+              </div>
+            </section>
+          </div>
         </div>
       </main>
       <Footer />

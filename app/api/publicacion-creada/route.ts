@@ -134,8 +134,8 @@ function card(o: {
   return `
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
-<body style="margin:0;padding:0;background:#f5fdf9;font-family:system-ui,-apple-system,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;padding:40px 16px;"><tr><td align="center">
+<body style="margin:0;padding:0;background:#FBF8EF;font-family:system-ui,-apple-system,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FBF8EF;padding:40px 16px;"><tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
       <tr><td align="center" style="padding-bottom:32px;">
         <span style="font-size:22px;font-weight:700;color:#1a2e1e;">Su<span style="color:#3d9b5e;">Fix</span></span>
@@ -144,7 +144,7 @@ function card(o: {
         <p style="margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#3d9b5e;">${o.eyebrow}</p>
         <h1 style="margin:0 0 16px;font-size:26px;font-weight:700;color:#1a2e1e;line-height:1.2;">${o.titulo}</h1>
         <p style="margin:0 0 24px;font-size:15px;color:#64748b;line-height:1.6;">${o.cuerpo}</p>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5fdf9;border-radius:12px;margin-bottom:28px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#FBF8EF;border-radius:12px;margin-bottom:28px;">
           <tr><td style="padding:16px;font-size:14px;color:#1a2e1e;line-height:1.6;">${o.detalle}</td></tr>
         </table>
         <a href="${o.ctaHref}" style="display:block;text-align:center;background:#3d9b5e;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 24px;border-radius:12px;margin-bottom:20px;">${o.ctaText}</a>

@@ -12,7 +12,7 @@
     font-size: max(16px, 1em);
   }
   body {
-    @apply bg-[#f5fdf9] text-sv-dark;
+    @apply bg-[#FBF8EF] text-sv-dark;
     font-family: var(--font-inter), system-ui, sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {

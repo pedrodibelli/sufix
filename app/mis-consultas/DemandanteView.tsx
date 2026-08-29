@@ -145,7 +145,7 @@ function PropuestaRow({
   const isRejected = estado === "rechazada";
 
   return (
-    <div className="rounded-xl border border-ink-100 bg-[#f5fdf9] p-3.5">
+    <div className="rounded-xl border border-ink-100 bg-[#FBF8EF] p-3.5">
       {/* Fila principal: avatar + info + precio + acciones */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         {/* Avatar + info */}
@@ -277,7 +277,7 @@ function InteresadoRow({
   }
 
   return (
-    <div className="rounded-xl border border-ink-100 bg-[#f5fdf9] p-3.5">
+    <div className="rounded-xl border border-ink-100 bg-[#FBF8EF] p-3.5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex flex-1 items-center gap-3 min-w-0">
           <Avatar url={perfil?.foto_url} initials={initials} size={40} textClass="text-xs" />
@@ -433,7 +433,7 @@ function TecnicosInteresadosModal({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-[#f5fdf9] p-4">
+        <div className="flex-1 overflow-y-auto bg-[#FBF8EF] p-4">
           <div className="space-y-2.5">
             {ordenados.map((prop) => (
               <InteresadoRow

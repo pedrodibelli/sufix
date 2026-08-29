@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Sora, Plus_Jakarta_Sans } from "next/font/google";
-import { createSupabaseServer } from "@/lib/supabase-server";
+import { Inter, Poppins, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -9,8 +8,12 @@ const inter = Inter({
   display: "swap",
 });
 
-const sora = Sora({
+// Reemplaza a Sora (rediseño 2026-08-28, look "crema/salvia" de la landing
+// nueva) — se mantiene la misma variable --font-sora para no tener que
+// tocar los usages de font-display en todo el resto del código.
+const sora = Poppins({
   subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
   variable: "--font-sora",
   display: "swap",
 });
@@ -34,24 +37,25 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#3d9b5e",
+  themeColor: "#4E7A3E",
 };
 
-export default async function RootLayout({
+// Nota (rediseño 2026-08-28): antes había un tema oscuro dedicado para
+// técnicos logueados (clase "theme-pro", ver globals.css) — el profesor de
+// la facu lo criticó y se decidió unificar todo en un solo tema claro para
+// demandante y técnico. Por eso este layout ya no necesita leer la sesión
+// para elegir clase de tema (se evita esa consulta a Supabase en cada
+// carga de página). La clase .theme-pro queda en globals.css sin usarse,
+// por si en algún momento se quiere reactivar un tema oscuro real.
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Marca el tema según el rol para que la pantalla de carga combine
-  // (oscura para el técnico, clara para el demandante/visitante).
-  const supabase = await createSupabaseServer();
-  const { data: { session } } = await supabase.auth.getSession();
-  const esTecnico = session?.user?.user_metadata?.es_profesional === true;
-
   return (
     <html
       lang="es"
-      className={`${inter.variable} ${sora.variable} ${jakarta.variable}${esTecnico ? " theme-pro" : ""}`}
+      className={`${inter.variable} ${sora.variable} ${jakarta.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen overflow-x-hidden antialiased max-sm:pb-[calc(5rem+env(safe-area-inset-bottom))]">{children}</body>

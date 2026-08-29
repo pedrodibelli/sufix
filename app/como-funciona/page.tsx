@@ -48,7 +48,7 @@ const FAQ = [
   },
   {
     q: "¿Cómo verifican a los técnicos?",
-    a: "Entrevista presencial, validación de identidad, antecedentes y matrícula cuando corresponde. La verificación se renueva anualmente.",
+    a: "Nuestro equipo revisa a mano cada perfil antes de publicarlo — reputación real (reseñas existentes, años en el oficio) y que los datos de contacto sean genuinos. El sello \"Verificado\" significa que una persona de Sufix lo chequeó, no una revisión automática.",
   },
   {
     q: "¿Qué pasa si el trabajo sale mal?",
@@ -117,20 +117,20 @@ export default async function ComoFuncionaPage() {
 
         {/* ── Flujo cliente ── */}
         {mostrarCliente && (
-        <section className="bg-gradient-to-br from-[#0e1a17] to-[#1f4a34]">
+        <section className="bg-zap-50">
           <div className="container-pad py-14 sm:py-20">
             <div className="mx-auto max-w-2xl text-center">
-              <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary/70">
+              <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-olive">
                 Para clientes
               </p>
-              <h2 className="reveal delay-100 display mt-1.5 text-2xl text-white sm:text-3xl">
+              <h2 className="reveal delay-100 display mt-1.5 text-2xl text-sv-dark sm:text-3xl">
                 Si necesitás resolver algo
               </h2>
             </div>
 
             <div className="mx-auto mt-10 grid max-w-5xl gap-5 sm:mt-14 sm:grid-cols-3 sm:gap-6">
               {PASOS_CLIENTE.map((paso, i) => (
-                <StepCard key={paso.title} n={i + 1} paso={paso} delay={STEP_DELAYS[i]} dark />
+                <StepCard key={paso.title} n={i + 1} paso={paso} delay={STEP_DELAYS[i]} />
               ))}
             </div>
           </div>
@@ -163,14 +163,14 @@ export default async function ComoFuncionaPage() {
         )}
 
         {/* ── Precios ── */}
-        <section className="bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] py-14 sm:py-20">
+        <section className="bg-white py-14 sm:py-20">
           <div className="container-pad">
             <div className="mx-auto max-w-4xl">
               <div className="text-center">
-                <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary/70">
+                <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-olive">
                   Transparencia de precios
                 </p>
-                <h2 className="reveal delay-100 display mt-1.5 text-2xl text-white sm:text-3xl">
+                <h2 className="reveal delay-100 display mt-1.5 text-2xl text-sv-dark sm:text-3xl">
                   Sin sorpresas
                 </h2>
               </div>
@@ -257,7 +257,7 @@ export default async function ComoFuncionaPage() {
         {/* ── CTA final ── */}
         <section className="bg-white py-14 sm:py-20">
           <div className="container-pad">
-            <div className="reveal mx-auto max-w-3xl rounded-2xl bg-gradient-to-br from-[#0e1a17] to-[#1f4a34] px-7 py-10 text-center sm:px-12 sm:py-14">
+            <div className="reveal mx-auto max-w-3xl rounded-2xl bg-sv-dark px-7 py-10 text-center sm:px-12 sm:py-14">
               {esTecnico ? (
                 <>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sv-primary">
@@ -306,36 +306,22 @@ export default async function ComoFuncionaPage() {
 function StepCard({
   n,
   paso,
-  dark = false,
   delay = "delay-0",
 }: {
   n: number;
   paso: { icon: string; title: string; body: string };
-  dark?: boolean;
   delay?: string;
 }) {
   return (
-    <div
-      className={`reveal ${delay} rounded-2xl border p-6 ${
-        dark ? "border-white/10 bg-white/[0.03]" : "border-ink-200 bg-[#fafcfa]"
-      }`}
-    >
+    <div className={`reveal ${delay} rounded-2xl border border-ink-200 bg-white p-6`}>
       <div className="flex items-center gap-3">
-        <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
-            dark ? "bg-sv-primary/20 text-sv-primary" : "bg-sv-primary/10 text-sv-primary"
-          }`}
-        >
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sv-primary/10 text-sm font-semibold text-sv-primary">
           {n}
         </span>
         <span className="text-2xl">{paso.icon}</span>
       </div>
-      <h3 className={`mt-4 text-base font-semibold ${dark ? "text-white" : "text-sv-dark"}`}>
-        {paso.title}
-      </h3>
-      <p className={`mt-1.5 text-sm leading-relaxed ${dark ? "text-white/50" : "text-ink-500"}`}>
-        {paso.body}
-      </p>
+      <h3 className="mt-4 text-base font-semibold text-sv-dark">{paso.title}</h3>
+      <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{paso.body}</p>
     </div>
   );
 }
