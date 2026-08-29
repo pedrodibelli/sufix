@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { TecnicosGrid } from "@/components/TecnicosGrid";
+import { TecnicosSortBar } from "@/components/TecnicosSortBar";
 import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
 import { HeroSearchCard } from "@/components/HeroSearchCard";
 import { ProblemStrip, SeguridadSection, OficiosGrid, ComoFuncionaPasos, WhatsAppMockupSection } from "@/components/HomeMarketingSections";
@@ -14,10 +15,11 @@ export default async function HomePage({
   searchParams,
 }: {
   searchParams: Promise<{
-    tecQ?: string; tecZona?: string;
+    tecQ?: string; tecZona?: string; tecSort?: string;
   }>;
 }) {
   const params = await searchParams;
+  const tecSort = params.tecSort === "resenas" ? "resenas" : "recomendados";
 
   // Filtros del directorio de técnicos, con prefijo "tec" (venían compartiendo
   // URL con los filtros viejos de "Consultas activas", ya retirados). Ya no
@@ -77,16 +79,25 @@ export default async function HomePage({
     return true;
   });
 
-  // Orden único (2026-08-21, ya no es elegible por el usuario): mejor
-  // calificación primero. Sin reseñas todavía = -1, así que un técnico recién
-  // registrado cae al final solo, y sube a medida que junta reseñas buenas —
-  // "automatizado" como pidió el usuario. Empate/sin reseñas: más nuevos primero.
+  // Orden (2026-08-29: vuelve a ser elegible, "Recomendados" / "Más reseñas"
+  // — antes era fijo por calificación, ver git history si hace falta el
+  // porqué de esa decisión). "Recomendados" = mejor calificación primero,
+  // sin reseñas todavía = -1 así un técnico recién registrado cae al final
+  // solo y sube a medida que junta reseñas buenas. "Más reseñas" = más
+  // cantidad de reseñas primero, sin importar el promedio. Ambos empatan
+  // por más nuevo primero.
   const tecnicosOrdenados = [...tecnicosFiltrados].sort((a, b) => {
     const ra = resumenMapTecnicos[a.user_id];
     const rb = resumenMapTecnicos[b.user_id];
-    const pa = ra && ra.total > 0 ? ra.promedio : -1;
-    const pb = rb && rb.total > 0 ? rb.promedio : -1;
-    if (pb !== pa) return pb - pa;
+    if (tecSort === "resenas") {
+      const ta = ra?.total ?? 0;
+      const tb = rb?.total ?? 0;
+      if (tb !== ta) return tb - ta;
+    } else {
+      const pa = ra && ra.total > 0 ? ra.promedio : -1;
+      const pb = rb && rb.total > 0 ? rb.promedio : -1;
+      if (pb !== pa) return pb - pa;
+    }
     return new Date(b.creado_at ?? 0).getTime() - new Date(a.creado_at ?? 0).getTime();
   });
 
@@ -196,7 +207,14 @@ export default async function HomePage({
                 TecnicosGrid internamente (reemplazo natural del link "Ver los
                 25 técnicos →" del mockup, que en el HTML apuntaba a una
                 tecnicos.html separada — acá todo vive en una sola página). */}
-            <section id="tecnicos" className="bg-zap-50 py-14 sm:py-20">
+            {/* pb más chico que pt a propósito: la línea/botón de "ver más"
+                de TecnicosGrid ya trae su propio mt-10 antes de esta
+                sección terminar, así que con pb completo el salto hacia
+                Seguridad quedaba más grande que entre el resto de las
+                secciones de más abajo. Restando esos 40px acá (en vez de
+                sacarle el margen a la línea) el salto final da igual sin
+                mover nada de posición dentro de la grilla. */}
+            <section id="tecnicos" className="bg-zap-50 pb-7 pt-14 sm:pb-10 sm:pt-20">
               <div className="container-home">
                 <div className="mx-auto max-w-2xl text-center">
                   <span className="text-[13px] font-bold uppercase tracking-wider text-sv-primary">Técnicos verificados</span>
@@ -211,6 +229,12 @@ export default async function HomePage({
                 </div>
 
                 <div className="mt-10">
+                  <TecnicosSortBar
+                    total={tecnicosOrdenados.length}
+                    tecQ={tecQ}
+                    tecZona={tecZona}
+                    tecSort={tecSort}
+                  />
                   <TecnicosGrid
                     tecnicos={tecnicosOrdenados}
                     resumenMap={resumenMapTecnicos}

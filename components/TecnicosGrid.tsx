@@ -64,11 +64,11 @@ export function TecnicosGrid({
 
       {/* Corte visual + paginado real: separa la grilla de la sección
           siguiente y, si hay más técnicos que los mostrados, los revela sin
-          recargar nada (ya están todos en memoria). Sin mt extra a
-          propósito: el padding normal de la sección (py-14 sm:py-20) ya
-          da el mismo salto que el resto de las secciones de abajo
-          (Seguridad→Oficios, etc.) — un margen acá encima lo agrandaba. */}
-      <div className="mt-0 flex justify-center">
+          recargar nada (ya están todos en memoria). mt-10 fijo (posición
+          de siempre, pegada a la grilla) — el ajuste de espacio total con
+          la sección siguiente se hace recortando el padding de la sección
+          en app/page.tsx, no moviendo esta línea. */}
+      <div className="mt-10 flex justify-center">
         {quedan > 0 ? (
           <button
             type="button"
