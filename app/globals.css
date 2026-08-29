@@ -78,6 +78,15 @@
   .container-pad {
     @apply mx-auto max-w-7xl px-5 sm:px-6 lg:px-8;
   }
+  /* Contenedor angosto (rediseño 2026-08-28): el mockup de la landing nueva
+     limita el contenido a 1140px, más angosto que container-pad (1280px) —
+     en pantallas anchas deja mucho más aire a los costados. Se usa SOLO en
+     las secciones nuevas de la home (hero, técnicos, marketing) — el resto
+     del sitio (categorías, buscar, admin, etc.) sigue con container-pad
+     sin cambios, no se pidió tocarlo. */
+  .container-home {
+    @apply mx-auto max-w-[1140px] px-5 sm:px-6 lg:px-8;
+  }
   /* Títulos con Sora */
   .display {
     @apply font-display font-semibold tracking-tight text-sv-dark;

@@ -68,12 +68,12 @@ export function TecnicosGrid({
           <button
             type="button"
             onClick={() => setVisibles((v) => v + TANDA)}
-            className="btn-outline border-white/25 bg-white/5 text-white hover:bg-white/10"
+            className="btn-outline"
           >
             Ver más técnicos ({quedan}) ↓
           </button>
         ) : (
-          <div className="h-px w-24 rounded-full bg-white/15" aria-hidden />
+          <div className="h-px w-24 rounded-full bg-sv-dark/15" aria-hidden />
         )}
       </div>
     </>

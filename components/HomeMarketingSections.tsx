@@ -10,7 +10,7 @@ import { CATEGORIES } from "@/lib/data";
 export function ProblemStrip() {
   return (
     <div className="bg-sv-dark py-6 text-center text-[#FBF8EF]">
-      <p className="container-pad mx-auto max-w-2xl font-display text-lg font-semibold sm:text-xl">
+      <p className="container-home mx-auto max-w-2xl font-display text-lg font-semibold sm:text-xl">
         Buscar un técnico de confianza hoy es preguntar en grupos de vecinos y{" "}
         <span className="text-sv-light">cruzar los dedos</span>. Sufix te muestra perfiles verificados de tu zona, al toque.
       </p>
@@ -46,7 +46,7 @@ const VERIFICACIONES = [
 export function SeguridadSection() {
   return (
     <section className="bg-white py-14 sm:py-20">
-      <div className="container-pad">
+      <div className="container-home">
         <div className="mx-auto mb-10 max-w-xl text-center sm:mb-14">
           <span className="text-[13px] font-bold uppercase tracking-wider text-sv-primary">Seguridad</span>
           <h2 className="display mt-3 text-3xl leading-tight text-sv-dark sm:text-4xl">
@@ -76,7 +76,7 @@ export function SeguridadSection() {
 export function OficiosGrid() {
   return (
     <section className="bg-zap-50 py-14 sm:py-20">
-      <div className="container-pad">
+      <div className="container-home">
         <div className="mx-auto mb-10 max-w-xl text-center sm:mb-14">
           <span className="text-[13px] font-bold uppercase tracking-wider text-sv-primary">Oficios</span>
           <h2 className="display mt-3 text-3xl leading-tight text-sv-dark sm:text-4xl">
@@ -112,7 +112,7 @@ const PASOS = [
 export function ComoFuncionaPasos() {
   return (
     <section className="bg-white py-14 sm:py-20">
-      <div className="container-pad">
+      <div className="container-home">
         <div className="mx-auto mb-10 max-w-xl text-center sm:mb-14">
           <span className="text-[13px] font-bold uppercase tracking-wider text-sv-primary">Cómo funciona</span>
           <h2 className="display mt-3 text-3xl leading-tight text-sv-dark sm:text-4xl">
@@ -145,7 +145,7 @@ export function ComoFuncionaPasos() {
 export function WhatsAppMockupSection() {
   return (
     <section className="bg-zap-50 py-14 sm:py-20">
-      <div className="container-pad grid items-center gap-10 lg:grid-cols-[1fr_0.85fr] lg:gap-16">
+      <div className="container-home grid items-center gap-10 lg:grid-cols-[1fr_0.85fr] lg:gap-16">
         <div>
           <span className="text-[13px] font-bold uppercase tracking-wider text-sv-primary">Todo por WhatsApp</span>
           <h2 className="display mt-3 text-3xl leading-tight text-sv-dark sm:text-4xl">

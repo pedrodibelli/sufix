@@ -143,7 +143,7 @@ export default async function HomePage({
                 style={{ background: "#E4EAD6", borderRadius: "44% 56% 60% 40% / 48% 42% 58% 52%" }}
                 aria-hidden
               />
-              <div className="container-pad relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-11">
+              <div className="container-home relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-11">
                 <div>
                   <span className="mb-3.5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-sv-olive">
                     ✦ Ya funcionamos en CABA
@@ -197,7 +197,7 @@ export default async function HomePage({
                 25 técnicos →" del mockup, que en el HTML apuntaba a una
                 tecnicos.html separada — acá todo vive en una sola página). */}
             <section id="tecnicos" className="bg-zap-50 py-14 sm:py-20">
-              <div className="container-pad">
+              <div className="container-home">
                 <div className="mx-auto max-w-2xl text-center">
                   <span className="text-[13px] font-bold uppercase tracking-wider text-sv-primary">Técnicos verificados</span>
                   <h2 className="display mt-2 text-3xl leading-tight text-sv-dark sm:text-4xl">
@@ -230,7 +230,7 @@ export default async function HomePage({
                 <WhatsAppMockupSection />
 
                 <section className="bg-white py-16 text-center sm:py-24">
-                  <div className="container-pad">
+                  <div className="container-home">
                     <h2 className="display mx-auto max-w-lg text-3xl leading-tight text-sv-dark sm:text-4xl">
                       Tu próximo arreglo, a un mensaje de distancia
                     </h2>
