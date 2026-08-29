@@ -2,11 +2,10 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { TecnicosGrid } from "@/components/TecnicosGrid";
-import { TecnicosSearchBar } from "@/components/TecnicosSearchBar";
 import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
 import { HeroSearchCard } from "@/components/HeroSearchCard";
 import { ProblemStrip, SeguridadSection, OficiosGrid, ComoFuncionaPasos, WhatsAppMockupSection } from "@/components/HomeMarketingSections";
-import { CATEGORIES, ZONES, ZONAS_CABA } from "@/lib/data";
+import { CATEGORIES, ZONAS_CABA } from "@/lib/data";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 export const revalidate = 0; // siempre datos frescos
@@ -190,6 +189,13 @@ export default async function HomePage({
             </section>
 
             {/* ── TÉCNICOS VERIFICADOS ── */}
+            {/* Copia fiel del mockup: título + descripción + grilla, nada más.
+                El buscador único de la página es el del hero (HeroSearchCard) —
+                antes había un segundo buscador acá (TecnicosSearchBar) que
+                confundía sobre cuál usar. El "ver más" lo resuelve
+                TecnicosGrid internamente (reemplazo natural del link "Ver los
+                25 técnicos →" del mockup, que en el HTML apuntaba a una
+                tecnicos.html separada — acá todo vive en una sola página). */}
             <section id="tecnicos" className="bg-zap-50 py-14 sm:py-20">
               <div className="container-pad">
                 <div className="mx-auto max-w-2xl text-center">
@@ -197,83 +203,20 @@ export default async function HomePage({
                   <h2 className="display mt-2 text-3xl leading-tight text-sv-dark sm:text-4xl">
                     {sinSesion ? "Perfiles listos, apenas entrás." : "Elegí con quién hablar."}
                   </h2>
+                  <p className="mt-3 text-base text-ink-500">
+                    {sinSesion
+                      ? "Así se ven los técnicos disponibles en tu zona ahora mismo."
+                      : "Mirá su perfil, sus reseñas y escribile por WhatsApp directo."}
+                  </p>
                 </div>
 
-                <div className="mx-auto mt-8 max-w-3xl">
-                  <TecnicosSearchBar
-                    tecQ={tecQ}
-                    tecZona={tecZona}
-                    tecnicos={tecnicos.map((t) => ({ user_id: t.user_id, nombre: t.nombre }))}
+                <div className="mt-10">
+                  <TecnicosGrid
+                    tecnicos={tecnicosOrdenados}
+                    resumenMap={resumenMapTecnicos}
+                    hayFiltrosActivos={!!(tecQ || tecZona)}
                   />
                 </div>
-
-                {sinSesion && (
-                  <div className="mt-5 text-center">
-                    <Link href="/registrar" className="text-sm font-medium text-sv-olive underline underline-offset-4 hover:text-sv-dark">
-                      Soy técnico, quiero aparecer acá →
-                    </Link>
-                  </div>
-                )}
-
-                {/* Stats reales — nada inventado */}
-                <div className="mb-8 mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {[
-                    { value: String(tecnicos.length), label: tecnicos.length === 1 ? "Técnico activo" : "Técnicos activos" },
-                    { value: String(CATEGORIES.length), label: "Oficios" },
-                    { value: String(ZONES.length), label: "Zonas en CABA" },
-                    { value: "$0", label: "Siempre gratis" },
-                  ].map((s) => (
-                    <div key={s.label} className="card p-4">
-                      <div className="display text-2xl text-sv-dark">{s.value}</div>
-                      <div className="mt-0.5 text-xs text-ink-500">{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <p className="mb-4 text-sm text-ink-500">
-                  {tecnicosOrdenados.length} {tecnicosOrdenados.length === 1 ? "técnico encontrado" : "técnicos encontrados"}
-                </p>
-
-                <TecnicosGrid
-                  tecnicos={tecnicosOrdenados}
-                  resumenMap={resumenMapTecnicos}
-                  hayFiltrosActivos={!!(tecQ || tecZona)}
-                />
-
-                {/* Cartel de reclutamiento — solo para visitantes sin cuenta */}
-                {sinSesion && (
-                  <div className="mt-14 rounded-3xl bg-white p-8 sm:p-12">
-                    <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-8">
-                      <div>
-                        <span className="inline-block rounded-full bg-sv-primary/10 px-3 py-1 text-xs font-semibold text-sv-olive">
-                          Para técnicos y profesionales
-                        </span>
-                        <h2 className="display mt-4 text-3xl leading-tight text-sv-dark sm:text-4xl">
-                          Aparecé gratis y que te encuentren tus próximos clientes.
-                        </h2>
-                        <p className="mt-4 text-ink-500">
-                          Sin comisión por trabajo, sin intermediarios. Los clientes te
-                          escriben directo a tu WhatsApp — cobrás el 100% de cada servicio.
-                        </p>
-                        <Link href="/registrar" className="btn-primary mt-6 inline-block">
-                          Crear mi perfil gratis →
-                        </Link>
-                      </div>
-                      <div className="space-y-3">
-                        {[
-                          { title: "Cobrás el 100%", body: "Sin comisión por trabajo. Lo que cobrás es tuyo." },
-                          { title: "Clientes a tu WhatsApp", body: "Te escriben directo, sin intermediarios ni esperas." },
-                          { title: "Sumá reputación", body: "Reseñas reales que te consiguen los próximos trabajos." },
-                        ].map((b) => (
-                          <div key={b.title} className="rounded-xl border border-ink-200 bg-zap-50 p-4">
-                            <p className="text-sm font-semibold text-sv-dark">{b.title}</p>
-                            <p className="mt-0.5 text-xs text-ink-500">{b.body}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </section>
 
