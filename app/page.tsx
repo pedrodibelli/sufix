@@ -150,20 +150,20 @@ export default async function HomePage({
                   </span>
                   {sinSesion ? (
                     <>
-                      <h1 className="display max-w-lg text-4xl font-extrabold leading-[1.1] text-sv-dark sm:text-5xl">
+                      <h1 className="display max-w-lg text-3xl font-extrabold leading-[1.15] text-sv-dark sm:text-4xl">
                         ¿Se rompió algo en casa? <span className="text-sv-primary">Encontrá a quien lo resuelva.</span>
                       </h1>
-                      <p className="mt-3.5 max-w-md text-base leading-relaxed text-ink-500 sm:text-lg">
+                      <p className="mt-3.5 max-w-md text-sm leading-relaxed text-ink-500 sm:text-base">
                         No empieces a pedir contactos por WhatsApp. Mirá perfiles verificados por nuestro equipo, sus
                         reseñas y su zona, y escribile directo — sin publicar nada, sin esperar propuestas.
                       </p>
                     </>
                   ) : (
                     <>
-                      <h1 className="display max-w-lg text-4xl font-extrabold leading-[1.1] text-sv-dark sm:text-5xl">
+                      <h1 className="display max-w-lg text-3xl font-extrabold leading-[1.15] text-sv-dark sm:text-4xl">
                         Encontrá tu <span className="text-sv-primary">técnico ideal.</span>
                       </h1>
-                      <p className="mt-3.5 max-w-md text-base leading-relaxed text-ink-500 sm:text-lg">
+                      <p className="mt-3.5 max-w-md text-sm leading-relaxed text-ink-500 sm:text-base">
                         Mirá su perfil, sus reseñas y escribile por WhatsApp directo.
                       </p>
                     </>
