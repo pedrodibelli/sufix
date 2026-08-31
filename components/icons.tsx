@@ -73,3 +73,52 @@ export function IconVerifiedBadge({ className = "h-3.5 w-3.5" }: IconProps) {
     </svg>
   );
 }
+
+// Íconos de oficio para la sección "Oficios" de la home (rediseño
+// 2026-08-31, pedido puntual del usuario para reemplazar los emojis por
+// algo propio y consistente — set hecho con Claude Design: grilla 24×24,
+// trazo 1.75 redondeado, un solo color vía currentColor). Los emojis de
+// rubro en el resto de la app (chips de técnico, etc.) NO se tocan, siguen
+// siendo datos con significado propio — ver comentario arriba del archivo.
+// "Gas matriculado" y "Carpintería" del set original quedaron rehechas acá
+// (rellenas/inconsistentes con el resto, no legibles a tamaño chico); el
+// resto de los 8 se usan tal cual los bajó el usuario.
+const OFICIO_PATHS: Record<string, string> = {
+  plomeria: "M7 3.4v7.6a6 6 0 0 0 6 6h7.6 M11 3.4v7.6a2 2 0 0 0 2 2h7.6 M5.2 3.4h7.6 M20.6 11.2v7.6",
+  electricidad: "M13.5 2.5 6 13h5l-1 8.5L18 10h-5.2z",
+  // Llama de línea simple — reemplaza la versión rellena original (rompía
+  // el estilo "solo trazo" del resto del set).
+  gas: "M12 2.8c.6 3-1.2 4.6-2.7 6.2-1.7 1.8-3.1 3.6-3.1 6 0 3.3 2.6 5.9 5.8 5.9s5.8-2.6 5.8-5.9c0-2-1.1-3.5-2.1-4.9-.9 1-1.6 1.6-2.5 2.1.6-2.4 1-4.9-1.2-9.4Z",
+  aire: "M6.6 7h10.8 M5 14c1.4 0 2 1.2 3.5 1.2S12 14 13.5 14s2 1.2 3.5 1.2S20 14 20 14 M5 18.6c1.4 0 2 1.2 3.5 1.2s2.1-1.2 3.5-1.2 2 1.2 3.5 1.2 2-1.2 2-1.2",
+  pintura: "M16 6.2h3.5a1.2 1.2 0 0 1 1.2 1.2v2.4a1.2 1.2 0 0 1-1.2 1.2H13a1.2 1.2 0 0 0-1.2 1.2v1.3",
+  // Clavo con punta en V — reemplaza el intento original (una sierra
+  // rellena que no se leía como herramienta a tamaño chico).
+  carpinteria: "M9 4h6 M12 4v13 M12 17l-2 3.5 M12 17l2 3.5",
+  albanileria: "M2.8 9.7h18.4M2.8 14.3h18.4 M9 5v4.7M15.5 5v4.7M6 9.7v4.6M12 9.7v4.6M18 9.7v4.6M9 14.3V19M15.5 14.3V19",
+  electrodomesticos: "M4 8.2h16",
+  vidrieria: "M7 17 17 7 M12.5 18.5 18.5 12.5",
+  // Llave sin el "ojo de cerradura" interno (pedido puntual: sacarle el
+  // círculo chico de adentro al círculo grande).
+  cerrajeria: "M11.6 11.6l9 9 M15.6 15.6l2.4-2.4 M18.2 18.2l2.4-2.4",
+};
+
+// Formas que necesitan un elemento extra además del/los <path> de arriba
+// (rectángulos, círculos) — mismo criterio 1.75/round que el resto.
+export function IconOficio({ slug, className = "h-full w-full" }: IconProps & { slug: string }) {
+  const d = OFICIO_PATHS[slug];
+  if (!d) return null;
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      {slug === "aire" && <rect x="3.2" y="3.2" width="17.6" height="6.4" rx="2" />}
+      {slug === "pintura" && <rect x="3" y="3.5" width="13" height="5.5" rx="1.6" />}
+      {slug === "pintura" && <rect x="10.3" y="14.5" width="3.4" height="6.5" rx="1.7" />}
+      {slug === "albanileria" && <rect x="2.8" y="5" width="18.4" height="14" rx="1.8" />}
+      {slug === "electrodomesticos" && <rect x="4" y="3" width="16" height="18" rx="2.6" />}
+      {slug === "electrodomesticos" && <circle cx="12" cy="14.6" r="4" />}
+      {slug === "electrodomesticos" && <circle cx="16.6" cy="5.6" r=".95" fill="currentColor" stroke="none" />}
+      {slug === "vidrieria" && <rect x="3.4" y="3.4" width="17.2" height="17.2" rx="2.4" />}
+      {slug === "cerrajeria" && <circle cx="8.2" cy="8.2" r="4.8" />}
+      <path d={d} />
+    </svg>
+  );
+}

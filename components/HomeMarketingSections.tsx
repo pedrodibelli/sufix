@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/data";
+import { IconOficio } from "@/components/icons";
 
 // Secciones de marketing de la home para visitantes sin cuenta (rediseño
 // 2026-08-28, landing "crema/salvia"). Todo estático/decorativo — sin fetch
@@ -90,8 +91,8 @@ export function OficiosGrid() {
               href={`/categoria/${c.slug}`}
               className="rounded-2xl border border-ink-100 bg-white p-5 text-center transition hover:-translate-y-0.5 hover:shadow-[0_18px_34px_-22px_rgba(29,46,32,0.3)]"
             >
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-sv-mint text-xl">
-                {c.icon}
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-sv-mint p-3 text-sv-primary">
+                <IconOficio slug={c.slug} />
               </div>
               <h4 className="font-display text-[14.5px] font-semibold text-sv-dark">{c.name}</h4>
             </Link>
