@@ -180,19 +180,22 @@ export default async function HomePage({
                     </>
                   )}
 
-                  {sinSesion && (
-                    <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
-                      {["Identidad verificada", "Reputación real, no inventada", "Revisado a mano por Sufix"].map((t) => (
-                        <div key={t} className="flex items-center gap-1.5 text-[13px] font-semibold text-sv-olive">
-                          <svg viewBox="0 0 24 24" fill="none" className="h-[17px] w-[17px] shrink-0">
-                            <path d="M12 3 4 6v6c0 5 3.4 8.7 8 9 4.6-.3 8-4 8-9V6l-8-3Z" stroke="#3C6030" strokeWidth="1.7" strokeLinejoin="round" />
-                            <path d="M9 12l2 2 4-4" stroke="#3C6030" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                          {t}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  {/* Antes solo para visitantes sin cuenta (sinSesion) — se
+                      muestra siempre para demandante: no es contenido de
+                      "primer contacto", es refuerzo de confianza válido
+                      para cualquiera (pedido 2026-08-31, unificar la home
+                      logueada con la de visitante). */}
+                  <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
+                    {["Identidad verificada", "Reputación real, no inventada", "Revisado a mano por Sufix"].map((t) => (
+                      <div key={t} className="flex items-center gap-1.5 text-[13px] font-semibold text-sv-olive">
+                        <svg viewBox="0 0 24 24" fill="none" className="h-[17px] w-[17px] shrink-0">
+                          <path d="M12 3 4 6v6c0 5 3.4 8.7 8 9 4.6-.3 8-4 8-9V6l-8-3Z" stroke="#3C6030" strokeWidth="1.7" strokeLinejoin="round" />
+                          <path d="M9 12l2 2 4-4" stroke="#3C6030" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {t}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <HeroSearchCard />
@@ -244,30 +247,36 @@ export default async function HomePage({
               </div>
             </section>
 
-            {/* ── Resto de la landing — solo primer contacto (sin sesión) ── */}
-            {sinSesion && (
-              <>
-                <SeguridadSection />
-                <ProblemStrip />
-                <OficiosGrid />
-                <ComoFuncionaPasos />
-                <WhatsAppMockupSection />
+            {/* ── Resto de la landing ── */}
+            {/* Antes solo para visitantes sin cuenta (sinSesion) — un
+                demandante logueado se quedaba con una versión mucho más
+                pobre de la home (solo hero + grilla), nada de esto. Se
+                unifica: ninguna de estas secciones es contenido exclusivo
+                de "primer contacto" — Oficios sirve para navegar, Seguridad
+                y Cómo funciona no dejan de aplicar por tener cuenta
+                (pedido 2026-08-31). El técnico logueado sigue viendo su
+                propia vista aparte (más abajo), eso no cambia. */}
+            <>
+              <SeguridadSection />
+              <ProblemStrip />
+              <OficiosGrid />
+              <ComoFuncionaPasos />
+              <WhatsAppMockupSection />
 
-                <section className="bg-white py-16 text-center sm:py-24">
-                  <div className="container-home">
-                    <h2 className="display mx-auto max-w-lg text-3xl leading-tight text-sv-dark sm:text-4xl">
-                      Tu próximo arreglo, a un mensaje de distancia
-                    </h2>
-                    <p className="mx-auto mt-3 max-w-md text-base text-ink-500">
-                      Buscá técnicos verificados de tu zona y escribiles directo por WhatsApp. Gratis, sin registro.
-                    </p>
-                    <Link href="#tecnicos" className="btn-primary mt-7 inline-block px-9">
-                      Buscar técnico →
-                    </Link>
-                  </div>
-                </section>
-              </>
-            )}
+              <section className="bg-white py-16 text-center sm:py-24">
+                <div className="container-home">
+                  <h2 className="display mx-auto max-w-lg text-3xl leading-tight text-sv-dark sm:text-4xl">
+                    Tu próximo arreglo, a un mensaje de distancia
+                  </h2>
+                  <p className="mx-auto mt-3 max-w-md text-base text-ink-500">
+                    Buscá técnicos verificados de tu zona y escribiles directo por WhatsApp.
+                  </p>
+                  <Link href="#tecnicos" className="btn-primary mt-7 inline-block px-9">
+                    Buscar técnico →
+                  </Link>
+                </div>
+              </section>
+            </>
           </>
         )}
 
