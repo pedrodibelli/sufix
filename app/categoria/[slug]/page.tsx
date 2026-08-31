@@ -63,11 +63,17 @@ export default async function CategoriaPage({
             <div className="mt-4">
               <div className="text-5xl">{cat.icon}</div>
               <h1 className="display mt-3 text-4xl text-sv-dark md:text-5xl">{cat.name}</h1>
-              <p className="mt-2 max-w-xl text-ink-700">{cat.blurb}</p>
+              {/* Frase única con la cantidad ya adentro (2026-08-29) —
+                  antes había un blurb con ejemplos de problemas sueltos
+                  (herencia del modelo viejo de "publicá tu problema", sin
+                  sentido acá) más una segunda línea aparte solo con el
+                  número. Se fusionan en una sola frase con propósito. */}
+              <p className="mt-2 max-w-xl text-ink-700">
+                {tecnicos.length}{" "}
+                {tecnicos.length === 1 ? "técnico" : "técnicos"} de {cat.name} verificados,
+                listos para contactar por WhatsApp.
+              </p>
             </div>
-            <p className="mt-6 text-sm font-medium text-ink-600">
-              {tecnicos.length} {tecnicos.length === 1 ? "técnico verificado" : "técnicos verificados"} de {cat.name.toLowerCase()}
-            </p>
           </div>
         </section>
 
