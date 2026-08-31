@@ -2,22 +2,23 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { IconPaso, IconCheck, IconChevronDown } from "@/components/icons";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const PASOS_CLIENTE = [
   {
-    icon: "🔍",
+    icon: "explorar",
     title: "Explorás perfiles",
     body: "Mirás foto, rubros, zona y reseñas de técnicos verificados cerca tuyo — sin registrarte.",
   },
   {
-    icon: "💬",
+    icon: "elegir",
     title: "Elegís y escribís",
     body: "Tocás \"Contactar por WhatsApp\" en el perfil que te convenza. Un clic, sin formularios ni esperas.",
   },
   {
-    icon: "🤝",
+    icon: "coordinar",
     title: "Coordinan directo",
     body: "Hablan por WhatsApp, acuerdan precio y fecha entre ustedes. Sin intermediarios, sin comisión.",
   },
@@ -25,17 +26,17 @@ const PASOS_CLIENTE = [
 
 const PASOS_TECNICO = [
   {
-    icon: "📋",
+    icon: "registro",
     title: "Te registrás y armás tu perfil",
     body: "Cargá tu foto, tus rubros y tu zona — es lo primero que ve un cliente antes de escribirte.",
   },
   {
-    icon: "👀",
+    icon: "aparecer",
     title: "Aparecés en el directorio",
     body: "Cualquiera puede ver tu perfil, tus reseñas y contactarte — con cuenta o sin ella.",
   },
   {
-    icon: "💬",
+    icon: "whatsapp",
     title: "Te escriben directo por WhatsApp",
     body: "Coordinás el trabajo y cobrás vos, directo con el cliente. Cero comisión, cero intermediarios.",
   },
@@ -80,8 +81,15 @@ export default async function ComoFuncionaPage() {
       <main className="bg-white">
 
         {/* ── Hero ── */}
-        <section className="bg-white py-14 sm:py-20 lg:py-24">
-          <div className="container-pad">
+        {/* Mismo blob decorativo que el hero de la home, para que se sienta
+            la misma familia visual apenas se entra (pedido 2026-08-31). */}
+        <section className="relative overflow-hidden bg-white py-14 sm:py-20 lg:py-24">
+          <div
+            className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] opacity-70"
+            style={{ background: "#E4EAD6", borderRadius: "44% 56% 60% 40% / 48% 42% 58% 52%" }}
+            aria-hidden
+          />
+          <div className="container-pad relative">
             <div className="mx-auto max-w-2xl text-center">
               <p className="reveal delay-0 text-[11px] font-semibold uppercase tracking-[0.18em] text-sv-primary">
                 Cómo funciona
@@ -189,13 +197,13 @@ export default async function ComoFuncionaPage() {
                   <div className="my-5 h-px bg-ink-100" />
                   <ul className="space-y-2.5 text-sm text-ink-600">
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> $0 por ver perfiles y reseñas
+                      <IconCheck className="h-4 w-4 shrink-0 text-sv-primary" /> $0 por ver perfiles y reseñas
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> $0 por escribir por WhatsApp
+                      <IconCheck className="h-4 w-4 shrink-0 text-sv-primary" /> $0 por escribir por WhatsApp
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> Elegís vos, sin apuro
+                      <IconCheck className="h-4 w-4 shrink-0 text-sv-primary" /> Elegís vos, sin apuro
                     </li>
                   </ul>
                 </div>
@@ -214,13 +222,13 @@ export default async function ComoFuncionaPage() {
                   <div className="my-5 h-px bg-sv-primary/15" />
                   <ul className="space-y-2.5 text-sm text-ink-600">
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> $0 por aparecer en el directorio
+                      <IconCheck className="h-4 w-4 shrink-0 text-sv-primary" /> $0 por aparecer en el directorio
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> $0 por usar la plataforma
+                      <IconCheck className="h-4 w-4 shrink-0 text-sv-primary" /> $0 por usar la plataforma
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <span className="text-sv-primary">✓</span> Cobrás directo del cliente, sin intermediarios
+                      <IconCheck className="h-4 w-4 shrink-0 text-sv-primary" /> Cobrás directo del cliente, sin intermediarios
                     </li>
                   </ul>
                 </div>
@@ -243,7 +251,7 @@ export default async function ComoFuncionaPage() {
                     <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-[15px] font-medium text-sv-dark sm:text-base">
                       {f.q}
                       <span className="mt-0.5 shrink-0 text-ink-300 transition-transform duration-200 group-open:rotate-180">
-                        ▾
+                        <IconChevronDown className="h-4 w-4" />
                       </span>
                     </summary>
                     <p className="mt-3 text-sm leading-relaxed text-ink-500">{f.a}</p>
@@ -318,7 +326,9 @@ function StepCard({
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sv-primary/10 text-sm font-semibold text-sv-primary">
           {n}
         </span>
-        <span className="text-2xl">{paso.icon}</span>
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sv-mint p-2.5 text-sv-primary">
+          <IconPaso slug={paso.icon} />
+        </span>
       </div>
       <h3 className="mt-4 text-base font-semibold text-sv-dark">{paso.title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-ink-500">{paso.body}</p>
