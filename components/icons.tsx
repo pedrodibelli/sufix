@@ -91,9 +91,11 @@ const OFICIO_PATHS: Record<string, string> = {
   gas: "M12 2.8c.6 3-1.2 4.6-2.7 6.2-1.7 1.8-3.1 3.6-3.1 6 0 3.3 2.6 5.9 5.8 5.9s5.8-2.6 5.8-5.9c0-2-1.1-3.5-2.1-4.9-.9 1-1.6 1.6-2.5 2.1.6-2.4 1-4.9-1.2-9.4Z",
   aire: "M6.6 7h10.8 M5 14c1.4 0 2 1.2 3.5 1.2S12 14 13.5 14s2 1.2 3.5 1.2S20 14 20 14 M5 18.6c1.4 0 2 1.2 3.5 1.2s2.1-1.2 3.5-1.2 2 1.2 3.5 1.2 2-1.2 2-1.2",
   pintura: "M16 6.2h3.5a1.2 1.2 0 0 1 1.2 1.2v2.4a1.2 1.2 0 0 1-1.2 1.2H13a1.2 1.2 0 0 0-1.2 1.2v1.3",
-  // Clavo con punta en V — reemplaza el intento original (una sierra
-  // rellena que no se leía como herramienta a tamaño chico).
-  carpinteria: "M9 4h6 M12 4v13 M12 17l-2 3.5 M12 17l2 3.5",
+  // Clavo con cabeza redonda ancha + hombros + vástago afinado a punta —
+  // pedido puntual del usuario con referencia visual (2026-08-31), el
+  // primer intento (cabeza plana + vástago recto) se leía como una "T"
+  // en vez de un clavo.
+  carpinteria: "M7 6c0-2 2.2-3.5 5-3.5s5 1.5 5 3.5 M7 6 10 8 M17 6 14 8 M10 8 10.3 16 M14 8 13.7 16 M10.3 16 12 20.5 M13.7 16 12 20.5",
   albanileria: "M2.8 9.7h18.4M2.8 14.3h18.4 M9 5v4.7M15.5 5v4.7M6 9.7v4.6M12 9.7v4.6M18 9.7v4.6M9 14.3V19M15.5 14.3V19",
   electrodomesticos: "M4 8.2h16",
   vidrieria: "M7 17 17 7 M12.5 18.5 18.5 12.5",
