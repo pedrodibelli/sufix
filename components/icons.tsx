@@ -202,3 +202,18 @@ export function IconStar({ className = "h-full w-full" }: IconProps) {
     </svg>
   );
 }
+
+// Dos personas — "elegís con quién hablar, sin intermediarios" en la
+// sección "Todo por WhatsApp" de la home (2026-09-03, mismo pedido: sacar
+// emojis). Junto con IconPaso "elegir" (chat) y "coordinar" (calendario)
+// completa el trío de esa lista de beneficios.
+export function IconPeople({ className = "h-full w-full" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <circle cx="6" cy="7" r="2.6" />
+      <path d="M2.5 18c.5-3 1.7-4.5 3.5-4.5s3 1.5 3.5 4.5" />
+      <circle cx="18" cy="7" r="2.6" />
+      <path d="M14.5 18c.5-3 1.7-4.5 3.5-4.5s3 1.5 3.5 4.5" />
+    </svg>
+  );
+}

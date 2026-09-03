@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/data";
-import { IconOficio, IconSeguridad, IconPaso, IconStar } from "@/components/icons";
+import { IconOficio, IconSeguridad, IconPaso, IconStar, IconPeople } from "@/components/icons";
 
 // Secciones de marketing de la home para visitantes sin cuenta (rediseño
 // 2026-08-28, landing "crema/salvia"). Todo estático/decorativo — sin fetch
@@ -155,12 +155,14 @@ export function WhatsAppMockupSection() {
           <p className="mt-3 text-base text-ink-500">Simple y rápido, sin vueltas ni intermediarios.</p>
           <div className="mt-6 flex flex-col gap-5">
             {[
-              { icon: "💬", title: "Hablás directo con el profesional", body: "Sin formularios, sin esperar respuesta de la plataforma." },
-              { icon: "🗓️", title: "Coordinás día, horario y detalles", body: "Vos y el técnico se ponen de acuerdo, a su ritmo." },
-              { icon: "🤝", title: "Elegís con quién hablar, sin intermediarios", body: "El contacto es directo, siempre." },
+              { icon: "elegir", title: "Hablás directo con el profesional", body: "Sin formularios, sin esperar respuesta de la plataforma." },
+              { icon: "coordinar", title: "Coordinás día, horario y detalles", body: "Vos y el técnico se ponen de acuerdo, a su ritmo." },
+              { icon: "personas", title: "Elegís con quién hablar, sin intermediarios", body: "El contacto es directo, siempre." },
             ].map((b) => (
               <div key={b.title} className="flex items-start gap-3.5">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sv-mint text-base">{b.icon}</span>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sv-mint p-2 text-sv-primary">
+                  {b.icon === "personas" ? <IconPeople /> : <IconPaso slug={b.icon} />}
+                </span>
                 <div>
                   <h4 className="font-display text-[15px] font-semibold text-sv-dark">{b.title}</h4>
                   <p className="text-[13.5px] text-ink-500">{b.body}</p>
