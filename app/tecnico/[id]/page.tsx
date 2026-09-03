@@ -154,7 +154,11 @@ export default async function TecnicoPage({
                   tecnicoId={id}
                   waLink={waLink}
                   origen="perfil"
-                  className="btn w-full bg-[#25D366] py-3.5 text-base text-white hover:brightness-95 sm:w-auto sm:px-8"
+                  // shrink-0 + whitespace-nowrap: sin esto, cuando la
+                  // izquierda crece mucho (varias zonas/rubros/reputación
+                  // externa), el botón se achicaba como cualquier flex item
+                  // y el texto se partía en dos líneas, agrandándolo mal.
+                  className="btn w-full shrink-0 whitespace-nowrap bg-[#25D366] py-3.5 text-base text-white hover:brightness-95 sm:w-auto sm:px-8"
                 >
                   <IconWhatsApp className="h-4 w-4" /> Contactar por WhatsApp
                 </ContactarWhatsAppButton>
