@@ -88,9 +88,13 @@ export default function PrivacidadPage() {
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li>Mostrar el perfil público de los técnicos a quien busca un servicio.</li>
                 <li>Permitir el contacto directo por WhatsApp entre las partes.</li>
-                <li>Enviar avisos por email relacionados con tu cuenta o tu actividad en el sitio.</li>
+                <li>Identificar tu cuenta y poder comunicarnos con vos si hiciera falta.</li>
                 <li>Entender qué tan bien funciona el directorio y mejorarlo.</li>
               </ul>
+              <p className="mt-3">
+                <strong>Hoy Sufix no envía emails automáticos ni newsletters.</strong> Si en algún
+                momento empezáramos a mandar avisos, lo vamos a aclarar acá antes.
+              </p>
               <p className="mt-3">
                 <strong>No vendemos tus datos personales ni los cedemos con fines publicitarios.</strong>
               </p>
@@ -119,7 +123,6 @@ export default function PrivacidadPage() {
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li><strong>Supabase</strong> — base de datos, autenticación y almacenamiento de fotos.</li>
                 <li><strong>Vercel</strong> — hosting del sitio.</li>
-                <li><strong>Google (Gmail)</strong> — envío de los emails de aviso.</li>
               </ul>
               <p className="mt-2">
                 No compartimos tus datos con nadie más, salvo requerimiento legal de autoridad
