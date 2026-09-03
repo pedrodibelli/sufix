@@ -87,7 +87,9 @@ export function TecnicosGrid({
             Ver más técnicos ({quedan}) ↓
           </button>
         ) : (
-          <div className="h-px w-24 rounded-full bg-sv-dark/15" aria-hidden />
+          // Estaba en /15 y prácticamente no se veía sobre el crema: el corte no
+          // se leía y quedaba como un hueco vacío hasta la sección Seguridad.
+          <div className="h-px w-28 rounded-full bg-sv-dark/35" aria-hidden />
         )}
       </div>
     </>
