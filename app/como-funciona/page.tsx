@@ -70,9 +70,16 @@ export default async function ComoFuncionaPage() {
   const { data: { session } } = await supabase.auth.getSession();
   const user = session?.user ?? null;
   const esTecnico = user?.user_metadata?.es_profesional === true;
-  const esDemandante = !!user && !esTecnico;
-  const mostrarCliente = !esTecnico;    // visitante o demandante
-  const mostrarTecnico = !esDemandante; // visitante o técnico
+
+  // Antes se ocultaba el flujo del otro rol (demandante logueado no veía
+  // "Si sos técnico", técnico no veía "Si necesitás resolver algo") —
+  // dejaba la página con la mitad del contenido y, en Precios, una sola
+  // tarjeta sola en medio de mucho vacío (se veía asimétrico y pobre).
+  // Mismo criterio que se aplicó en la home (2026-08-31): ningún flujo es
+  // exclusivo de un rol, mostrar los dos siempre es más completo y no
+  // perjudica a nadie.
+  const mostrarCliente = true;
+  const mostrarTecnico = true;
 
   return (
     <>
