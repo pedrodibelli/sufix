@@ -13,10 +13,13 @@ export function TecnicosGrid({
   tecnicos,
   resumenMap,
   hayFiltrosActivos = false,
+  rubroContexto = null,
 }: {
   tecnicos: TecnicoPublico[];
   resumenMap: Record<string, Resumen>;
   hayFiltrosActivos?: boolean;
+  // Oficio desde el que se está mirando la grilla, si lo hay. Ver TecnicoCard.
+  rubroContexto?: string | null;
 }) {
   // Mostrar todos los técnicos de entrada (web pensada para ser bien
   // scrolleable): el corte por tandas de TANDA es solo para cuando el
@@ -64,7 +67,7 @@ export function TecnicosGrid({
           tarjetas quedaban más angostas/apretadas que la referencia. */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {mostrados.map((t) => (
-          <TecnicoCard key={t.user_id} tecnico={t} resumen={resumenMap[t.user_id]} />
+          <TecnicoCard key={t.user_id} tecnico={t} resumen={resumenMap[t.user_id]} rubroContexto={rubroContexto} />
         ))}
       </div>
 

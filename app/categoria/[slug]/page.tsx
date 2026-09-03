@@ -9,7 +9,7 @@ import { IconOficio } from "@/components/icons";
 import { Avatar } from "@/components/Avatar";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
-import { calificacionEfectiva } from "@/lib/reputacion";
+import { calificacionEfectiva, promedioGeneral as calcPromedioGeneral, puntajeRecomendado } from "@/lib/reputacion";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 export const revalidate = 0; // siempre datos frescos, se actualiza solo con cada técnico nuevo
@@ -49,10 +49,14 @@ export default async function CategoriaPage({
   // Mismo orden que la home: mejor calificación primero (Google Maps cuenta
   // igual que una reseña nativa si el técnico la tiene cargada — ver
   // lib/reputacion.ts), sin reseñas de ningún tipo = -1.
+  // Mismo criterio ponderado que "Recomendados" en la home (2026-09-04).
+  const globalRubro = calcPromedioGeneral(tecnicos.map((t) => calificacionEfectiva(t, resumenMap[t.user_id])));
   const tecnicosOrdenados = [...tecnicos].sort((a, b) => {
     const ca = calificacionEfectiva(a, resumenMap[a.user_id]);
     const cb = calificacionEfectiva(b, resumenMap[b.user_id]);
-    if (cb.promedio !== ca.promedio) return cb.promedio - ca.promedio;
+    const pa = puntajeRecomendado(ca.promedio, ca.total, globalRubro);
+    const pb = puntajeRecomendado(cb.promedio, cb.total, globalRubro);
+    if (pb !== pa) return pb - pa;
     return new Date(b.creado_at ?? 0).getTime() - new Date(a.creado_at ?? 0).getTime();
   });
 
@@ -176,7 +180,7 @@ export default async function CategoriaPage({
         </section>
 
         <section className="container-home py-12">
-          <TecnicosGrid tecnicos={tecnicosOrdenados} resumenMap={resumenMap} />
+          <TecnicosGrid tecnicos={tecnicosOrdenados} resumenMap={resumenMap} rubroContexto={slug} />
         </section>
       </main>
       <Footer />

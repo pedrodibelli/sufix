@@ -10,6 +10,7 @@ import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
 import { calificacionEfectiva } from "@/lib/reputacion";
+import { mensajeWhatsApp } from "@/lib/whatsapp";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { DejarResenaForm } from "./DejarResenaForm";
 import { ReportarPerfilBoton } from "./ReportarPerfilBoton";
@@ -26,10 +27,16 @@ type Resena = {
 
 export default async function TecnicoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  // ?rubro=<slug> lo agrega la tarjeta cuando venís desde /categoria/[slug],
+  // para que el mensaje de WhatsApp de acá nombre el oficio por el que
+  // llegaste y no el primero de la lista del técnico (ver lib/whatsapp.ts).
+  searchParams: Promise<{ rubro?: string }>;
 }) {
   const { id } = await params;
+  const { rubro: rubroContexto } = await searchParams;
   const supabase = await createSupabaseServer();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -82,10 +89,11 @@ export default async function TecnicoPage({
     : null;
 
   const telefonoLimpio = perfil.telefono?.replace(/\D/g, "") ?? "";
-  const primerRubroNombre = rubrosNombres[0] ?? "un servicio";
-  const mensajeWa = encodeURIComponent(
-    `Hola ${nombre.split(" ")[0]}! Te encontré en Sufix, me interesa tu servicio de ${primerRubroNombre}. ¿Estás disponible?`
-  );
+  // El oficio solo se nombra si vino en la URL Y el técnico lo tiene cargado.
+  const rubroDelContexto = rubroContexto && rubros.includes(rubroContexto)
+    ? rubroCats.find((c) => c.slug === rubroContexto)?.name ?? null
+    : null;
+  const mensajeWa = encodeURIComponent(mensajeWhatsApp(nombre, rubroDelContexto));
   const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensajeWa}` : null;
 
   return (

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/data";
-import { IconOficio, IconSeguridad, IconPaso, IconStar, IconPeople } from "@/components/icons";
+import { IconOficio, IconSeguridad, IconPaso, IconStar } from "@/components/icons";
 
 // Secciones de marketing de la home para visitantes sin cuenta (rediseño
 // 2026-08-28, landing "crema/salvia"). Todo estático/decorativo — sin fetch
@@ -155,30 +155,13 @@ export function ComoFuncionaPasos() {
 export function WhatsAppMockupSection() {
   return (
     <section className="bg-zap-50 py-14 sm:py-20">
-      <div className="container-home grid items-center gap-10 lg:grid-cols-[1fr_0.85fr] lg:gap-16">
-        <div>
+      <div className="container-home">
+        <div className="mx-auto mb-10 max-w-xl text-center">
           <span className="text-[13px] font-bold uppercase tracking-wider text-sv-primary">Todo por WhatsApp</span>
           <h2 className="display mt-3 text-3xl leading-tight text-sv-dark sm:text-4xl">
             Contactás, coordinás <span className="text-sv-primary">y listo.</span>
           </h2>
-          <p className="mt-3 text-base text-ink-500">Simple y rápido, sin vueltas ni intermediarios.</p>
-          <div className="mt-6 flex flex-col gap-5">
-            {[
-              { icon: "elegir", title: "Hablás directo con el profesional", body: "Sin formularios, sin esperar respuesta de la plataforma." },
-              { icon: "coordinar", title: "Coordinás día, horario y detalles", body: "Vos y el técnico se ponen de acuerdo, a su ritmo." },
-              { icon: "personas", title: "Elegís con quién hablar, sin intermediarios", body: "El contacto es directo, siempre." },
-            ].map((b) => (
-              <div key={b.title} className="flex items-start gap-3.5">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sv-mint p-2 text-sv-primary">
-                  {b.icon === "personas" ? <IconPeople /> : <IconPaso slug={b.icon} />}
-                </span>
-                <div>
-                  <h4 className="font-display text-[15px] font-semibold text-sv-dark">{b.title}</h4>
-                  <p className="text-[13.5px] text-ink-500">{b.body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="mt-3 text-base text-ink-500">Así se ve una consulta de verdad, de principio a fin.</p>
         </div>
 
         <div className="mx-auto w-full max-w-[320px] overflow-hidden rounded-[32px] border-[8px] border-sv-dark bg-white shadow-[0_30px_60px_-24px_rgba(29,46,32,0.4)]">

@@ -7,6 +7,7 @@ import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
 import { calificacionEfectiva } from "@/lib/reputacion";
+import { mensajeWhatsApp } from "@/lib/whatsapp";
 
 export type TecnicoPublico = {
   user_id: string;
@@ -34,9 +35,15 @@ export function TecnicoCard({
   tecnico,
   resumen,
   modoPreview = false,
+  rubroContexto = null,
 }: {
   tecnico: TecnicoPublico;
   resumen?: { promedio: number; total: number };
+  // Slug del oficio por el que el usuario llegó a esta tarjeta, si lo hay.
+  // Lo pasa /categoria/[slug]; la home no pasa nada porque no puede saberlo.
+  // Sirve para dos cosas: el mensaje de WhatsApp y el link al perfil, que se
+  // lo lleva en la URL para que allá tampoco se pierda el contexto.
+  rubroContexto?: string | null;
   // Para cuando el técnico ve SU PROPIA tarjeta (home) — no tiene sentido
   // que se contacte a sí mismo por WhatsApp, así que el botón cambia por
   // un link para editar el perfil.
@@ -54,12 +61,16 @@ export function TecnicoCard({
   const rubros = tecnico.rubro ?? [];
   const rubroCats = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
   const rubrosNombres = rubroCats.length > 0 ? rubroCats.map((c) => c.name) : rubros;
-  const primerRubro = rubrosNombres[0] ?? "un servicio";
+  // Solo se nombra el oficio si el técnico realmente lo tiene cargado —
+  // defensivo, aunque /categoria/[slug] ya filtra por eso.
+  const rubroDelContexto = rubroContexto && rubros.includes(rubroContexto)
+    ? CATEGORIES.find((c) => c.slug === rubroContexto)?.name ?? null
+    : null;
   const bio = tecnico.titular?.trim() || "";
 
   const telefonoLimpio = tecnico.telefono?.replace(/\D/g, "") ?? "";
   const mensaje = encodeURIComponent(
-    `Hola ${nombre.split(" ")[0]}! Te encontré en Sufix, me interesa tu servicio de ${primerRubro}. ¿Estás disponible?`
+    mensajeWhatsApp(nombre, rubroDelContexto)
   );
   const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensaje}` : null;
 
@@ -94,7 +105,10 @@ export function TecnicoCard({
         </span>
       )}
 
-      <Link href={`/tecnico/${tecnico.user_id}`} className="flex flex-1 flex-col">
+      <Link
+        href={`/tecnico/${tecnico.user_id}${rubroDelContexto ? `?rubro=${rubroContexto}` : ""}`}
+        className="flex flex-1 flex-col"
+      >
         {/* mt-6 fijo siempre (no solo si verificado): el sello ocupa ese
             espacio arriba a la derecha para quien lo tiene, pero todas las
             tarjetas necesitan el mismo aire reservado — si no, las que no

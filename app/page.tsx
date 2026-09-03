@@ -7,7 +7,7 @@ import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
 import { HeroSearchCard } from "@/components/HeroSearchCard";
 import { ProblemStrip, SeguridadSection, OficiosGrid, ComoFuncionaPasos, WhatsAppMockupSection } from "@/components/HomeMarketingSections";
 import { CATEGORIES, ZONAS_CABA } from "@/lib/data";
-import { calificacionEfectiva } from "@/lib/reputacion";
+import { calificacionEfectiva, promedioGeneral, puntajeRecomendado } from "@/lib/reputacion";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 export const revalidate = 0; // siempre datos frescos
@@ -91,13 +91,22 @@ export default async function HomePage({
   // lib/reputacion.ts) cuenta acá igual que una reseña nativa de Sufix —
   // es reputación real y verificable, no tiene sentido que un técnico
   // arranque de cero en el orden solo porque las reseñas están en Google.
+  // "Recomendados" usa un promedio ponderado por confianza, no el promedio
+  // pelado (2026-09-04): así un 4.90 con 570 reseñas le gana a un 5.00 con
+  // una sola, que es lo que pasaba antes. Ver puntajeRecomendado() para la
+  // fórmula y el porqué. "Más reseñas" sigue ordenando por cantidad, que es
+  // lo que dice la etiqueta.
+  const califs = tecnicosFiltrados.map((t) => calificacionEfectiva(t, resumenMapTecnicos[t.user_id]));
+  const globalTecnicos = promedioGeneral(califs);
   const tecnicosOrdenados = [...tecnicosFiltrados].sort((a, b) => {
     const ca = calificacionEfectiva(a, resumenMapTecnicos[a.user_id]);
     const cb = calificacionEfectiva(b, resumenMapTecnicos[b.user_id]);
     if (tecSort === "resenas") {
       if (cb.total !== ca.total) return cb.total - ca.total;
     } else {
-      if (cb.promedio !== ca.promedio) return cb.promedio - ca.promedio;
+      const pa = puntajeRecomendado(ca.promedio, ca.total, globalTecnicos);
+      const pb = puntajeRecomendado(cb.promedio, cb.total, globalTecnicos);
+      if (pb !== pa) return pb - pa;
     }
     return new Date(b.creado_at ?? 0).getTime() - new Date(a.creado_at ?? 0).getTime();
   });
