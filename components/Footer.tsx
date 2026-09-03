@@ -20,20 +20,24 @@ export function Footer() {
     .map((slug) => CATEGORIES.find((c) => c.slug === slug))
     .filter((c): c is (typeof CATEGORIES)[number] => !!c);
 
-  const linkCls = "text-[13.5px] text-ink-500 transition-colors hover:text-sv-primary";
-  const tituloCls = "font-display text-[13px] font-semibold uppercase tracking-wider text-sv-dark";
+  // Footer oscuro (2026-09-04). El resto de la app es crema; que el pie sea
+  // verde oscuro lo separa del contenido y marca el final de la página, que es
+  // lo que hace casi cualquier sitio con el que nos comparan. Mismo par de
+  // colores que la tira "el problema" de la home (bg-sv-dark + crema).
+  const linkCls = "text-[13.5px] text-[#FBF8EF]/60 transition-colors hover:text-[#FBF8EF]";
+  const tituloCls = "font-display text-[13px] font-semibold uppercase tracking-wider text-[#FBF8EF]";
 
   return (
-    <footer className="border-t border-ink-100 bg-[#FBF8EF]">
+    <footer className="bg-sv-dark">
       <div className="container-home py-12 sm:py-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Marca */}
           <div className="lg:pr-4">
             <div className="flex items-center gap-2">
               <Image src="/logo.png" alt="Sufix" width={26} height={26} className="h-[26px] w-[26px] object-contain" />
-              <span className="font-display text-lg font-semibold text-sv-dark">Sufix</span>
+              <span className="font-display text-lg font-semibold text-[#FBF8EF]">Sufix</span>
             </div>
-            <p className="mt-3 text-[13.5px] leading-relaxed text-ink-500">
+            <p className="mt-3 text-[13.5px] leading-relaxed text-[#FBF8EF]/60">
               Conectamos hogares con técnicos verificados de CABA y zona norte. Sin comisiones, sin
               intermediarios.
             </p>
@@ -41,7 +45,7 @@ export function Footer() {
               href="https://www.instagram.com/sufix.ar/"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-2 text-[13.5px] font-medium text-ink-500 transition-colors hover:text-sv-primary"
+              className="mt-4 inline-flex items-center gap-2 text-[13.5px] font-medium text-[#FBF8EF]/60 transition-colors hover:text-[#FBF8EF]"
             >
               <IconInstagram className="h-[18px] w-[18px]" />
               @sufix.ar
@@ -119,11 +123,11 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-ink-100 pt-6">
-          <p className="text-[13px] text-ink-400">
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-[#FBF8EF]/15 pt-6">
+          <p className="text-[13px] text-[#FBF8EF]/45">
             © {new Date().getFullYear()} Sufix. Hecho en Buenos Aires.
           </p>
-          <p className="text-[13px] text-ink-400">sufixapp.com</p>
+          <p className="text-[13px] text-[#FBF8EF]/45">sufixapp.com</p>
         </div>
       </div>
     </footer>
