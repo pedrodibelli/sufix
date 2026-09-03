@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
+import { IconSearch, IconPeople } from "@/components/icons";
 
 type Resumen = { promedio: number; total: number };
 
@@ -31,7 +32,12 @@ export function TecnicosGrid({
   if (tecnicos.length === 0) {
     return (
       <div className="card p-10 text-center">
-        <div className="text-2xl">{hayFiltrosActivos ? "🔍" : "🔧"}</div>
+        {/* Íconos de línea, no emojis (2026-09-04): este estado vacío solo
+            aparece en rubros sin técnicos o con filtros sin resultados, así
+            que se había escapado de la limpieza de emojis anterior. */}
+        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-sv-mint p-2.5 text-sv-primary">
+          {hayFiltrosActivos ? <IconSearch className="h-full w-full" /> : <IconPeople />}
+        </div>
         <h3 className="display mt-2 text-xl text-sv-dark">
           {hayFiltrosActivos ? "Sin resultados para esa búsqueda" : "Todavía no hay técnicos cargados"}
         </h3>
