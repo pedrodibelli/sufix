@@ -99,6 +99,14 @@ export function OficiosGrid() {
             </Link>
           ))}
         </div>
+        {/* Mismo remate que "Cómo funciona" (2026-09-04). La grilla de arriba
+            ya muestra los 10 oficios; lo que suma /categorias es cuántos
+            técnicos hay en cada uno. */}
+        <div className="mt-10 text-center">
+          <Link href="/categorias" className="text-sm font-semibold text-sv-primary underline underline-offset-4 hover:text-sv-olive">
+            Ver todos los oficios →
+          </Link>
+        </div>
       </div>
     </section>
   );
