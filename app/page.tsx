@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { TecnicosGrid } from "@/components/TecnicosGrid";
-import { TecnicosSortBar } from "@/components/TecnicosSortBar";
+import { TecnicosDirectorio } from "@/components/TecnicosDirectorio";
 import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
 import { HeroSearchCard } from "@/components/HeroSearchCard";
 import { ProblemStrip, SeguridadSection, OficiosGrid, ComoFuncionaPasos, WhatsAppMockupSection } from "@/components/HomeMarketingSections";
@@ -242,16 +241,15 @@ export default async function HomePage({
                 </div>
 
                 <div className="mt-10">
-                  <TecnicosSortBar
-                    total={tecnicosOrdenados.length}
-                    tecQ={tecQ}
-                    tecZona={tecZona}
-                    tecSort={tecSort}
-                  />
-                  <TecnicosGrid
+                  {/* La barra de orden y la grilla van juntas en un componente
+                      cliente: cambiar de orden se resuelve en el navegador, sin
+                      navegar ni saltar el scroll. El servidor igual manda la
+                      lista ya ordenada, con el mismo criterio. */}
+                  <TecnicosDirectorio
                     tecnicos={tecnicosOrdenados}
                     resumenMap={resumenMapTecnicos}
                     hayFiltrosActivos={!!(tecQ || tecZona)}
+                    ordenInicial={tecSort}
                   />
                 </div>
               </div>
