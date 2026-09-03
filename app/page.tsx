@@ -7,6 +7,7 @@ import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
 import { HeroSearchCard } from "@/components/HeroSearchCard";
 import { ProblemStrip, SeguridadSection, OficiosGrid, ComoFuncionaPasos, WhatsAppMockupSection } from "@/components/HomeMarketingSections";
 import { CATEGORIES, ZONAS_CABA } from "@/lib/data";
+import { calificacionEfectiva } from "@/lib/reputacion";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 export const revalidate = 0; // siempre datos frescos
@@ -43,7 +44,7 @@ export default async function HomePage({
   if (!esProfesional) {
     const { data: tecnicosRaw } = await supabaseServer
       .from("perfiles_publicos")
-      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at")
+      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, google_rating, google_reviews_count, google_maps_url")
       .not("rubro", "is", null)
       .not("telefono", "is", null)
       .order("creado_at", { ascending: false });
@@ -86,17 +87,17 @@ export default async function HomePage({
   // solo y sube a medida que junta reseñas buenas. "Más reseñas" = más
   // cantidad de reseñas primero, sin importar el promedio. Ambos empatan
   // por más nuevo primero.
+  // La reputación de Google Maps (para quien la tenga cargada, ver
+  // lib/reputacion.ts) cuenta acá igual que una reseña nativa de Sufix —
+  // es reputación real y verificable, no tiene sentido que un técnico
+  // arranque de cero en el orden solo porque las reseñas están en Google.
   const tecnicosOrdenados = [...tecnicosFiltrados].sort((a, b) => {
-    const ra = resumenMapTecnicos[a.user_id];
-    const rb = resumenMapTecnicos[b.user_id];
+    const ca = calificacionEfectiva(a, resumenMapTecnicos[a.user_id]);
+    const cb = calificacionEfectiva(b, resumenMapTecnicos[b.user_id]);
     if (tecSort === "resenas") {
-      const ta = ra?.total ?? 0;
-      const tb = rb?.total ?? 0;
-      if (tb !== ta) return tb - ta;
+      if (cb.total !== ca.total) return cb.total - ca.total;
     } else {
-      const pa = ra && ra.total > 0 ? ra.promedio : -1;
-      const pb = rb && rb.total > 0 ? rb.promedio : -1;
-      if (pb !== pa) return pb - pa;
+      if (cb.promedio !== ca.promedio) return cb.promedio - ca.promedio;
     }
     return new Date(b.creado_at ?? 0).getTime() - new Date(a.creado_at ?? 0).getTime();
   });
@@ -115,7 +116,7 @@ export default async function HomePage({
     const [{ data: perfilRow }, { data: resumenRow }, { data: contactosRows }] = await Promise.all([
       supabaseServer
         .from("perfiles_publicos")
-        .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at")
+        .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, google_rating, google_reviews_count, google_maps_url")
         .eq("user_id", user.id)
         .maybeSingle(),
       supabaseServer.from("resenas_resumen").select("promedio, total").eq("tecnico_id", user.id).maybeSingle(),

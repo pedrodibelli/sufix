@@ -9,6 +9,7 @@ import { IconMapPin, IconVerifiedBadge, IconWhatsApp } from "@/components/icons"
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
+import { calificacionEfectiva } from "@/lib/reputacion";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { DejarResenaForm } from "./DejarResenaForm";
 
@@ -33,7 +34,7 @@ export default async function TecnicoPage({
 
   const { data: perfil } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, anos_experiencia")
+    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, anos_experiencia, google_rating, google_reviews_count, google_maps_url")
     .eq("user_id", id)
     .maybeSingle();
 
@@ -63,8 +64,9 @@ export default async function TecnicoPage({
   const rubros: string[] = Array.isArray(perfil.rubro) ? perfil.rubro : perfil.rubro ? [perfil.rubro] : [];
   const rubroCats = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
   const rubrosNombres = rubroCats.length > 0 ? rubroCats.map((c) => c.name) : rubros;
-  const promedio = resumen ? Number(resumen.promedio) : 0;
-  const total = resumen ? Number(resumen.total) : 0;
+  const resumenSufix = resumen ? { promedio: Number(resumen.promedio), total: Number(resumen.total) } : undefined;
+  const calificacion = calificacionEfectiva(perfil, resumenSufix);
+  const { promedio, total, esGoogle } = calificacion;
   const lista = (resenas ?? []) as Resena[];
 
   const telefonoLimpio = perfil.telefono?.replace(/\D/g, "") ?? "";
@@ -98,7 +100,30 @@ export default async function TecnicoPage({
                   )}
                   <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500">
                     {total > 0 ? (
-                      <StarRating rating={promedio} reviews={total} size="md" />
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <StarRating rating={promedio} reviews={total} size="md" />
+                        {/* Aclaración explícita cuando la calificación viene de Google
+                            Maps y no de reseñas nativas de Sufix (opt-in por técnico,
+                            ver lib/reputacion.ts) — nunca se mezcla ni se presenta
+                            como si fuera de acá. Clickeable a la ficha real para que
+                            cualquiera lo pueda verificar. */}
+                        {esGoogle && (
+                          perfil.google_maps_url ? (
+                            <a
+                              href={perfil.google_maps_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 rounded-full border border-ink-200 px-2 py-0.5 text-[11px] font-medium text-ink-500 underline-offset-2 hover:underline"
+                            >
+                              Reputación de Google Maps ↗
+                            </a>
+                          ) : (
+                            <span className="inline-flex items-center rounded-full border border-ink-200 px-2 py-0.5 text-[11px] font-medium text-ink-500">
+                              Reputación de Google Maps
+                            </span>
+                          )
+                        )}
+                      </div>
                     ) : (
                       <span className="inline-flex items-center rounded-full bg-blue-600 px-2.5 py-0.5 text-[12px] font-semibold text-white">
                         Nuevo en Sufix
@@ -154,14 +179,22 @@ export default async function TecnicoPage({
           </div>
         </section>
 
-        {/* Reseñas */}
+        {/* Reseñas — siempre las nativas de Sufix (comentarios reales
+            dejados acá), nunca las de Google mezcladas con esto. El
+            contador usa resumenSufix, no la calificación efectiva de
+            arriba (que puede venir de Google). */}
         <section className="container-pad py-10">
           <h2 className="display text-2xl text-sv-dark">
-            Reseñas {total > 0 && <span className="text-ink-400">({total})</span>}
+            Reseñas en Sufix {resumenSufix && resumenSufix.total > 0 && <span className="text-ink-400">({resumenSufix.total})</span>}
           </h2>
 
           {lista.length === 0 ? (
             <div className="mt-5 rounded-2xl border border-dashed border-ink-200 p-10 text-center text-ink-400">
+              {esGoogle && (
+                <p className="mb-2 text-sm text-ink-500">
+                  Su reputación de Google Maps ya está arriba — acá van las reseñas de quienes lo contactaron por Sufix.
+                </p>
+              )}
               Todavía no tiene reseñas. ¡Sé el primero en calificarlo!
             </div>
           ) : (

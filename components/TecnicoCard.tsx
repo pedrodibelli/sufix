@@ -6,6 +6,7 @@ import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconSparkle } from "@/comp
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
+import { calificacionEfectiva } from "@/lib/reputacion";
 
 export type TecnicoPublico = {
   user_id: string;
@@ -17,6 +18,11 @@ export type TecnicoPublico = {
   telefono: string | null;
   titular: string | null;
   creado_at?: string;
+  // Reputación de Google Maps (opt-in por técnico, ver migración
+  // 20260903) — NULL para quien no confirmó que quiere mostrarla.
+  google_rating?: number | null;
+  google_reviews_count?: number | null;
+  google_maps_url?: string | null;
 };
 
 const DIAS_NUEVO = 20;
@@ -55,7 +61,8 @@ export function TecnicoCard({
   );
   const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensaje}` : null;
 
-  const sinResenas = !resumen || resumen.total === 0;
+  const calificacion = calificacionEfectiva(tecnico, resumen);
+  const sinResenas = calificacion.total === 0;
   const esNuevo = tecnico.creado_at
     ? (Date.now() - new Date(tecnico.creado_at).getTime()) / 86_400_000 <= DIAS_NUEVO
     : false;
@@ -129,7 +136,12 @@ export function TecnicoCard({
           {sinResenas ? (
             <span className="text-xs text-ink-400">Sin reseñas aún</span>
           ) : (
-            <StarRating rating={resumen.promedio} reviews={resumen.total} />
+            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+              <StarRating rating={calificacion.promedio} reviews={calificacion.total} />
+              {calificacion.esGoogle && (
+                <span className="text-[11px] font-medium text-ink-400">· Google Maps</span>
+              )}
+            </div>
           )}
         </div>
 

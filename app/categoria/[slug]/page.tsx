@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { TecnicosGrid } from "@/components/TecnicosGrid";
 import { type TecnicoPublico } from "@/components/TecnicoCard";
 import { categoryBySlug } from "@/lib/data";
+import { calificacionEfectiva } from "@/lib/reputacion";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 export const revalidate = 0; // siempre datos frescos, se actualiza solo con cada técnico nuevo
@@ -27,7 +28,7 @@ export default async function CategoriaPage({
   const supabase = await createSupabaseServer();
   const { data: tecnicosRaw } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at")
+    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, google_rating, google_reviews_count, google_maps_url")
     .contains("rubro", [slug])
     .not("telefono", "is", null)
     .order("creado_at", { ascending: false });
@@ -41,13 +42,13 @@ export default async function CategoriaPage({
     (resumenRows ?? []).map((r) => [r.tecnico_id, { promedio: Number(r.promedio), total: Number(r.total) }])
   );
 
-  // Mismo orden que la home: mejor calificación primero, sin reseñas = -1.
+  // Mismo orden que la home: mejor calificación primero (Google Maps cuenta
+  // igual que una reseña nativa si el técnico la tiene cargada — ver
+  // lib/reputacion.ts), sin reseñas de ningún tipo = -1.
   const tecnicosOrdenados = [...tecnicos].sort((a, b) => {
-    const ra = resumenMap[a.user_id];
-    const rb = resumenMap[b.user_id];
-    const pa = ra && ra.total > 0 ? ra.promedio : -1;
-    const pb = rb && rb.total > 0 ? rb.promedio : -1;
-    if (pb !== pa) return pb - pa;
+    const ca = calificacionEfectiva(a, resumenMap[a.user_id]);
+    const cb = calificacionEfectiva(b, resumenMap[b.user_id]);
+    if (cb.promedio !== ca.promedio) return cb.promedio - ca.promedio;
     return new Date(b.creado_at ?? 0).getTime() - new Date(a.creado_at ?? 0).getTime();
   });
 
