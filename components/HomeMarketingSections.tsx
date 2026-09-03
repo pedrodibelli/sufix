@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/data";
-import { IconOficio, IconSeguridad } from "@/components/icons";
+import { IconOficio, IconSeguridad, IconPaso, IconStar } from "@/components/icons";
 
 // Secciones de marketing de la home para visitantes sin cuenta (rediseño
 // 2026-08-28, landing "crema/salvia"). Todo estático/decorativo — sin fetch
@@ -105,9 +105,9 @@ export function OficiosGrid() {
 
 // ---- Cómo funciona, 3 pasos (versión corta — la larga vive en /como-funciona) ----
 const PASOS = [
-  { icon: "🔍", title: "Buscá por oficio y zona", body: "Filtrá entre técnicos verificados de tu barrio en segundos." },
-  { icon: "⭐", title: "Mirá su perfil y reseñas", body: "Comparás experiencia y opiniones reales de otros clientes." },
-  { icon: "💬", title: "Escribí por WhatsApp", body: "Un clic y hablás directo con el técnico. Gratis, sin registro." },
+  { icon: "explorar", title: "Buscá por oficio y zona", body: "Filtrá entre técnicos verificados de tu barrio en segundos." },
+  { icon: "star", title: "Mirá su perfil y reseñas", body: "Comparás experiencia y opiniones reales de otros clientes." },
+  { icon: "elegir", title: "Escribí por WhatsApp", body: "Un clic y hablás directo con el técnico. Gratis, sin registro." },
 ];
 
 export function ComoFuncionaPasos() {
@@ -123,8 +123,8 @@ export function ComoFuncionaPasos() {
         <div className="mx-auto flex max-w-3xl flex-col items-start gap-8 sm:flex-row sm:items-start sm:justify-between">
           {PASOS.map((p, i) => (
             <div key={p.title} className="flex flex-1 flex-col items-center text-center">
-              <div className="mb-4 flex h-[70px] w-[70px] items-center justify-center rounded-full border-[1.5px] border-sv-dark/10 bg-[#FBF8EF] text-2xl shadow-[0_14px_30px_-18px_rgba(29,46,32,0.25)]">
-                {p.icon}
+              <div className="mb-4 flex h-[70px] w-[70px] items-center justify-center rounded-full border-[1.5px] border-sv-dark/10 bg-[#FBF8EF] p-4 text-sv-primary shadow-[0_14px_30px_-18px_rgba(29,46,32,0.25)]">
+                {p.icon === "star" ? <IconStar /> : <IconPaso slug={p.icon} />}
               </div>
               <p className="max-w-[150px] font-display text-sm font-semibold leading-snug text-sv-dark">{p.title}</p>
               <p className="mt-1 max-w-[170px] text-xs leading-relaxed text-ink-500">{p.body}</p>

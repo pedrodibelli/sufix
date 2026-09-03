@@ -191,3 +191,14 @@ export function IconSeguridad({ slug, className = "h-full w-full" }: IconProps &
     </svg>
   );
 }
+
+// Estrella sola (mismo trazo que la de IconSeguridad "reputacion") — se
+// reusa en la versión corta de "Cómo funciona" de la home, junto con
+// IconPaso "explorar"/"elegir" (2026-09-03, mismo pedido: sacar emojis).
+export function IconStar({ className = "h-full w-full" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M12 2.5l2.87 5.83 6.43.93-4.65 4.54 1.1 6.4L12 17.2l-5.75 3 1.1-6.4-4.65-4.54 6.43-.93z" />
+    </svg>
+  );
+}
