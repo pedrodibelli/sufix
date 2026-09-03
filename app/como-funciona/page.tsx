@@ -45,7 +45,7 @@ const PASOS_TECNICO = [
 const FAQ = [
   {
     q: "¿Cuánto cuesta contactar a un técnico?",
-    a: "Nada. Mirar perfiles, reseñas y escribirle a un técnico por WhatsApp es gratis, hoy y siempre.",
+    a: "Nada. Mirar perfiles, reseñas y escribirle a un técnico por WhatsApp es gratis: Sufix no te cobra por contactar ni se lleva comisión del trabajo.",
   },
   {
     q: "¿Cómo verifican a los técnicos?",

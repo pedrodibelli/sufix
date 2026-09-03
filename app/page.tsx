@@ -158,7 +158,7 @@ export default async function HomePage({
               <div className="container-home relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-11">
                 <div>
                   <span className="mb-3.5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-sv-olive">
-                    ✦ Ya funcionamos en CABA
+                    ✦ Ya funcionamos en CABA y zona norte
                   </span>
                   {sinSesion ? (
                     <>
