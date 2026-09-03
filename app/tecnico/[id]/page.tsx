@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
 import { Avatar } from "@/components/Avatar";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconOficio } from "@/components/icons";
+import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconOficio, IconCheck } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
@@ -35,7 +35,7 @@ export default async function TecnicoPage({
 
   const { data: perfil } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, anos_experiencia, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
+    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, anos_experiencia, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
     .eq("user_id", id)
     .maybeSingle();
 
@@ -54,10 +54,12 @@ export default async function TecnicoPage({
     }
   }
 
-  const [{ data: resumen }, { data: resenas }, { count: completados }] = await Promise.all([
+  // Se sacó la cuenta de "trabajos completados" (2026-09-04): consultaba
+  // `propuestas`, tabla del flujo pre-pivot que ya nadie alimenta, así que
+  // devolvía 0 para todos. Era su único uso — una consulta menos por visita.
+  const [{ data: resumen }, { data: resenas }] = await Promise.all([
     supabase.from("resenas_resumen").select("promedio, total").eq("tecnico_id", id).maybeSingle(),
     supabase.from("resenas").select("id, estrellas, comentario, creado_at, autor_nombre").eq("tecnico_id", id).order("creado_at", { ascending: false }),
-    supabase.from("propuestas").select("id", { count: "exact", head: true }).eq("profesional_id", id).eq("estado", "completada"),
   ]);
 
   const nombre = toTitleCase(perfil.nombre ?? "Profesional");
@@ -69,6 +71,15 @@ export default async function TecnicoPage({
   const calificacion = calificacionEfectiva(perfil, resumenSufix);
   const { promedio, total, fuenteExterna } = calificacion;
   const lista = (resenas ?? []) as Resena[];
+  const zonas: string[] = Array.isArray(perfil.zona) ? perfil.zona : perfil.zona ? [perfil.zona] : [];
+  const primerNombre = nombre.split(" ")[0];
+  // Fecha de alta del perfil. El equipo verifica ANTES de publicar, así que
+  // "desde" es exacto sin afirmar de más sobre cuándo fue la revisión.
+  const mesVerificacion = perfil.creado_at
+    ? "En Sufix desde " + new Date(perfil.creado_at)
+        .toLocaleDateString("es-AR", { month: "long", year: "numeric" })
+        .replace(" de ", " ")
+    : null;
 
   const telefonoLimpio = perfil.telefono?.replace(/\D/g, "") ?? "";
   const primerRubroNombre = rubrosNombres[0] ?? "un servicio";
@@ -167,23 +178,61 @@ export default async function TecnicoPage({
               )}
             </div>
 
-            {/* Stats */}
-            <div className="mt-8 grid grid-cols-3 gap-3 sm:max-w-md">
-              <div className="card p-4">
-                <div className="text-xs uppercase tracking-wider text-ink-500">Trabajos completados</div>
-                <div className="display mt-1 text-2xl">{completados ?? 0}</div>
-              </div>
-              <div className="card p-4">
-                <div className="text-xs uppercase tracking-wider text-ink-500">Calificación</div>
-                <div className="display mt-1 text-2xl">{total > 0 ? promedio.toFixed(2) : "—"}</div>
-              </div>
-              <div className="card p-4">
-                <div className="text-xs uppercase tracking-wider text-ink-500">Experiencia</div>
-                <div className="display mt-1 text-2xl">
-                  {perfil.anos_experiencia ? `${perfil.anos_experiencia} años` : "—"}
+            {/* Qué significa "Verificado" (2026-09-04). Antes acá había tres
+                tarjetas — "Trabajos completados", "Calificación" y
+                "Experiencia" — que en 24 de 25 perfiles mostraban 0, — y —.
+                Era la pantalla donde el visitante decide si escribe o no, y
+                lo único que comunicaba era vacío; encima "0 trabajos" iba a
+                decir 0 para siempre, porque desde el pivot no hay forma de
+                cerrar un trabajo en la app.
+
+                En su lugar va lo que el equipo efectivamente hace antes de
+                publicar a alguien: hablarle, confirmar el teléfono y revisar
+                su trayectoria. Ese trabajo ya existía y no se veía en ningún
+                lado — el visitante solo tenía un sello genérico igual al de
+                cualquier plataforma que no verifica nada.
+
+                Solo se renderiza si verificado = true: si algún día entra un
+                perfil sin revisar, no se afirma nada sobre él. */}
+            {perfil.verificado && (
+              <div className="mt-8 rounded-2xl border border-sv-primary/25 bg-sv-mint/60 p-5 sm:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                  <div className="flex items-center gap-2">
+                    <IconVerifiedBadge className="h-[18px] w-[18px] text-sv-primary" />
+                    <h2 className="font-display text-[15px] font-semibold text-sv-dark">
+                      Revisado por el equipo de Sufix
+                    </h2>
+                  </div>
+                  {mesVerificacion && (
+                    <span className="text-[12.5px] text-ink-500">{mesVerificacion}</span>
+                  )}
                 </div>
+
+                <ul className="mt-4 grid gap-2.5 sm:grid-cols-3 sm:gap-x-7">
+                  {[
+                    "Hablamos con " + primerNombre + " antes de publicar su perfil.",
+                    "Confirmamos que este WhatsApp es suyo.",
+                    "Revisamos su trayectoria en el oficio.",
+                  ].map((t) => (
+                    <li key={t} className="flex items-start gap-2.5 text-[14px] leading-relaxed text-ink-700">
+                      <IconCheck className="mt-[3px] h-4 w-4 shrink-0 text-sv-primary" />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Solo la experiencia: contar zonas y oficios era redundante,
+                    están listados con nombre unos centímetros más arriba. */}
+                {perfil.anos_experiencia ? (
+                  <p className="mt-4 border-t border-sv-primary/20 pt-4 text-[14px] text-ink-700">
+                    <span className="font-display font-semibold text-sv-dark">
+                      {perfil.anos_experiencia} años
+                    </span>{" "}
+                    en el oficio.
+                  </p>
+                ) : null}
               </div>
-            </div>
+            )}
           </div>
         </section>
 
