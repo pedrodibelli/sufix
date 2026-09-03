@@ -23,7 +23,7 @@ export function CategoryGrid({
           <Link
             key={c.slug}
             href={`/categoria/${c.slug}`}
-            className="rounded-2xl border border-ink-100 bg-white p-5 text-center transition hover:-translate-y-0.5 hover:shadow-[0_18px_34px_-22px_rgba(29,46,32,0.3)]"
+            className="rounded-2xl border border-ink-100 bg-white p-5 text-center transition-colors duration-200 hover:border-sv-primary/40 hover:shadow-[0_18px_34px_-22px_rgba(29,46,32,0.3)]"
           >
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-sv-mint p-3 text-sv-primary">
               <IconOficio slug={c.slug} />

@@ -182,6 +182,17 @@
   transform: translateY(0);
 }
 
+/* Una vez terminada la animación se saca la transición y el transform.
+   Sin esto cada elemento revelado se queda con una declaración de
+   transition viva y su propia capa de composición: con decenas de
+   elementos en la home eso es trabajo que el navegador rehace en cada
+   frame de scroll aunque la animación ya haya pasado (medido 2026-09-04). */
+.reveal.reveal-done {
+  transition: none;
+  transform: none;
+  will-change: auto;
+}
+
 /* ── Reducir movimiento ────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .animate-dropdown,
@@ -250,3 +261,4 @@
   transform: translateX(1.4em);
   background-color: #fff;
 }
+
