@@ -5,6 +5,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { MobileMenu } from "@/components/MobileMenu";
 import { BottomNav } from "@/components/BottomNav";
 import { RealtimeRefresh } from "@/components/RealtimeRefresh";
+import { IconBandera } from "@/components/icons";
 import { isAdminEmail } from "@/lib/admin";
 
 export async function Header() {
@@ -68,6 +69,12 @@ export async function Header() {
               )}
             </Link>
           )}
+          {/* Reportar un problema (2026-09-03) — con banderita, para que se
+              distinga del resto del menú sin gritar. */}
+          <Link href="/reportar" className={`${navLink} inline-flex items-center gap-1.5`}>
+            <IconBandera className="h-[15px] w-[15px] text-rose-500" />
+            Reportar
+          </Link>
         </nav>
 
         {/* Acciones */}

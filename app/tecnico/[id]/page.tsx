@@ -12,6 +12,7 @@ import { toTitleCase } from "@/lib/format";
 import { calificacionEfectiva } from "@/lib/reputacion";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { DejarResenaForm } from "./DejarResenaForm";
+import { ReportarPerfilBoton } from "./ReportarPerfilBoton";
 
 export const revalidate = 0;
 
@@ -233,6 +234,17 @@ export default async function TecnicoPage({
               </Link>
             </div>
           ) : null}
+
+          {/* Reportar (2026-09-03): la sección "Seguridad" de la home promete
+              "podés reportar" desde hace rato, pero no existía ninguna forma
+              de hacerlo. Va acá abajo, discreto — es una salida de seguridad,
+              no algo que queramos empujar. No se le muestra al técnico en su
+              propio perfil. */}
+          {(!user || user.id !== id) && (
+            <div className="mt-10 border-t border-ink-100 pt-6 text-center">
+              <ReportarPerfilBoton tecnicoId={id} nombre={nombre} />
+            </div>
+          )}
         </section>
       </main>
       <Footer />

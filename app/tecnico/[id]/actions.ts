@@ -78,3 +78,29 @@ export async function registrarContacto(
     // silencioso a propósito
   }
 }
+
+// Reporte de un perfil (2026-09-03). Puede reportar cualquiera, con o sin
+// cuenta — quien detecta un teléfono falso capaz ni tiene usuario, mismo
+// criterio que contactos_tecnico. La tabla `reportes` solo tiene policy de
+// SELECT para los mails de admin (migración 20260903e): se insertan desde
+// acá y se leen solo en /admin, así un técnico no puede ver quién lo reportó.
+export async function reportarPerfil(
+  tecnicoId: string,
+  motivo: string,
+  detalle: string
+): Promise<{ ok: true } | { error: string }> {
+  if (!motivo.trim()) return { error: "Elegí un motivo." };
+
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { error } = await supabase.from("reportes").insert({
+    tecnico_id: tecnicoId,
+    reportado_por: user?.id ?? null,
+    motivo,
+    detalle: detalle.trim() ? detalle.trim().slice(0, 500) : null,
+  });
+
+  if (error) return { error: "No se pudo enviar el reporte. Probá de nuevo." };
+  return { ok: true };
+}
