@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
 import { Avatar } from "@/components/Avatar";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconVerifiedBadge, IconWhatsApp } from "@/components/icons";
+import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconOficio } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
@@ -141,8 +141,9 @@ export default async function TecnicoPage({
                   {rubroCats.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {rubroCats.map((c) => (
-                        <span key={c.slug} className="rounded-full border border-ink-200 px-2.5 py-0.5 text-[12px] font-medium text-ink-600">
-                          {c.icon} {c.name}
+                        <span key={c.slug} className="inline-flex items-center gap-1.5 rounded-full border border-ink-200 px-2.5 py-0.5 text-[12px] font-medium text-ink-600">
+                          <IconOficio slug={c.slug} className="h-3.5 w-3.5 shrink-0 text-sv-primary" />
+                          {c.name}
                         </span>
                       ))}
                     </div>

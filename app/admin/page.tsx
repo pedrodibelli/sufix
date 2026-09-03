@@ -109,13 +109,6 @@ export default async function AdminPage() {
             </p>
             <ReportesClient reportes={reportes} />
           </section>
-
-          <div className="mt-10 rounded-2xl border border-dashed border-ink-200 p-10 text-center text-ink-400">
-            <p className="text-sm">
-              &quot;Pagos en revisión&quot; y &quot;Disputas&quot; están pausadas — dependían del flujo viejo de
-              publicar un problema, que ya no es alcanzable desde la web.
-            </p>
-          </div>
         </div>
       </main>
       <Footer />

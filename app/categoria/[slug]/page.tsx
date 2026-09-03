@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { TecnicosGrid } from "@/components/TecnicosGrid";
 import { type TecnicoPublico } from "@/components/TecnicoCard";
 import { categoryBySlug } from "@/lib/data";
+import { IconOficio } from "@/components/icons";
 import { calificacionEfectiva } from "@/lib/reputacion";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
@@ -62,7 +63,14 @@ export default async function CategoriaPage({
               ← Todos los técnicos
             </Link>
             <div className="mt-4">
-              <div className="text-5xl">{cat.icon}</div>
+              {/* Ícono de línea propio, no el emoji de cat.icon (2026-09-04):
+                  era el último lugar donde sobrevivía un emoji de rubro — la
+                  home y /categorias ya usaban IconOficio. Además los emojis
+                  se dibujan distinto en cada sistema, así que no controlábamos
+                  cómo se veía el encabezado del rubro. */}
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-4 text-sv-primary shadow-[0_10px_24px_-14px_rgba(29,46,32,0.45)]">
+                <IconOficio slug={cat.slug} />
+              </div>
               <h1 className="display mt-3 text-4xl text-sv-dark md:text-5xl">{cat.name}</h1>
               {/* Frase única con la cantidad ya adentro (2026-08-29) —
                   antes había un blurb con ejemplos de problemas sueltos

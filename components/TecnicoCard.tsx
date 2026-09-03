@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { StarRating } from "@/components/StarRating";
 import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
-import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconSparkle } from "@/components/icons";
+import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconSparkle, IconOficio } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
@@ -155,7 +155,10 @@ export function TecnicoCard({
             <div className="mt-3.5 border-t border-dashed border-ink-200" />
             <div className="mt-3.5 flex flex-wrap gap-1.5">
               {chipsVisibles.map((c) => (
-                <span key={c.slug} className="chip border-sv-primary px-2 py-0.5 text-[11px]">{c.icon} {c.name}</span>
+                <span key={c.slug} className="chip inline-flex items-center gap-1 border-sv-primary px-2 py-0.5 text-[11px]">
+                  <IconOficio slug={c.slug} className="h-3 w-3 shrink-0 text-sv-primary" />
+                  {c.name}
+                </span>
               ))}
               {chipsRestantes > 0 && (
                 <span className="chip px-2 py-0.5 text-[11px] text-ink-400">+{chipsRestantes} más</span>
