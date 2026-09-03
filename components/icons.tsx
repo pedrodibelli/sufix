@@ -207,6 +207,18 @@ export function IconStar({ className = "h-full w-full" }: IconProps) {
 // sección "Todo por WhatsApp" de la home (2026-09-03, mismo pedido: sacar
 // emojis). Junto con IconPaso "elegir" (chat) y "coordinar" (calendario)
 // completa el trío de esa lista de beneficios.
+// Instagram (footer) — glifo de línea, mismo criterio 24×24/trazo 1.75
+// que el resto del set (2026-09-03).
+export function IconInstagram({ className = "h-[18px] w-[18px]" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconPeople({ className = "h-full w-full" }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>

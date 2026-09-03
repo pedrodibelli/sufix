@@ -178,7 +178,10 @@ export default async function ComoFuncionaPage() {
         )}
 
         {/* ── Precios ── */}
-        <section className="bg-white py-14 sm:py-20">
+        {/* id para poder linkear desde el footer ("Cuánto cuesta") — el
+            contenido de que es gratis ya estaba escrito acá, no hacía
+            falta una página nueva (2026-09-03). */}
+        <section id="precios" className="scroll-mt-20 bg-white py-14 sm:py-20">
           <div className="container-pad">
             <div className="mx-auto max-w-4xl">
               <div className="text-center">
@@ -246,7 +249,8 @@ export default async function ComoFuncionaPage() {
         </section>
 
         {/* ── FAQ ── */}
-        <section className="bg-white">
+        {/* id para linkear "Preguntas frecuentes" desde el footer. */}
+        <section id="faq" className="scroll-mt-20 bg-white">
           <div className="container-pad py-14 sm:py-20">
             <div className="mx-auto max-w-2xl">
               <h2 className="reveal delay-0 display text-center text-2xl text-sv-dark sm:text-3xl">

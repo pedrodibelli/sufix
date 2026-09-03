@@ -46,7 +46,8 @@ const VERIFICACIONES = [
 
 export function SeguridadSection() {
   return (
-    <section className="bg-white py-14 sm:py-20">
+    // id para linkear "Seguridad" desde el footer (2026-09-03).
+    <section id="seguridad" className="scroll-mt-20 bg-white py-14 sm:py-20">
       <div className="container-home">
         <div className="mx-auto mb-10 max-w-xl text-center sm:mb-14">
           <span className="text-[13px] font-bold uppercase tracking-wider text-sv-primary">Seguridad</span>

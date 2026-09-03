@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/data";
+import { IconInstagram } from "@/components/icons";
 
 // Footer completo (2026-09-03): antes era una sola línea con el logo. Se
 // suma la estructura clásica de columnas + los links legales, que además
@@ -36,6 +37,15 @@ export function Footer() {
               Conectamos hogares con técnicos verificados de CABA y zona norte. Sin comisiones, sin
               intermediarios.
             </p>
+            <a
+              href="https://www.instagram.com/sufix.ar/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 text-[13.5px] font-medium text-ink-500 transition-colors hover:text-sv-primary"
+            >
+              <IconInstagram className="h-[18px] w-[18px]" />
+              @sufix.ar
+            </a>
           </div>
 
           {/* Oficios */}
@@ -57,7 +67,10 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Sufix */}
+          {/* Sufix — todo apunta a contenido que ya existe: "Cuánto cuesta"
+              y "Preguntas frecuentes" son anclas a secciones de
+              /como-funciona que ya estaban escritas, y "Seguridad" a la
+              sección de la home. No hacía falta crear páginas nuevas. */}
           <div>
             <h3 className={tituloCls}>Sufix</h3>
             <ul className="mt-3.5 space-y-2">
@@ -68,14 +81,30 @@ export function Footer() {
                 <Link href="/como-funciona" className={linkCls}>Cómo funciona</Link>
               </li>
               <li>
-                <Link href="/registrar" className={linkCls}>Sumate como técnico</Link>
+                <Link href="/como-funciona#precios" className={linkCls}>Cuánto cuesta</Link>
+              </li>
+              <li>
+                <Link href="/como-funciona#faq" className={linkCls}>Preguntas frecuentes</Link>
+              </li>
+              <li>
+                <Link href="/#seguridad" className={linkCls}>Seguridad</Link>
               </li>
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Para técnicos + Legal */}
           <div>
-            <h3 className={tituloCls}>Legal</h3>
+            <h3 className={tituloCls}>Para técnicos</h3>
+            <ul className="mt-3.5 space-y-2">
+              <li>
+                <Link href="/registrar" className={linkCls}>Sumate como profesional</Link>
+              </li>
+              <li>
+                <Link href="/ingresar" className={linkCls}>Ingresar a mi cuenta</Link>
+              </li>
+            </ul>
+
+            <h3 className={`${tituloCls} mt-7`}>Legal y soporte</h3>
             <ul className="mt-3.5 space-y-2">
               <li>
                 <Link href="/terminos" className={linkCls}>Términos y Condiciones</Link>
