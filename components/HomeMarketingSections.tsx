@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/data";
-import { IconOficio } from "@/components/icons";
+import { IconOficio, IconSeguridad } from "@/components/icons";
 
 // Secciones de marketing de la home para visitantes sin cuenta (rediseño
 // 2026-08-28, landing "crema/salvia"). Todo estático/decorativo — sin fetch
@@ -23,22 +23,22 @@ export function ProblemStrip() {
 // "antecedentes penales" ni "matrícula verificada" que todavía no chequeamos) ----
 const VERIFICACIONES = [
   {
-    icon: "🔍",
+    icon: "revision",
     title: "Revisión manual, no automática",
     body: "Una persona de nuestro equipo mira cada perfil antes de publicarlo — no se auto-declara nadie.",
   },
   {
-    icon: "⭐",
+    icon: "reputacion",
     title: "Reputación real, no inventada",
     body: "Priorizamos técnicos con historial y reseñas comprobables antes de sumarlos al directorio.",
   },
   {
-    icon: "📱",
+    icon: "contacto",
     title: "Contacto verificado",
     body: "Confirmamos que el teléfono de WhatsApp que ves en el perfil es real y del técnico.",
   },
   {
-    icon: "🚩",
+    icon: "reportar",
     title: "Podés reportar",
     body: "Si algo no cuadra con un perfil, nos avisás y lo revisamos — así mantenemos el directorio limpio.",
   },
@@ -60,8 +60,8 @@ export function SeguridadSection() {
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {VERIFICACIONES.map((v) => (
             <div key={v.title} className="rounded-2xl border border-ink-100 bg-white p-5">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-sv-mint text-lg">
-                {v.icon}
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-sv-mint p-2.5 text-sv-primary">
+                <IconSeguridad slug={v.icon} />
               </div>
               <h4 className="font-display text-[14.5px] font-semibold leading-tight text-sv-dark">{v.title}</h4>
               <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-500">{v.body}</p>

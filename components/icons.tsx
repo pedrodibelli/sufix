@@ -170,3 +170,24 @@ export function IconChevronDown({ className = "h-4 w-4" }: IconProps) {
     </svg>
   );
 }
+
+// Íconos de la sección "Seguridad" de la home (2026-09-03) — mismo criterio
+// que IconOficio/IconPaso, reemplazan los emojis (🔍⭐📱🚩) de las 4 tarjetas.
+const SEGURIDAD_PATHS: Record<string, string> = {
+  revision: "M14.5 14.5 20 20", // + círculo (lupa)
+  reputacion: "M12 2.5l2.87 5.83 6.43.93-4.65 4.54 1.1 6.4L12 17.2l-5.75 3 1.1-6.4-4.65-4.54 6.43-.93z", // estrella
+  contacto: "M11 18.3h2", // + rect redondeado (celular)
+  reportar: "M6 21V4 M6 4.5h10.5l-2.7 3.5 2.7 3.5H6", // bandera
+};
+
+export function IconSeguridad({ slug, className = "h-full w-full" }: IconProps & { slug: string }) {
+  const d = SEGURIDAD_PATHS[slug];
+  if (!d) return null;
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      {slug === "revision" && <circle cx="10" cy="10" r="6" />}
+      {slug === "contacto" && <rect x="7" y="2.5" width="10" height="19" rx="2.2" />}
+      <path d={d} />
+    </svg>
+  );
+}
