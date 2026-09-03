@@ -18,11 +18,13 @@ export type TecnicoPublico = {
   telefono: string | null;
   titular: string | null;
   creado_at?: string;
-  // Reputación de Google Maps (opt-in por técnico, ver migración
-  // 20260903) — NULL para quien no confirmó que quiere mostrarla.
-  google_rating?: number | null;
-  google_reviews_count?: number | null;
-  google_maps_url?: string | null;
+  // Reputación externa (Google Maps, PorAca, etc. — opt-in por técnico,
+  // ver migración 20260903b) — NULL para quien no confirmó que quiere
+  // mostrarla.
+  reputacion_fuente?: string | null;
+  reputacion_rating?: number | null;
+  reputacion_total?: number | null;
+  reputacion_url?: string | null;
 };
 
 const DIAS_NUEVO = 20;
@@ -138,8 +140,8 @@ export function TecnicoCard({
           ) : (
             <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
               <StarRating rating={calificacion.promedio} reviews={calificacion.total} />
-              {calificacion.esGoogle && (
-                <span className="text-[11px] font-medium text-ink-400">· Google Maps</span>
+              {calificacion.fuenteExterna && (
+                <span className="text-[11px] font-medium text-ink-400">· {calificacion.fuenteExterna}</span>
               )}
             </div>
           )}

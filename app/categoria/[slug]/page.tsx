@@ -28,7 +28,7 @@ export default async function CategoriaPage({
   const supabase = await createSupabaseServer();
   const { data: tecnicosRaw } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, google_rating, google_reviews_count, google_maps_url")
+    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
     .contains("rubro", [slug])
     .not("telefono", "is", null)
     .order("creado_at", { ascending: false });

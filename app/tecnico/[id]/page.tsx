@@ -34,7 +34,7 @@ export default async function TecnicoPage({
 
   const { data: perfil } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, anos_experiencia, google_rating, google_reviews_count, google_maps_url")
+    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, anos_experiencia, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
     .eq("user_id", id)
     .maybeSingle();
 
@@ -66,7 +66,7 @@ export default async function TecnicoPage({
   const rubrosNombres = rubroCats.length > 0 ? rubroCats.map((c) => c.name) : rubros;
   const resumenSufix = resumen ? { promedio: Number(resumen.promedio), total: Number(resumen.total) } : undefined;
   const calificacion = calificacionEfectiva(perfil, resumenSufix);
-  const { promedio, total, esGoogle } = calificacion;
+  const { promedio, total, fuenteExterna } = calificacion;
   const lista = (resenas ?? []) as Resena[];
 
   const telefonoLimpio = perfil.telefono?.replace(/\D/g, "") ?? "";
@@ -102,24 +102,26 @@ export default async function TecnicoPage({
                     {total > 0 ? (
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <StarRating rating={promedio} reviews={total} size="md" />
-                        {/* Aclaración explícita cuando la calificación viene de Google
-                            Maps y no de reseñas nativas de Sufix (opt-in por técnico,
-                            ver lib/reputacion.ts) — nunca se mezcla ni se presenta
-                            como si fuera de acá. Clickeable a la ficha real para que
-                            cualquiera lo pueda verificar. */}
-                        {esGoogle && (
-                          perfil.google_maps_url ? (
+                        {/* Aclaración explícita cuando la calificación viene de una
+                            fuente externa (Google Maps, PorAca, etc. — opt-in por
+                            técnico, ver lib/reputacion.ts) y no de reseñas nativas
+                            de Sufix — nunca se mezcla ni se presenta como si fuera
+                            de acá. Clickeable a la ficha real para que cualquiera
+                            lo pueda verificar, invitando a ver las reseñas reales
+                            en la fuente (pedido 2026-09-03). */}
+                        {fuenteExterna && (
+                          perfil.reputacion_url ? (
                             <a
-                              href={perfil.google_maps_url}
+                              href={perfil.reputacion_url}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 rounded-full border border-ink-200 px-2 py-0.5 text-[11px] font-medium text-ink-500 underline-offset-2 hover:underline"
                             >
-                              Reputación de Google Maps ↗
+                              Ver las {total} reseñas en {fuenteExterna} ↗
                             </a>
                           ) : (
                             <span className="inline-flex items-center rounded-full border border-ink-200 px-2 py-0.5 text-[11px] font-medium text-ink-500">
-                              Reputación de Google Maps
+                              Reputación de {fuenteExterna}
                             </span>
                           )
                         )}
@@ -190,9 +192,9 @@ export default async function TecnicoPage({
 
           {lista.length === 0 ? (
             <div className="mt-5 rounded-2xl border border-dashed border-ink-200 p-10 text-center text-ink-400">
-              {esGoogle && (
+              {fuenteExterna && (
                 <p className="mb-2 text-sm text-ink-500">
-                  Su reputación de Google Maps ya está arriba — acá van las reseñas de quienes lo contactaron por Sufix.
+                  Su reputación de {fuenteExterna} ya está arriba — acá van las reseñas de quienes lo contactaron por Sufix.
                 </p>
               )}
               Todavía no tiene reseñas. ¡Sé el primero en calificarlo!

@@ -44,7 +44,7 @@ export default async function HomePage({
   if (!esProfesional) {
     const { data: tecnicosRaw } = await supabaseServer
       .from("perfiles_publicos")
-      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, google_rating, google_reviews_count, google_maps_url")
+      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
       .not("rubro", "is", null)
       .not("telefono", "is", null)
       .order("creado_at", { ascending: false });
@@ -116,7 +116,7 @@ export default async function HomePage({
     const [{ data: perfilRow }, { data: resumenRow }, { data: contactosRows }] = await Promise.all([
       supabaseServer
         .from("perfiles_publicos")
-        .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, google_rating, google_reviews_count, google_maps_url")
+        .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
         .eq("user_id", user.id)
         .maybeSingle(),
       supabaseServer.from("resenas_resumen").select("promedio, total").eq("tecnico_id", user.id).maybeSingle(),
