@@ -60,7 +60,7 @@ function IngresarInner() {
       <div className="w-full max-w-sm">
           <h1 className="display text-4xl leading-tight">Ingresá a Sufix</h1>
           <p className="mt-2 text-sm text-ink-400">
-            Tu casa anda mal, vos no tenés que perder la mañana.
+            Tus contactos y tus reseñas, donde los dejaste.
           </p>
 
           {/* Login con Google: PAUSADO a propósito (ver CLAUDE.md). Para

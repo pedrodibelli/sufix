@@ -99,7 +99,7 @@ export default function RegistrarPage() {
       <div className="w-full max-w-sm">
         <h1 className="display text-4xl leading-tight">Crear cuenta</h1>
         <p className="mt-2 text-sm text-ink-400">
-          Gratis. Sin comisiones. Tu problema, resuelto.
+          Gratis, sin comisiones. Para técnicos y para quienes los buscan.
         </p>
 
         {/* Login con Google: PAUSADO a propósito (ver CLAUDE.md) — abría
