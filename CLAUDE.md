@@ -184,15 +184,15 @@ Vercel. El código usa:
 - **Decisión histórica: no usé el dominio viejo (`solvit.homes`, de Mateo).** Al deployar
   conecté el repo en Vercel y usé el **dominio que genera Vercel** (`*.vercel.app`) — sigue
   siendo la URL en producción hoy (ver nota de rebranding al principio del archivo).
-- El código de `/publicar/actions.ts` (email dormido de Resend) ahora referencia
-  `sufix.com.ar` y envía desde `noreply@sufix.com.ar` — dominio propio, comprado en
-  2026-08, pero **todavía sin verificar en ninguna cuenta de Resend**.
-- Por eso: dejar `RESEND_API_KEY` **sin setear** → los emails transaccionales se saltean y
-  la app sigue andando (no rompe).
-- Setear `NEXT_PUBLIC_APP_URL` a la URL real del deploy para que los links de confirmación
-  apunten bien (overridea el default `sufix.com.ar`, que hoy no resuelve a nada).
-- **URL de producción actual: `https://solvitweb.vercel.app`** (dominio `sufix.com.ar` aún
-  no conectado — pendiente de recuperar acceso a Vercel, ver §6).
+- ✅ **RESUELTO 2026-09-07: hay dominio propio y los mails salen.** `sufixapp.com` está
+  verificado en Resend (DKIM + 2 CNAME + DMARC, cargados en DonWeb que es donde vive el DNS)
+  y `RESEND_API_KEY` está seteada en Vercel. Lo nuevo se manda con `lib/mail.ts` desde
+  `hola@sufixapp.com`. Ver §16 para el detalle.
+- `/publicar/actions.ts` (email dormido de Resend, referencia `sufix.com.ar`) sigue sin usarse:
+  `/publicar` está redirigido desde el pivot, así que ese código no se ejecuta.
+- **URL de producción: `https://sufixapp.com`** (`solvitweb.vercel.app` sigue como alias).
+  `sufix.com.ar`, `sufix.store`, `sufix.online` y `sufixapp.online/.store` están registrados en
+  Vercel pero **no resuelven** — no se conectaron a ningún deploy.
 
 ---
 
@@ -318,15 +318,22 @@ El registro deja al usuario logueado directo.
   **sigue vivo y comparte la misma base** — todavía NO lo corté (pendiente: sacarlo del team + rotar keys).
 - **Modelo: el cliente paga todo** (consulta + tarifa); Mateo le paga la consulta al técnico al
   concretarse (payout manual) — ver §9. Mercado Pago = fase 2.
-- **Emails apagados** (sin `RESEND_API_KEY`): Resend necesita un **dominio propio verificado**, que
-  no tengo. Todo lo de emails (aviso de publicación, confirmación de cuenta, alerta de urgentes)
-  está **bloqueado hasta tener dominio**.
-- **Admin = `solvithomes@gmail.com`**.
+- **Emails: FUNCIONANDO** desde 2026-09-07 con Resend + `sufixapp.com` (ver §7 y §16).
+- **Admin = `solvithomes@gmail.com` y `sufixar@gmail.com`** (ver `lib/admin.ts`).
+  ⚠️ **No borrar esas dos cuentas de Supabase.** El control de acceso a `/admin` es "tu email
+  está en esta lista", y con "Confirm email" apagado cualquiera podría registrar una dirección
+  libre y quedar admin. Hoy la puerta está tapada porque las dos están ocupadas. Si alguna se
+  borra, sacarla antes de `lib/admin.ts` y de las funciones SQL de admin.
 - Realtime requiere conexión **autenticada** (`supabase.realtime.setAuth(token)` antes de suscribir).
 
 ## 13. Roadmap / pendientes
-**Bloqueado por "dominio propio":**
-- Comprar dominio → habilita Resend (emails de la app) + SMTP en Supabase (confirmación de cuenta) + Mercado Pago.
+**Pendiente de la puesta en marcha de los mails (2026-09-07):**
+- **Prender "Confirm email"** en Supabase → Authentication → Providers → Email. El SMTP ya está
+  configurado y probado (el mail de recuperar contraseña llega). ⚠️ Si se prende sin que el SMTP
+  funcione, **nadie puede registrarse**.
+- **Rotar `RESEND_API_KEY`**: la actual se pegó en un chat. Cambiarla en Vercel Y en el password
+  del SMTP de Supabase (usan la misma).
+- Marcar "No es spam" en los avisos que caigan ahí: el dominio es nuevo y no tiene reputación.
 
 **Negocio:**
 - Cambiar datos de pago (transferencia + WhatsApp) de Mateo por los propios → Mercado Pago.
@@ -387,3 +394,54 @@ El registro deja al usuario logueado directo.
   reapunta solo — ver §14.1). Si un aviso "no llega", revisar `select … from net._http_response`
   en el SQL Editor (status 200 = llegó al endpoint; 401 = header mal; vacío = el webhook no disparó).
 - A futuro (con dominio): migrar a **Resend** para mejor entregabilidad y remitente `@dominio`.
+
+---
+
+## 16. Alta de técnicos y mails propios (2026-09-07)
+
+### Un técnico NO entra al directorio hasta que lo aprueban
+La home promete "ningún técnico entra sin que lo miremos primero" y hasta esta fecha no era
+cierto: quien se registraba aparecía al instante. Ahora los tres listados públicos filtran por
+`verificado = true` — la home (`app/page.tsx`), `/categoria/[slug]` y los contadores de
+`/categorias`. El perfil suelto `/tecnico/[id]` sigue accesible por link directo (lo necesita
+`/admin` para revisarlo) pero avisa que está en revisión.
+
+- El técnico ve en su home un cartel de "tu perfil está en revisión" y el subtítulo cambia a
+  "así se va a ver tu perfil cuando lo publiquemos".
+- `/admin` tiene la sección **Técnicos pendientes de revisión**, con el teléfono como link de
+  WhatsApp (verificar = hablarle). El botón "Marcar verificado" usa **service role**: la policy
+  `perfil_owner` es `FOR ALL USING (auth.uid() = user_id)`, así que ni el admin puede editar el
+  perfil de otro por RLS.
+
+### Mails (lib/mail.ts, Resend desde hola@sufixapp.com)
+| Mail | Qué lo dispara |
+|---|---|
+| Técnico nuevo → a los admins | Webhook `aviso-tecnico-nuevo`: INSERT en `perfiles_profesionales` → `/api/tecnico-registrado` |
+| Perfil aprobado → al técnico | `verificarTecnico()` en `app/admin/actions.ts` |
+| Confirmación de cuenta y recuperar contraseña | Supabase Auth vía SMTP de Resend (no pasa por nuestro código) |
+
+`enviarMail()` nunca tira: si falta la key loguea y devuelve `false`. Un aviso que no sale no
+debe tumbar la acción que lo dispara. Los mails salen **de a uno**, no en paralelo: Resend
+limita a 2 pedidos por segundo.
+
+> Los dos endpoints viejos (`/api/propuesta-creada`, `/api/publicacion-creada`, por Gmail SMTP
+> con nodemailer) siguen ahí pero **están dormidos**: disparan sobre `propuestas` y
+> `publicaciones`, tablas que desde el pivot ya nadie escribe.
+
+### Teléfonos: el link de WhatsApp tiene que funcionar siempre
+`wa.me` necesita `54 + 9 + área + número` (13 dígitos). Sin ese `9` el link abre un chat vacío.
+Había tres cargados mal a mano. `telefonoWhatsApp()` en `lib/whatsapp.ts` normaliza las variantes
+conocidas y devuelve `null` si no puede completarlo con certeza — mejor no mostrar el botón que
+mandar a un chat equivocado. El campo del registro tiene el prefijo `+54 9 11` **fijo** y se queda
+con los **últimos** 8 dígitos, así da lo mismo pegar el número entero o escribirlo con el 15.
+
+### Otras cosas de esta tanda
+- **Borrar cuenta** (`/perfil`, los dos roles). `resenas` no tiene FK contra `auth.users`, así que
+  no se borran solas: hay que hacerlo a mano, igual que la foto en Storage.
+- **Recuperar contraseña**: `/restablecer` (el mail vuelve por `/auth/callback?next=/restablecer`,
+  que canjea el `code` de PKCE). Antes el link volvía a `/ingresar`, que no tiene dónde escribir
+  la contraseña nueva.
+- **`components/PasswordInput.tsx`**: campo de contraseña con ojo, usado en los 6 de la app.
+- **Páginas del modelo viejo redirigidas** (307, en `next.config.mjs`): `/buscar`, `/oferentes`,
+  `/servicio/:slug`, `/profesional/:slug` y `/publicar`. Esta última importa: seguía insertando en
+  `publicaciones` y ese INSERT dispara mails a los técnicos sobre un trabajo que nadie puede ver.
