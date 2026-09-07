@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { enviarMail } from "@/lib/mail";
 import { ADMIN_EMAILS } from "@/lib/admin";
+import { CATEGORIES } from "@/lib/data";
 
 export const runtime = "nodejs";
 
@@ -69,7 +70,9 @@ export async function POST(req: NextRequest) {
     const emailTecnico = userRes?.user?.email ?? "(sin email)";
 
     const nombre = (perfil.nombre ?? "").trim() || "Sin nombre";
-    const rubros = Array.isArray(perfil.rubro) && perfil.rubro.length ? perfil.rubro.join(", ") : "—";
+    const rubros = Array.isArray(perfil.rubro) && perfil.rubro.length
+      ? perfil.rubro.map((r: string) => CATEGORIES.find((c) => c.slug === r)?.name ?? r).join(", ")
+      : "—";
     const zonas = Array.isArray(perfil.zona) && perfil.zona.length ? perfil.zona.join(", ") : "—";
     const tel = String(perfil.telefono ?? "—");
     const telLimpio = tel.replace(/\D/g, "");

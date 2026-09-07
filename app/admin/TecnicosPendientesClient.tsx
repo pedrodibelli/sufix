@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { verificarTecnico } from "./actions";
+import { CATEGORIES } from "@/lib/data";
 
 export type TecnicoPendiente = {
   user_id: string;
@@ -66,7 +67,7 @@ export function TecnicosPendientesClient({ tecnicos }: { tecnicos: TecnicoPendie
                   </div>
                   <div className="flex gap-2">
                     <dt className="text-ink-400">Rubros</dt>
-                    <dd>{t.rubro?.length ? t.rubro.join(", ") : <span className="text-rose-600">ninguno</span>}</dd>
+                    <dd>{t.rubro?.length ? t.rubro.map((r) => CATEGORIES.find((c) => c.slug === r)?.name ?? r).join(", ") : <span className="text-rose-600">ninguno</span>}</dd>
                   </div>
                   <div className="flex gap-2">
                     <dt className="text-ink-400">Zonas</dt>
