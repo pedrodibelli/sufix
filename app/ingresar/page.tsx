@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -31,6 +31,24 @@ function IngresarInner() {
   // por el SMTP configurado. Sin SMTP no llega nada, así que el texto de éxito
   // no promete que ya está en la bandeja, solo que lo pedimos.
   const [reseteando, setReseteando] = useState(false);
+  // Cuando un link de recuperacion falla, Supabase devuelve al sitio con el
+  // motivo en la query Y en el hash (#error=...). El hash no llega al
+  // servidor, asi que hay que leerlo en el navegador. Sin esto el usuario
+  // aterrizaba en el login sin ninguna explicacion de por que no funciono.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const h = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const code = q.get("error_code") ?? h.get("error_code");
+    const err = q.get("error") ?? h.get("error");
+    if (!code && !err) return;
+    setAvisoReset(
+      code === "otp_expired"
+        ? "Ese enlace ya venció o se usó. Escribí tu email acá abajo y pedí uno nuevo."
+        : "No pudimos validar el enlace. Escribí tu email acá abajo y pedí uno nuevo."
+    );
+    // Se limpia la URL para que al recargar no vuelva a aparecer el error.
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []);
   const [avisoReset, setAvisoReset] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
