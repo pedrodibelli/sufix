@@ -9,3 +9,6 @@ next-env.d.ts
 tsconfig.tsbuildinfo
 .opencode/
 opencode.json
+
+# Archivos de trabajo temporales de sesiones de Claude Code
+tmp-*
