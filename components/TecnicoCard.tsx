@@ -159,18 +159,18 @@ export function TecnicoCard({
                iguala alturas por fila). Con una sola línea garantizada, sumar
                la segunda reputación no cambia el alto de NINGUNA tarjeta, y
                las que tienen una sola fuente tampoco reservan lugar vacío. */
-            /* items-baseline, no items-center: la calificación va a 13px y la
-               etiqueta de la fuente a 11px, y centrar las CAJAS dejaba el
-               nombre de la fuente visiblemente más abajo que los números.
-               Alineando por línea de base, los dos textos apoyan sobre la
-               misma línea.
+            /* items-center, NO items-baseline. Se probó baseline para alinear la
+               etiqueta de la fuente (11px) con la calificación (13px) y salió
+               peor: la baseline de un inline-flex la define su primer hijo, que
+               acá es el ícono de estrella, no el texto — el desfase pasó de 1px
+               a 3.2px y la línea entera se veía caída. Medido, no supuesto.
 
                flex-nowrap + truncate a propósito: si esto se parte en dos
                renglones, la fila entera de tarjetas crece de alto (el grid
                iguala alturas por fila). Con una sola línea garantizada, sumar
                la segunda reputación no cambia el alto de NINGUNA tarjeta, y
                las que tienen una sola fuente tampoco reservan lugar vacío. */
-            <div className="flex flex-nowrap items-baseline gap-x-1.5 overflow-hidden">
+            <div className="flex flex-nowrap items-center gap-x-1.5 overflow-hidden">
               <span className="shrink-0">
                 <StarRating rating={calificacion.promedio} reviews={calificacion.total} />
               </span>
@@ -181,8 +181,8 @@ export function TecnicoCard({
                   primera, y separada — con un punto se leía como continuación
                   de la misma frase y no como otra calificación. */}
               {calificacion.secundaria && (
-                <span className="ml-2 flex shrink items-baseline gap-1 truncate text-[11px] font-medium text-ink-400">
-                  <svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor" className="shrink-0 self-center" aria-hidden>
+                <span className="ml-2 flex shrink items-center gap-1 truncate text-[11px] font-medium text-ink-400">
+                  <svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor" className="shrink-0" aria-hidden>
                     <path d="M10 1.6l2.6 5.3 5.9.9-4.3 4.2 1 5.9L10 15.1l-5.3 2.8 1-5.9L1.4 7.8l5.9-.9L10 1.6z" />
                   </svg>
                   <span className="truncate">
