@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { isAdminEmail } from "@/lib/admin";
 import { ReportesClient, type Reporte } from "./ReportesClient";
+import { TecnicosPendientesClient, type TecnicoPendiente } from "./TecnicosPendientesClient";
 // AdminClient/DisputasClient (pagos en revisión y disputas) quedan sin usar
 // a propósito — ver comentario más abajo. No se borran, listos para
 // reactivar si se vuelve al flujo viejo (tag de git
@@ -39,6 +40,16 @@ export default async function AdminPage() {
     .eq("estado", "pendiente")
     .order("creado_at", { ascending: false })
     .limit(100);
+
+  // Técnicos que se registraron solos por la web y todavía nadie revisó
+  // (2026-09-07). Hasta ahora no había forma de enterarse de que existían:
+  // entraban al directorio con verificado = false y ahí quedaban.
+  const { data: pendientesRaw } = await supabase
+    .from("perfiles_publicos")
+    .select("user_id, nombre, telefono, rubro, zona, creado_at")
+    .eq("verificado", false)
+    .order("creado_at", { ascending: false });
+  const pendientes = (pendientesRaw ?? []) as TecnicoPendiente[];
 
   const reportes: Reporte[] = [];
 
@@ -108,6 +119,22 @@ export default async function AdminPage() {
               pueden llegar sin cuenta; el resto siempre tiene un usuario detrás.
             </p>
             <ReportesClient reportes={reportes} />
+          </section>
+
+          <section className="mt-12">
+            <div className="flex items-baseline gap-3">
+              <h2 className="display text-lg">Técnicos pendientes de revisión</h2>
+              {pendientes.length > 0 && (
+                <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-semibold text-amber-700">
+                  {pendientes.length} sin revisar
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-sm text-ink-500">
+              Se registraron solos desde la web. Hablá con cada uno y, si está todo bien,
+              marcalo verificado — recién ahí su perfil muestra que lo revisaste.
+            </p>
+            <TecnicosPendientesClient tecnicos={pendientes} />
           </section>
         </div>
       </main>
