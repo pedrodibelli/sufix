@@ -75,11 +75,11 @@ export async function POST(req: NextRequest) {
     const telLimpio = tel.replace(/\D/g, "");
 
     const html = `
-      <p style="margin:0 0 4px;font-size:17px;font-weight:600;">Un tecnico se registro y espera revision</p>
-      <p style="margin:0 0 18px;color:#5A6B5C;">Todavia no aparece en el directorio.</p>
+      <p style="margin:0 0 4px;font-size:17px;font-weight:600;">Un técnico se registró y espera revisión</p>
+      <p style="margin:0 0 18px;color:#5A6B5C;">Todavía no aparece en el directorio.</p>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
         <tr><td style="padding:5px 0;color:#8A9689;width:90px;">Nombre</td><td style="padding:5px 0;font-weight:600;">${escapar(nombre)}</td></tr>
-        <tr><td style="padding:5px 0;color:#8A9689;">Telefono</td><td style="padding:5px 0;">${telLimpio ? `<a href="https://wa.me/${telLimpio}" style="color:#4E7A3E;">${escapar(tel)}</a>` : "—"}</td></tr>
+        <tr><td style="padding:5px 0;color:#8A9689;">Teléfono</td><td style="padding:5px 0;">${telLimpio ? `<a href="https://wa.me/${telLimpio}" style="color:#4E7A3E;">${escapar(tel)}</a>` : "—"}</td></tr>
         <tr><td style="padding:5px 0;color:#8A9689;">Rubros</td><td style="padding:5px 0;">${escapar(rubros)}</td></tr>
         <tr><td style="padding:5px 0;color:#8A9689;">Zonas</td><td style="padding:5px 0;">${escapar(zonas)}</td></tr>
         <tr><td style="padding:5px 0;color:#8A9689;">Email</td><td style="padding:5px 0;">${escapar(emailTecnico)}</td></tr>
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 
     // A todos los admins: si manana se suma alguien mas al equipo, lo recibe
     // sin tocar codigo (la lista es la misma que da acceso a /admin).
-    const asunto = `Nuevo tecnico esperando revision: ${nombre}`;
+    const asunto = `Nuevo técnico esperando revisión: ${nombre}`;
     const resultados: Record<string, boolean> = {};
     for (const para of ADMIN_EMAILS) {
       resultados[para] = await enviarMail({ para, asunto, html });
