@@ -76,7 +76,10 @@ export default async function TecnicoPage({
   const rubrosNombres = rubroCats.length > 0 ? rubroCats.map((c) => c.name) : rubros;
   const resumenSufix = resumen ? { promedio: Number(resumen.promedio), total: Number(resumen.total) } : undefined;
   const calificacion = calificacionEfectiva(perfil, resumenSufix);
-  const { promedio, total, fuenteExterna } = calificacion;
+  const { promedio, total } = calificacion;
+  // El link "ver las reseñas en la fuente" habla SIEMPRE de la externa,
+  // encabece o no el número de arriba.
+  const externa = calificacion.externa;
   const lista = (resenas ?? []) as Resena[];
   const zonas: string[] = Array.isArray(perfil.zona) ? perfil.zona : perfil.zona ? [perfil.zona] : [];
   const primerNombre = nombre.split(" ")[0];
@@ -129,7 +132,7 @@ export default async function TecnicoPage({
                             de acá. Clickeable a la ficha real para que cualquiera
                             lo pueda verificar, invitando a ver las reseñas reales
                             en la fuente (pedido 2026-09-03). */}
-                        {fuenteExterna && (
+                        {externa && (
                           perfil.reputacion_url ? (
                             <a
                               href={perfil.reputacion_url}
@@ -137,11 +140,11 @@ export default async function TecnicoPage({
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 rounded-full border border-ink-200 px-2 py-0.5 text-[11px] font-medium text-ink-500 underline-offset-2 hover:underline"
                             >
-                              Ver las {total} reseñas en {fuenteExterna} ↗
+                              Ver las {externa.total} reseñas en {externa.fuente} ↗
                             </a>
                           ) : (
                             <span className="inline-flex items-center rounded-full border border-ink-200 px-2 py-0.5 text-[11px] font-medium text-ink-500">
-                              Reputación de {fuenteExterna}
+                              Reputación de {externa.fuente}
                             </span>
                           )
                         )}
@@ -267,9 +270,9 @@ export default async function TecnicoPage({
 
           {lista.length === 0 ? (
             <div className="mt-5 rounded-2xl border border-dashed border-ink-200 p-10 text-center text-ink-400">
-              {fuenteExterna && (
+              {externa && (
                 <p className="mb-2 text-sm text-ink-500">
-                  Su reputación de {fuenteExterna} ya está arriba — acá van las reseñas de quienes lo contactaron por Sufix.
+                  Su reputación de {externa.fuente} ya está arriba — acá van las reseñas de quienes lo contactaron por Sufix.
                 </p>
               )}
               Todavía no tiene reseñas. ¡Sé el primero en calificarlo!

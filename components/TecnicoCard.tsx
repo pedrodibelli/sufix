@@ -154,10 +154,22 @@ export function TecnicoCard({
           {sinResenas ? (
             <span className="text-xs text-ink-400">Sin reseñas aún</span>
           ) : (
-            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-              <StarRating rating={calificacion.promedio} reviews={calificacion.total} />
-              {calificacion.fuenteExterna && (
-                <span className="text-[11px] font-medium text-ink-400">· {calificacion.fuenteExterna}</span>
+            /* flex-nowrap + truncate a propósito: si esto se parte en dos
+               renglones, la fila entera de tarjetas crece de alto (el grid
+               iguala alturas por fila). Con una sola línea garantizada, sumar
+               la segunda reputación no cambia el alto de NINGUNA tarjeta, y
+               las que tienen una sola fuente tampoco reservan lugar vacío. */
+            <div className="flex flex-nowrap items-center gap-x-1.5 overflow-hidden">
+              <span className="shrink-0">
+                <StarRating rating={calificacion.promedio} reviews={calificacion.total} />
+              </span>
+              {calificacion.fuente && (calificacion.secundaria || calificacion.externa) && (
+                <span className="shrink-0 text-[11px] font-medium text-ink-400">· {calificacion.fuente}</span>
+              )}
+              {calificacion.secundaria && (
+                <span className="truncate text-[11px] font-medium text-ink-400">
+                  · {calificacion.secundaria.promedio.toFixed(1)} ({calificacion.secundaria.total}) {calificacion.secundaria.fuente}
+                </span>
               )}
             </div>
           )}

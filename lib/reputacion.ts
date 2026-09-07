@@ -13,17 +13,55 @@ export type ConReputacionExterna = {
 
 export type Resumen = { promedio: number; total: number };
 
+// Un técnico puede tener las DOS reputaciones a la vez: la externa (Google
+// Maps, PorAca) y las reseñas nativas de Sufix. Antes la externa ganaba
+// siempre y la de Sufix desaparecía de la tarjeta — justo la que nos importa
+// que crezca, porque es la única que solo existe acá.
+//
+// Ahora encabeza la que tiene MÁS reseñas (más reseñas = más confianza, sin
+// importar de dónde vengan) y la otra se devuelve como `secundaria` para
+// mostrarla al lado, más chica.
+//
+// Lo que NO se hace: promediar las dos en un solo número. Un 4.9 de Google y
+// un 5.0 de Sufix no son la misma escala ni el mismo público, y el resultado
+// no sería verificable en ninguna parte.
+export type Fuente = { promedio: number; total: number; fuente: string };
+
+export type Calificacion = {
+  // La que encabeza: la de MÁS reseñas entre la externa y la de Sufix.
+  promedio: number;
+  total: number;
+  // Etiqueta de la que encabeza ("Google Maps", "PorAca", "Sufix"). null si
+  // no hay ninguna reputación.
+  fuente: string | null;
+  // La otra, cuando existen las dos. null si solo hay una.
+  secundaria: Fuente | null;
+  // La externa, encabece o no. La usa el perfil para el link "ver las reseñas
+  // en la fuente": ese link siempre habla de la externa, nunca de Sufix.
+  externa: Fuente | null;
+};
+
 export function calificacionEfectiva(
   tecnico: ConReputacionExterna,
   resumen?: Resumen
-): { promedio: number; total: number; fuenteExterna: string | null } {
-  if (tecnico.reputacion_fuente && tecnico.reputacion_rating != null && tecnico.reputacion_total != null) {
-    return { promedio: tecnico.reputacion_rating, total: tecnico.reputacion_total, fuenteExterna: tecnico.reputacion_fuente };
+): Calificacion {
+  const totalExterno = tecnico.reputacion_total ?? 0;
+  const externa: Fuente | null =
+    tecnico.reputacion_fuente && tecnico.reputacion_rating != null && totalExterno > 0
+      ? { promedio: tecnico.reputacion_rating, total: totalExterno, fuente: tecnico.reputacion_fuente }
+      : null;
+  const propia =
+    resumen && resumen.total > 0
+      ? { promedio: resumen.promedio, total: resumen.total, fuente: "Sufix" }
+      : null;
+
+  if (externa && propia) {
+    const [cabeza, cola] = externa.total >= propia.total ? [externa, propia] : [propia, externa];
+    return { promedio: cabeza.promedio, total: cabeza.total, fuente: cabeza.fuente, secundaria: cola, externa };
   }
-  if (resumen && resumen.total > 0) {
-    return { promedio: resumen.promedio, total: resumen.total, fuenteExterna: null };
-  }
-  return { promedio: -1, total: 0, fuenteExterna: null };
+  if (externa) return { promedio: externa.promedio, total: externa.total, fuente: externa.fuente, secundaria: null, externa };
+  if (propia) return { promedio: propia.promedio, total: propia.total, fuente: propia.fuente, secundaria: null, externa: null };
+  return { promedio: -1, total: 0, fuente: null, secundaria: null, externa: null };
 }
 
 // ── Orden "Recomendados" ────────────────────────────────────────────────
