@@ -165,8 +165,11 @@ Vercel. El código usa:
 - **Repo GitHub conectado** → auto-deploy: push a `main` = producción.
 - **Env vars (Production):** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
   `NEXT_PUBLIC_APP_URL` (= `https://solvitweb.vercel.app`), `CRON_SECRET` (seteado).
-  `RESEND_API_KEY` **sin setear a propósito** (emails apagados — ver §7).
-- **Pendiente:** agregar `https://solvitweb.vercel.app/**` a **Supabase → Auth → Redirect URLs**.
+  `RESEND_API_KEY` (2026-09-07, ver §7 y §16), `WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`.
+  ⚠️ Vercel las marca **Sensitive**: no se pueden volver a leer, ni por CLI ni por panel. El
+  `WEBHOOK_SECRET` se recupera copiándolo de un webhook ya configurado en Supabase.
+- ✅ Redirect URLs de Supabase: ya acepta `https://sufixapp.com/**` (verificado con
+  `generateLink`, respeta el `redirect_to` que se le pide).
 
 ### Pasos (referencia)
 1. Crear proyecto en mi Vercel apuntando a `pedrodibelli/solvit` (uso el dominio
@@ -174,8 +177,7 @@ Vercel. El código usa:
 2. Cargar en Vercel: `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` (mínimo).
 3. ✅ Base de Supabase: **reuso la original** (soy owner — ver sección 5).
 4. Agregar la URL nueva de Vercel a las Redirect URLs de Supabase Auth.
-5. Setear `NEXT_PUBLIC_APP_URL` a la URL de Vercel. Dejar `RESEND_API_KEY` **sin setear**
-   (no uso `solvit.homes` — ver sección 7). `CRON_SECRET` opcional.
+5. Setear `NEXT_PUBLIC_APP_URL` a la URL real del deploy. `CRON_SECRET` opcional.
 
 ---
 
