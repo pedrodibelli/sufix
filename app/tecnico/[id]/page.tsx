@@ -202,6 +202,18 @@ export default async function TecnicoPage({
 
                 Solo se renderiza si verificado = true: si algún día entra un
                 perfil sin revisar, no se afirma nada sobre él. */}
+            {/* Un perfil sin revisar ya no sale en el directorio, pero el link
+                directo sigue funcionando (lo necesita /admin para revisarlo).
+                Se aclara, para que nadie lo confunda con uno aprobado. */}
+            {!perfil.verificado && (
+              <div className="mt-8 rounded-2xl border border-amber-300 bg-amber-50 p-5 sm:max-w-lg">
+                <p className="text-sm font-semibold text-amber-900">Perfil en revisión</p>
+                <p className="mt-1 text-[14px] leading-relaxed text-amber-800">
+                  Todavía no lo revisó nuestro equipo, así que no aparece en el directorio.
+                </p>
+              </div>
+            )}
+
             {perfil.verificado && (
               <div className="mt-8 rounded-2xl border border-sv-primary/25 bg-sv-mint/60 p-5 sm:p-6">
                 <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">

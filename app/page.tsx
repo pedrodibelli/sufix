@@ -44,6 +44,11 @@ export default async function HomePage({
     const { data: tecnicosRaw } = await supabaseServer
       .from("perfiles_publicos")
       .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
+      // Solo verificados (2026-09-07). La home promete "ningún técnico entra
+      // sin que lo miremos primero" y hasta ahora no era cierto: quien se
+      // registraba solo aparecía al instante. Ahora el perfil espera en
+      // /admin > Técnicos pendientes hasta que alguien lo apruebe.
+      .eq("verificado", true)
       .not("rubro", "is", null)
       .not("telefono", "is", null)
       .order("creado_at", { ascending: false });
@@ -297,8 +302,24 @@ export default async function HomePage({
                 {miPerfil.nombre ? `Hola, ${miPerfil.nombre.split(" ")[0]}` : "Tu perfil"}
               </h1>
               <p className="mt-1 text-sm text-ink-500">
-                Así te ven los clientes que te buscan en el directorio.
+                {miPerfil.verificado
+                  ? "Así te ven los clientes que te buscan en el directorio."
+                  : "Así se va a ver tu perfil cuando lo publiquemos."}
               </p>
+
+              {/* Sin esto, un técnico recién registrado veía su tarjeta y daba
+                  por hecho que ya estaba publicado — desde 2026-09-07 no
+                  aparece en el directorio hasta que alguien lo revisa. */}
+              {!miPerfil.verificado && (
+                <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-4 sm:p-5">
+                  <p className="text-sm font-semibold text-amber-900">Tu perfil está en revisión</p>
+                  <p className="mt-1 text-sm leading-relaxed text-amber-800">
+                    Todavía no aparece en el directorio. Una persona de nuestro equipo lo mira a
+                    mano y se contacta con vos por WhatsApp para confirmar tus datos. Mientras
+                    tanto podés dejarlo completo.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_1fr]">

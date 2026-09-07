@@ -34,6 +34,11 @@ export default async function CategoriaPage({
     .from("perfiles_publicos")
     .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
     .contains("rubro", [slug])
+      // Solo verificados (2026-09-07). La home promete "ningún técnico entra
+      // sin que lo miremos primero" y hasta ahora no era cierto: quien se
+      // registraba solo aparecía al instante. Ahora el perfil espera en
+      // /admin > Técnicos pendientes hasta que alguien lo apruebe.
+    .eq("verificado", true)
     .not("telefono", "is", null)
     .order("creado_at", { ascending: false });
 
