@@ -16,10 +16,34 @@ export const runtime = "nodejs";
 // pestaña justo después, un aviso disparado desde el navegador no sale nunca.
 // Desde la base sale siempre, y de paso cubre las altas hechas por script.
 export async function POST(req: NextRequest) {
+  // El 401 se devolvía sin dejar rastro, y eso hizo imposible diagnosticar por
+  // qué no salían los avisos: el webhook llegaba, rebotaba y no quedaba nada en
+  // los logs. Ahora se dice QUÉ falló, sin revelar el secreto en ningún caso.
   const auth = req.headers.get("authorization");
-  if (!process.env.WEBHOOK_SECRET || auth !== `Bearer ${process.env.WEBHOOK_SECRET}`) {
-    return NextResponse.json({ error: "no autorizado" }, { status: 401 });
+  const esperado = process.env.WEBHOOK_SECRET;
+  if (!esperado) {
+    console.error("[tecnico-registrado] 401: falta WEBHOOK_SECRET en el entorno");
+    return NextResponse.json({ error: "no autorizado", motivo: "falta el secreto en el servidor" }, { status: 401 });
   }
+  if (!auth) {
+    console.error("[tecnico-registrado] 401: el webhook no mandó header Authorization");
+    return NextResponse.json({ error: "no autorizado", motivo: "falta el header Authorization" }, { status: 401 });
+  }
+  if (!auth.startsWith("Bearer ")) {
+    console.error(`[tecnico-registrado] 401: el header no empieza con "Bearer " (empieza con "${auth.slice(0, 7)}")`);
+    return NextResponse.json({ error: "no autorizado", motivo: 'el header debe empezar con "Bearer "' }, { status: 401 });
+  }
+  if (auth !== `Bearer ${esperado}`) {
+    const recibido = auth.slice(7);
+    console.error(`[tecnico-registrado] 401: el secreto no coincide (recibido: ${recibido.length} caracteres, esperado: ${esperado.length})`);
+    return NextResponse.json({
+      error: "no autorizado",
+      motivo: "el secreto no coincide",
+      largoRecibido: recibido.length,
+      largoEsperado: esperado.length,
+    }, { status: 401 });
+  }
+  console.log("[tecnico-registrado] autorizado, procesando");
 
   try {
     const body = await req.json();
