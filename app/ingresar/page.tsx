@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { supabase } from "@/lib/supabase";
+import { PasswordInput } from "@/components/PasswordInput";
 import { LoadingScreen } from "@/components/LoadingScreen";
 // import { GoogleButton } from "@/components/GoogleButton"; // pausado, ver CLAUDE.md
 
@@ -93,13 +94,11 @@ function IngresarInner() {
               />
             </Field>
             <Field label="Contraseña">
-              <input
-                type="password"
-                placeholder="••••••••"
+              <PasswordInput
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="field"
+                onChange={setPassword}
+                placeholder="••••••••"
+                autoComplete="current-password"
               />
             </Field>
             <div className="flex items-center justify-between text-xs">
@@ -118,7 +117,7 @@ function IngresarInner() {
                   }
                   setReseteando(true);
                   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-                    redirectTo: `${window.location.origin}/ingresar`,
+                    redirectTo: `${window.location.origin}/auth/callback?next=/restablecer`,
                   });
                   setReseteando(false);
                   // Se responde igual exista o no la cuenta: decir "ese mail no

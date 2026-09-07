@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { PasswordInput } from "@/components/PasswordInput";
 import { cambiarPassword } from "./actions";
 
 // Cambio de contraseña, disponible para cualquier cuenta (técnico o
@@ -76,33 +77,27 @@ export function CambiarPasswordForm() {
 
       <div>
         <label className={labelCls}>Contraseña actual</label>
-        <input
-          type="password"
-          className="field"
+        <PasswordInput
           value={actual}
-          onChange={(e) => setActual(e.target.value)}
+          onChange={setActual}
           placeholder="••••••••"
           autoComplete="current-password"
         />
       </div>
       <div>
         <label className={labelCls}>Contraseña nueva</label>
-        <input
-          type="password"
-          className="field"
+        <PasswordInput
           value={nueva}
-          onChange={(e) => setNueva(e.target.value)}
+          onChange={setNueva}
           placeholder="Mínimo 8 caracteres"
           autoComplete="new-password"
         />
       </div>
       <div>
         <label className={labelCls}>Confirmar contraseña nueva</label>
-        <input
-          type="password"
-          className="field"
+        <PasswordInput
           value={confirmar}
-          onChange={(e) => setConfirmar(e.target.value)}
+          onChange={setConfirmar}
           placeholder="Repetí la contraseña nueva"
           autoComplete="new-password"
         />

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { PasswordInput } from "@/components/PasswordInput";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { RubroChips } from "@/components/RubroChips";
 import { ZonaChips } from "@/components/ZonaChips";
@@ -154,24 +155,20 @@ export default function RegistrarPage() {
           </Field>
 
           <Field label="Contraseña">
-            <input
-              type="password"
-              placeholder="Mínimo 8 caracteres"
+            <PasswordInput
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="field"
+              onChange={setPassword}
+              placeholder="Mínimo 8 caracteres"
+              autoComplete="new-password"
             />
           </Field>
 
           <Field label="Confirmar contraseña">
-            <input
-              type="password"
-              placeholder="Repetí la contraseña"
+            <PasswordInput
               value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-              className="field"
+              onChange={setConfirm}
+              placeholder="Repetí la contraseña"
+              autoComplete="new-password"
             />
           </Field>
 
