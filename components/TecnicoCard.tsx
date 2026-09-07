@@ -159,16 +159,35 @@ export function TecnicoCard({
                iguala alturas por fila). Con una sola línea garantizada, sumar
                la segunda reputación no cambia el alto de NINGUNA tarjeta, y
                las que tienen una sola fuente tampoco reservan lugar vacío. */
-            <div className="flex flex-nowrap items-center gap-x-1.5 overflow-hidden">
+            /* items-baseline, no items-center: la calificación va a 13px y la
+               etiqueta de la fuente a 11px, y centrar las CAJAS dejaba el
+               nombre de la fuente visiblemente más abajo que los números.
+               Alineando por línea de base, los dos textos apoyan sobre la
+               misma línea.
+
+               flex-nowrap + truncate a propósito: si esto se parte en dos
+               renglones, la fila entera de tarjetas crece de alto (el grid
+               iguala alturas por fila). Con una sola línea garantizada, sumar
+               la segunda reputación no cambia el alto de NINGUNA tarjeta, y
+               las que tienen una sola fuente tampoco reservan lugar vacío. */
+            <div className="flex flex-nowrap items-baseline gap-x-1.5 overflow-hidden">
               <span className="shrink-0">
                 <StarRating rating={calificacion.promedio} reviews={calificacion.total} />
               </span>
               {calificacion.fuente && (calificacion.secundaria || calificacion.externa) && (
                 <span className="shrink-0 text-[11px] font-medium text-ink-400">· {calificacion.fuente}</span>
               )}
+              {/* La segunda fuente arranca con su propia estrella, igual que la
+                  primera, y separada — con un punto se leía como continuación
+                  de la misma frase y no como otra calificación. */}
               {calificacion.secundaria && (
-                <span className="truncate text-[11px] font-medium text-ink-400">
-                  · {calificacion.secundaria.promedio.toFixed(1)} ({calificacion.secundaria.total}) {calificacion.secundaria.fuente}
+                <span className="ml-2 flex shrink items-baseline gap-1 truncate text-[11px] font-medium text-ink-400">
+                  <svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor" className="shrink-0 self-center" aria-hidden>
+                    <path d="M10 1.6l2.6 5.3 5.9.9-4.3 4.2 1 5.9L10 15.1l-5.3 2.8 1-5.9L1.4 7.8l5.9-.9L10 1.6z" />
+                  </svg>
+                  <span className="truncate">
+                    {calificacion.secundaria.promedio.toFixed(1)} ({calificacion.secundaria.total}) {calificacion.secundaria.fuente}
+                  </span>
                 </span>
               )}
             </div>
