@@ -134,3 +134,55 @@ export async function cambiarPassword(data: {
 
   return { ok: true };
 }
+
+// ── Borrar la cuenta ────────────────────────────────────────────────────
+//
+// No existía para ningún rol (2026-09-07). La política de privacidad ya
+// promete la baja total escribiendo a sufixar@gmail.com, así que además de
+// ser lo esperable, tenerlo acá es cumplir lo que dice el sitio sin que
+// nadie tenga que mandar un mail.
+//
+// Hace falta la service role key: borrar el propio usuario de auth.users no
+// se puede con la anon key. El id NUNCA viene del cliente — sale de la
+// sesión — así que esta función solo puede borrar a quien la llama.
+export async function borrarCuenta(
+  confirmacion: string
+): Promise<{ ok: true } | { error: string }> {
+  if (confirmacion.trim().toUpperCase() !== "BORRAR") {
+    return { error: 'Escribí BORRAR para confirmar.' };
+  }
+
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Se cerró tu sesión. Volvé a entrar e intentá de nuevo." };
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) {
+    return { error: "No podemos procesar la baja ahora. Escribinos a sufixar@gmail.com." };
+  }
+  const { createClient } = await import("@supabase/supabase-js");
+  const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
+
+  // `resenas` no tiene FK contra auth.users (ver 20260621_resenas.sql: tecnico_id
+  // y autor_id son uuid sueltos), así que no se van solas con el cascade. Se
+  // borran las que escribió y las que recibió: las primeras llevan su nombre
+  // (autor_nombre) y las segundas califican a un perfil que deja de existir.
+  await admin.from("resenas").delete().eq("autor_id", user.id);
+  await admin.from("resenas").delete().eq("tecnico_id", user.id);
+
+  // La foto vive fuera de la base, en Storage — el cascade no la toca.
+  await admin.storage.from("avatars").remove([`${user.id}/avatar`]);
+
+  // perfiles_profesionales SÍ tiene ON DELETE CASCADE, así que la tarjeta del
+  // directorio se va sola al borrar el usuario. Se borra igual acá primero:
+  // si por lo que sea el cascade no estuviera aplicado en la base, no queremos
+  // dejar un perfil público huérfano de una cuenta que ya no existe.
+  await admin.from("perfiles_profesionales").delete().eq("user_id", user.id);
+
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) return { error: "No se pudo borrar la cuenta. Escribinos a sufixar@gmail.com." };
+
+  await supabase.auth.signOut();
+  return { ok: true };
+}

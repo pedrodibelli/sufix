@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { PerfilForm } from "./PerfilForm";
+import { BorrarCuenta } from "./BorrarCuenta";
 import { DatosCuentaForm } from "./DatosCuentaForm";
 import { CambiarPasswordForm } from "./CambiarPasswordForm";
 
@@ -129,6 +130,8 @@ export default async function PerfilPage() {
                   </div>
                 )}
               </section>
+
+              <BorrarCuenta esProfesional={false} />
             </div>
           </div>
         </main>
@@ -202,6 +205,8 @@ export default async function PerfilPage() {
                 <CambiarPasswordForm />
               </div>
             </section>
+
+            <BorrarCuenta esProfesional />
           </div>
         </div>
       </main>
