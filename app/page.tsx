@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { Bienvenida } from "@/components/Bienvenida";
 import { TecnicosDirectorio } from "@/components/TecnicosDirectorio";
 import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
 import { HeroSearchCard } from "@/components/HeroSearchCard";
@@ -157,6 +158,7 @@ export default async function HomePage({
     <>
       <Header />
       <main className="overflow-x-hidden bg-[#FBF8EF]">
+        <Bienvenida esProfesional={esProfesional} />
 
         {/* Directorio de técnicos — para demandantes y visitantes, no técnicos. */}
         {!esProfesional && (

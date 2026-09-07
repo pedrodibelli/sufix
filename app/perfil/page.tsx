@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { Bienvenida } from "@/components/Bienvenida";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { PerfilForm } from "./PerfilForm";
@@ -69,6 +70,7 @@ export default async function PerfilPage() {
       <>
         <Header />
         <main className="min-h-screen bg-[#FBF8EF]">
+          <Bienvenida esProfesional={false} />
           <div className="container-pad py-10">
             <div className="mx-auto max-w-lg">
               <h1 className="display text-2xl">Mi perfil</h1>
@@ -146,6 +148,7 @@ export default async function PerfilPage() {
     <>
       <Header />
       <main className="min-h-screen bg-[#FBF8EF]">
+        <Bienvenida esProfesional={true} />
         <div className="container-pad py-10">
           <div className="mx-auto max-w-lg">
             <div className="flex items-center gap-4">

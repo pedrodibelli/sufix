@@ -25,6 +25,7 @@ export default function RegistrarPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [esperandoConfirmacion, setEsperandoConfirmacion] = useState(false);
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -62,14 +63,24 @@ export default function RegistrarPage() {
       metadata.zonas = zonas;
     }
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: metadata,
-        // Redirige la confirmación al deploy actual (no a la Site URL global de
-        // Supabase, que es compartida con el deploy original en solvit.homes).
-        emailRedirectTo: `${window.location.origin}/`,
+        // El link del mail vuelve por /auth/callback, que canjea el `code` de
+        // PKCE por una sesión real (2026-09-07). Antes volvía a "/" pelado: el
+        // usuario confirmaba, aterrizaba en la home DESLOGUEADO y tenía que
+        // iniciar sesión a mano, sin que nada le dijera que la confirmación
+        // habia funcionado.
+        //
+        // El técnico va a /perfil (tiene que completar foto y experiencia); el
+        // demandante va a la home, que es el directorio y es lo que vino a ver.
+        // encodeURIComponent obligatorio: el destino lleva su propio "?", y sin
+        // codificar el callback leia next="/perfil" y perdia el bienvenida=1.
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+          esProfesional ? "/perfil?bienvenida=1" : "/?bienvenida=1"
+        )}`,
       },
     });
 
@@ -80,12 +91,47 @@ export default function RegistrarPage() {
     }
 
     setLoading(false);
+
+    // Con "Confirm email" prendido, signUp NO devuelve sesión: hay que esperar
+    // a que el usuario toque el link. Sin esta rama lo mandábamos a "/" igual y
+    // caía deslogueado, sin ninguna explicación.
+    if (!signUpData.session) {
+      setEsperandoConfirmacion(true);
+      return;
+    }
+
     setRedirecting(true);
     // Navegación DURA (recarga real), no soft (router.push). En la PWA standalone
     // del celular la transición client-side de Next se cuelga esperando el render
     // del Server Component de "/", y el spinner queda infinito. Una recarga completa
     // hace que el servidor lea la cookie de sesión recién creada y "/" cargue limpio.
     setTimeout(() => window.location.assign("/"), 400);
+  }
+
+  if (esperandoConfirmacion) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#FBF8EF] p-8">
+        <div className="w-full max-w-sm text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-sv-mint text-sv-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7" aria-hidden>
+              <rect x="2.5" y="4.5" width="19" height="15" rx="2.5" />
+              <path d="m3 6 9 6.5L21 6" />
+            </svg>
+          </div>
+          <h1 className="display mt-5 text-3xl leading-tight">Revisá tu email</h1>
+          <p className="mt-3 text-sm leading-relaxed text-ink-500">
+            Te mandamos un mail a <span className="font-semibold text-sv-dark">{email}</span>.
+            Abrilo y tocá el botón para activar tu cuenta — con eso ya entrás, no hace falta que
+            vuelvas a poner la contraseña.
+          </p>
+          <p className="mt-4 text-[13px] leading-relaxed text-ink-400">
+            Si no lo ves, fijate en spam o promociones. El mail llega de{" "}
+            <span className="font-medium text-ink-500">hola@sufixapp.com</span>.
+          </p>
+          <Link href="/" className="btn-ghost mt-7 inline-block px-8">Volver al inicio</Link>
+        </div>
+      </main>
+    );
   }
 
   if (redirecting) {
