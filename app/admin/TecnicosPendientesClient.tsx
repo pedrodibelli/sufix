@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { verificarTecnico } from "./actions";
 import { CATEGORIES } from "@/lib/data";
+import { telefonoWhatsApp } from "@/lib/whatsapp";
 
 export type TecnicoPendiente = {
   user_id: string;
@@ -33,7 +34,7 @@ export function TecnicosPendientesClient({ tecnicos }: { tecnicos: TecnicoPendie
     <div className="mt-6 space-y-3">
       {error && <p className="text-sm text-rose-600">{error}</p>}
       {visibles.map((t) => {
-        const tel = (t.telefono ?? "").replace(/\D/g, "");
+        const tel = telefonoWhatsApp(t.telefono) ?? "";
         return (
           <div key={t.user_id} className="card p-5">
             <div className="flex flex-wrap items-start justify-between gap-4">

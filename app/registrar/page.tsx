@@ -34,7 +34,7 @@ export default function RegistrarPage() {
       return;
     }
     if (esProfesional) {
-      if (!telefono.trim()) { setError("El teléfono es obligatorio para profesionales."); return; }
+      if (telefono.length !== 8) { setError("El WhatsApp tiene que tener 8 números después del +54 9 11."); return; }
       if (categorias.length === 0) { setError("Seleccioná al menos un rubro."); return; }
       if (zonas.length === 0) { setError("Seleccioná al menos una zona de trabajo."); return; }
     }
@@ -56,7 +56,7 @@ export default function RegistrarPage() {
     };
 
     if (esProfesional) {
-      metadata.telefono = telefono.trim();
+      metadata.telefono = "+54911" + telefono;
       metadata.categorias = categorias;
       metadata.zonas = zonas;
     }
@@ -211,14 +211,37 @@ export default function RegistrarPage() {
                 Datos del profesional
               </p>
 
-              <Field label="Teléfono">
-                <input
-                  type="tel"
-                  placeholder="+54 9 11 ..."
-                  value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
-                  className="field"
-                />
+              {/* Prefijo fijo (2026-09-07): antes era un campo libre con
+                  placeholder "+54 9 11 ..." y entraban de tres formas
+                  distintas — con el 9, sin el 9, y sin prefijo. Sin ese 9 el
+                  link de WhatsApp no abre nada y el técnico nunca se entera de
+                  que lo contactaron. Ahora solo se cargan los 8 dígitos y el
+                  resto no se puede equivocar. */}
+              <Field label="WhatsApp">
+                <div className="flex items-stretch gap-2">
+                  <span className="flex shrink-0 items-center rounded-xl border border-zap-200 bg-zap-100 px-3 font-medium text-ink-500">
+                    +54 9 11
+                  </span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="6601 5871"
+
+                    value={telefono}
+                    onChange={(e) => {
+                      // Se queda con los ULTIMOS 8 digitos, no con los primeros:
+                      // asi funciona igual si pegan el numero entero (+54 9 11 ...)
+                      // o si lo escriben con el 15 adelante, que es como lo pasa
+                      // casi todo el mundo.
+                      const d = e.target.value.replace(/[^0-9]/g, "");
+                      setTelefono(d.length > 8 ? d.slice(-8) : d);
+                    }}
+                    className="field"
+                  />
+                </div>
+                <p className="mt-1.5 text-[12.5px] text-ink-400">
+                  Los 8 números que siguen al 11, sin el 15.
+                </p>
               </Field>
 
               <div>

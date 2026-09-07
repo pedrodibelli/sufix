@@ -10,7 +10,7 @@ import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
 import { calificacionEfectiva } from "@/lib/reputacion";
-import { mensajeWhatsApp } from "@/lib/whatsapp";
+import { mensajeWhatsApp, telefonoWhatsApp } from "@/lib/whatsapp";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { DejarResenaForm } from "./DejarResenaForm";
 import { ReportarPerfilBoton } from "./ReportarPerfilBoton";
@@ -88,7 +88,7 @@ export default async function TecnicoPage({
         .replace(" de ", " ")
     : null;
 
-  const telefonoLimpio = perfil.telefono?.replace(/\D/g, "") ?? "";
+  const telefonoLimpio = telefonoWhatsApp(perfil.telefono) ?? "";
   // El oficio solo se nombra si vino en la URL Y el técnico lo tiene cargado.
   const rubroDelContexto = rubroContexto && rubros.includes(rubroContexto)
     ? rubroCats.find((c) => c.slug === rubroContexto)?.name ?? null

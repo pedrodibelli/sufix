@@ -7,7 +7,7 @@ import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { toTitleCase } from "@/lib/format";
 import { calificacionEfectiva } from "@/lib/reputacion";
-import { mensajeWhatsApp } from "@/lib/whatsapp";
+import { mensajeWhatsApp, telefonoWhatsApp } from "@/lib/whatsapp";
 
 export type TecnicoPublico = {
   user_id: string;
@@ -68,7 +68,9 @@ export function TecnicoCard({
     : null;
   const bio = tecnico.titular?.trim() || "";
 
-  const telefonoLimpio = tecnico.telefono?.replace(/\D/g, "") ?? "";
+  // Normalizado, no solo "sacar lo que no sea numero": un telefono cargado
+  // sin el 9 hacia que el link de WhatsApp no abriera nada (ver lib/whatsapp.ts).
+  const telefonoLimpio = telefonoWhatsApp(tecnico.telefono) ?? "";
   const mensaje = encodeURIComponent(
     mensajeWhatsApp(nombre, rubroDelContexto)
   );

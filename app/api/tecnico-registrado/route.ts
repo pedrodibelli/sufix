@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { enviarMail } from "@/lib/mail";
 import { ADMIN_EMAILS } from "@/lib/admin";
 import { CATEGORIES } from "@/lib/data";
+import { telefonoWhatsApp } from "@/lib/whatsapp";
 
 export const runtime = "nodejs";
 
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
       : "—";
     const zonas = Array.isArray(perfil.zona) && perfil.zona.length ? perfil.zona.join(", ") : "—";
     const tel = String(perfil.telefono ?? "—");
-    const telLimpio = tel.replace(/\D/g, "");
+    const telLimpio = telefonoWhatsApp(tel) ?? "";
 
     const html = `
       <p style="margin:0 0 4px;font-size:17px;font-weight:600;">Un técnico se registró y espera revisión</p>
