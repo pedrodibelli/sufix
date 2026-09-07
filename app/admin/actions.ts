@@ -3,6 +3,7 @@
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { isAdminEmail } from "@/lib/admin";
 import { revalidatePath } from "next/cache";
+import { enviarMail } from "@/lib/mail";
 
 export async function aprobarPago(
   propuestaId: string
@@ -97,6 +98,32 @@ export async function verificarTecnico(
     .update({ verificado: true })
     .eq("user_id", userId);
   if (error) return { error: error.message };
+
+  // Avisarle que ya está publicado. Va después del update y sin await sobre el
+  // resultado del envío en el camino de error: si el mail falla, el técnico ya
+  // quedó verificado igual — no queremos que un problema de Resend deshaga una
+  // aprobación. enviarMail() nunca tira, devuelve false y loguea.
+  const { data: perfil } = await admin
+    .from("perfiles_profesionales")
+    .select("nombre")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const { data: userRes } = await admin.auth.admin.getUserById(userId);
+  const emailTecnico = userRes?.user?.email;
+  if (emailTecnico) {
+    const primerNombre = (perfil?.nombre ?? "").trim().split(" ")[0] || "Hola";
+    await enviarMail({
+      para: emailTecnico,
+      asunto: "Tu perfil ya está publicado en Sufix",
+      html: `
+        <p style="margin:0 0 14px;font-size:17px;font-weight:600;">${primerNombre}, tu perfil ya está publicado</p>
+        <p style="margin:0 0 14px;">Lo revisamos y desde ahora aparecés en el directorio de Sufix. Los clientes de tu zona pueden verte y escribirte por WhatsApp directo.</p>
+        <p style="margin:0 0 20px;color:#5A6B5C;">Si querés que te encuentren más fácil, sumale una foto y contá tus años de oficio desde tu perfil.</p>
+        <p style="margin:0;">
+          <a href="https://sufixapp.com/tecnico/${userId}" style="display:inline-block;background:#4E7A3E;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:600;font-size:14px;">Ver mi perfil</a>
+        </p>`,
+    });
+  }
 
   revalidatePath("/admin");
   revalidatePath("/");

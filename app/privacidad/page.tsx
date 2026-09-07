@@ -92,8 +92,16 @@ export default function PrivacidadPage() {
                 <li>Entender qué tan bien funciona el directorio y mejorarlo.</li>
               </ul>
               <p className="mt-3">
-                <strong>Hoy Sufix no envía emails automáticos ni newsletters.</strong> Si en algún
-                momento empezáramos a mandar avisos, lo vamos a aclarar acá antes.
+                <strong>Los emails que te podemos mandar son estos, y ninguno es publicidad:</strong>
+              </p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                <li>Confirmación de tu dirección de email al crear la cuenta.</li>
+                <li>Recuperación de contraseña, solo si vos la pedís.</li>
+                <li>Si sos técnico: el aviso de que revisamos tu perfil y ya está publicado.</li>
+              </ul>
+              <p className="mt-3">
+                No mandamos newsletters ni promociones. Si algún día quisiéramos hacerlo, lo
+                aclaramos acá antes y te vamos a pedir permiso.
               </p>
               <p className="mt-3">
                 <strong>No vendemos tus datos personales ni los cedemos con fines publicitarios.</strong>
@@ -123,6 +131,7 @@ export default function PrivacidadPage() {
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li><strong>Supabase</strong> — base de datos, autenticación y almacenamiento de fotos.</li>
                 <li><strong>Vercel</strong> — hosting del sitio.</li>
+                <li><strong>Resend</strong> — envío de los emails de arriba. Solo recibe tu dirección y el contenido del aviso.</li>
               </ul>
               <p className="mt-2">
                 No compartimos tus datos con nadie más, salvo requerimiento legal de autoridad

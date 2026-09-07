@@ -25,6 +25,12 @@ function IngresarInner() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  // "Olvidé mi contraseña" era un href="#" — un link que no hacía nada
+  // (2026-09-07). Ahora pide el mail de recuperación a Supabase, que lo manda
+  // por el SMTP configurado. Sin SMTP no llega nada, así que el texto de éxito
+  // no promete que ya está en la bandeja, solo que lo pedimos.
+  const [reseteando, setReseteando] = useState(false);
+  const [avisoReset, setAvisoReset] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -101,10 +107,38 @@ function IngresarInner() {
                 <input type="checkbox" className="rounded border-ink-300 accent-sv-primary" />
                 Recordarme
               </label>
-              <a href="#" className="text-ink-400 underline underline-offset-2">
-                Olvidé mi contraseña
-              </a>
+              <button
+                type="button"
+                disabled={reseteando}
+                onClick={async () => {
+                  setAvisoReset("");
+                  if (!email.trim()) {
+                    setAvisoReset("Escribí tu email arriba y volvé a tocar acá.");
+                    return;
+                  }
+                  setReseteando(true);
+                  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+                    redirectTo: `${window.location.origin}/ingresar`,
+                  });
+                  setReseteando(false);
+                  // Se responde igual exista o no la cuenta: decir "ese mail no
+                  // está registrado" le confirmaría a cualquiera qué direcciones
+                  // tienen cuenta en Sufix.
+                  setAvisoReset(
+                    error
+                      ? "No pudimos enviarlo ahora. Probá de nuevo en un rato."
+                      : "Si esa dirección tiene una cuenta, te llega un mail para cambiarla."
+                  );
+                }}
+                className="text-ink-400 underline underline-offset-2 disabled:opacity-60"
+              >
+                {reseteando ? "Enviando…" : "Olvidé mi contraseña"}
+              </button>
             </div>
+
+            {avisoReset && (
+              <p className="rounded-xl bg-zap-100 px-4 py-2 text-sm text-sv-olive">{avisoReset}</p>
+            )}
 
             {error && (
               <p className="rounded-xl bg-red-50 px-4 py-2 text-sm text-red-600">
