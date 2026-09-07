@@ -90,12 +90,14 @@ export async function POST(req: NextRequest) {
 
     // A todos los admins: si manana se suma alguien mas al equipo, lo recibe
     // sin tocar codigo (la lista es la misma que da acceso a /admin).
-    const enviados = await Promise.all(
-      ADMIN_EMAILS.map((para) =>
-        enviarMail({ para, asunto: `Nuevo tecnico esperando revision: ${nombre}`, html })
-      )
-    );
-    return NextResponse.json({ ok: true, enviados: enviados.filter(Boolean).length });
+    const asunto = `Nuevo tecnico esperando revision: ${nombre}`;
+    const resultados: Record<string, boolean> = {};
+    for (const para of ADMIN_EMAILS) {
+      resultados[para] = await enviarMail({ para, asunto, html });
+    }
+    const enviados = Object.values(resultados).filter(Boolean).length;
+    console.log(`[tecnico-registrado] enviados ${enviados}/${ADMIN_EMAILS.length}: ${JSON.stringify(resultados)}`);
+    return NextResponse.json({ ok: true, enviados, resultados });
   } catch (e) {
     console.error("[tecnico-registrado] error:", e);
     return NextResponse.json({ ok: true });
