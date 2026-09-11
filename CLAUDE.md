@@ -201,9 +201,53 @@ Vercel. El código usa:
 # 📍 ESTADO ACTUAL DEL PRODUCTO (leer esto primero)
 
 > Sección agregada para que una sesión nueva sepa **en qué punto estamos y cómo funciona
-> todo**, sin tener que explorar el código. Última actualización: **2026-06-21**.
+> todo**, sin tener que explorar el código. Última actualización: **2026-09-11**.
 
-## 8. Cómo funciona la app hoy (features que YA están)
+## 8.0 Mapa del sitio — lo que está VIVO hoy
+
+> El §8 de más abajo ("Cómo funciona la app hoy") describe el modelo **pre-pivot**
+> (publicar problema → propuestas → pago → código de cierre). Quedó desactualizado por
+> el pivot del 20/21-08 y se conserva solo como referencia histórica de un esquema que
+> sigue en el código pero **pausado** (ver §11). Lo que un visitante ve hoy en
+> producción es esto:
+
+| Ruta | Qué es | Quién la ve |
+|---|---|---|
+| `/` | Home: hero + buscador, directorio de técnicos **verificados**, secciones de marketing (Seguridad, Oficios, Cómo funciona, WhatsApp) | Todos. El técnico logueado ve además su propia vista previa arriba, con cartel de "en revisión" si todavía no lo aprobaron |
+| `/categoria/[slug]` | Técnicos de un oficio, con hero de stats (verificados, zonas cubiertas) | Todos |
+| `/categorias` | Grilla de los 10 oficios con conteo real de técnicos (se actualiza solo) | Todos |
+| `/tecnico/[id]` | Perfil público: foto, rubros, zonas, reseñas (nativas + reputación externa tipo Google Maps si está cargada), botón WhatsApp, botón de reportar el perfil | Todos. Un perfil sin `verificado=true` avisa "en revisión" en vez de mostrarse como aprobado |
+| `/como-funciona` | Explicación del modelo (gratis, sin comisión) + FAQ | Todos |
+| `/registrar`, `/ingresar` | Alta y login, con confirmación de mail (ver §10) | Visitantes |
+| `/restablecer` | Pantalla para poner la contraseña nueva, llega por el mail de "olvidé mi contraseña" | Quien pidió el reset |
+| `/perfil` | Edición de datos propios; el técnico completa foto/experiencia; sección "Borrar mi cuenta" (los dos roles) | Usuarios logueados |
+| `/reportar` | Reportar un problema general (con el sitio o con un técnico) — **exige cuenta**, es una conversación | Usuarios logueados |
+| `/admin` | Panel: **Reportes** + **Técnicos pendientes de revisión** (ver §11, actualizado) | Solo los dos emails admin |
+| `/terminos`, `/privacidad` | Legales, linkeados del footer | Todos |
+
+**Redirigidas (307), del modelo viejo — no tocar salvo que se restaure ese modelo:**
+`/publicar`, `/buscar`, `/oferentes`, `/servicio/[slug]`, `/profesional/[slug]` (ver
+`next.config.mjs`). `/publicar` en particular seguía insertando en `publicaciones` y
+disparando mails reales a técnicos sobre un trabajo que nadie podía ver — por eso se cortó.
+
+**Directorio de técnicos — reglas que no son obvias mirando el código:**
+- Un técnico **no aparece en ningún listado público** hasta que un admin lo marca
+  `verificado = true` desde `/admin`. El trigger de alta (`crear_perfil_al_registrarse`)
+  llena rubro/zona desde el metadata pero **nunca** pone `verificado` en true — nace en false.
+- La calificación que se muestra sigue `calificacionEfectiva()` en `lib/reputacion.ts`: si
+  `reputacion_fuente` + `reputacion_rating` + `reputacion_total` están los tres cargados,
+  se usa esa (ej. Google Maps); si no, se usan las reseñas nativas de `resenas`; si no hay
+  ninguna, no se muestra nada (nunca se inventa un promedio). El orden "Recomendados" usa un
+  promedio ponderado por confianza (más peso cuanto más reseñas tiene), no el promedio pelado.
+- `reputacion_url` sola (sin rating/total) **no muestra nada en la web** — queda guardada
+  en la base para cuando se complete el dato. Ver §17 para cómo se consigue ese dato.
+
+## 8. Cómo funciona la app hoy (features que YA están) — HISTÓRICO, pre-pivot
+
+> ⚠️ Este §8 y el §9 describen el modelo **de antes del 20/21-08-2026**. El código sigue
+> en el repo, intacto, pero **no es alcanzable desde ningún link de la web hoy** — ver
+> §8.0 arriba para lo que sí está vivo. Se conserva como documentación por si algún día
+> se revierte el pivot (ver la nota al principio del archivo).
 
 **Roles** (según `user_metadata.es_profesional`):
 - **Demandante / cliente** (tema claro) — publica problemas, recibe propuestas, paga la conexión, califica.
@@ -307,13 +351,33 @@ ni cliente ni técnico — hasta tener una base de usuarios activos definida.
 > documentación, pero hay que **correr el SQL a mano en el SQL Editor de Supabase**. Si una
 > sesión crea una migración nueva, **darle el SQL al usuario para que lo pegue y ejecute**.
 
-**Auth:** "Confirm email" está **APAGADO** en Supabase (no hay SMTP, los mails no llegarían).
-El registro deja al usuario logueado directo.
+**Auth:** "Confirm email" está **PRENDIDO** en Supabase desde 2026-09-11 (antes estaba
+apagado a propósito porque no había SMTP). El SMTP de Resend está configurado y probado de
+punta a punta: el mail de recuperar contraseña llega, y el de confirmación de cuenta
+también — registrar una cuenta ya no deja al usuario logueado directo, hay que tocar el
+link del mail. Ese link vuelve por `/auth/callback?next=...` (canjea el `code` de PKCE
+por una sesión real) y aterriza en `/perfil?bienvenida=1` si es técnico o `/?bienvenida=1`
+si es demandante — el componente `Bienvenida` muestra el cartel de "cuenta confirmada".
+
+⚠️ **Si alguna vez hay que tocar esto de nuevo:** nunca prender "Confirm email" sin haber
+probado antes que el SMTP manda de verdad (ej. con "olvidé mi contraseña", que usa el mismo
+SMTP y no bloquea a nadie si falla). Prenderlo con el SMTP roto deja a **todo el mundo** sin
+poder registrarse — pasó una vez en esta sesión por apurar el orden.
 
 ## 11. Panel de administración (`/admin`)
-- Accesible **solo** para `solvithomes@gmail.com` (ver `lib/admin.ts` — mantener sincronizado
-  con el chequeo de email dentro de las funciones SQL de admin).
-- Dos secciones: **Pagos en revisión** (aprobar/rechazar) y **Disputas abiertas** (resolver).
+- Accesible para **`solvithomes@gmail.com` y `sufixar@gmail.com`** (ver `lib/admin.ts` —
+  mantener sincronizado con el chequeo de email dentro de las funciones SQL de admin y con
+  la policy RLS de `reportes`, migración `20260903e`).
+- **Secciones vivas hoy:**
+  - **Reportes** — problemas con un técnico, con el sitio, o sugerencias (tabla `reportes`,
+    sin policy de SELECT salvo para los admins — ni el propio técnico reportado puede leer
+    quién lo reportó). Botón "Marcar revisado".
+  - **Técnicos pendientes de revisión** — quienes se registraron solos por la web y todavía
+    no están `verificado = true`. Botón "Marcar verificado" (dispara el mail de "tu perfil
+    ya está publicado" al técnico).
+- **Secciones pausadas** (código y RPCs intactos, no se llaman desde `/admin` porque su flujo
+  de origen — publicar problema → propuesta → pago — no es alcanzable desde ningún link hoy):
+  **Pagos en revisión** (aprobar/rechazar) y **Disputas abiertas** (resolver).
 
 ## 12. Decisiones tomadas (y por qué)
 - **Reusar la base de Supabase de Mateo** (soy owner). El deploy viejo de Mateo (`solvit.homes`)
@@ -329,13 +393,15 @@ El registro deja al usuario logueado directo.
 - Realtime requiere conexión **autenticada** (`supabase.realtime.setAuth(token)` antes de suscribir).
 
 ## 13. Roadmap / pendientes
-**Pendiente de la puesta en marcha de los mails (2026-09-07):**
-- **Prender "Confirm email"** en Supabase → Authentication → Providers → Email. El SMTP ya está
-  configurado y probado (el mail de recuperar contraseña llega). ⚠️ Si se prende sin que el SMTP
-  funcione, **nadie puede registrarse**.
-- **Rotar `RESEND_API_KEY`**: la actual se pegó en un chat. Cambiarla en Vercel Y en el password
-  del SMTP de Supabase (usan la misma).
-- Marcar "No es spam" en los avisos que caigan ahí: el dominio es nuevo y no tiene reputación.
+**✅ Hecho, de la puesta en marcha de los mails (2026-09-07 a 09-11):**
+- ~~Prender "Confirm email"~~ — hecho el 2026-09-11, probado end-to-end (ver §10).
+- Marcar "No es spam" en los avisos de `sufixar@gmail.com`/`solvithomes@gmail.com` que
+  cayeron en spam — el dominio es nuevo y todavía está construyendo reputación con Gmail.
+
+**Pendiente (sigue abierto):**
+- **Rotar `RESEND_API_KEY`**: la que está en uso hoy se pegó en un chat en algún momento
+  de la sesión del 2026-09-07. Cambiarla en Vercel **y** en el password del SMTP de Supabase
+  (usan la misma clave) — no está confirmado que ya se haya rotado.
 
 **Negocio:**
 - Cambiar datos de pago (transferencia + WhatsApp) de Mateo por los propios → Mercado Pago.
@@ -368,7 +434,13 @@ El registro deja al usuario logueado directo.
   Configuration → Redirect URLs).
 
 ## 14. Cómo trabajar en este repo (workflow para Claude)
-1. **Cambio de código** → `npm run build` (verificar que compila) → `git add -A` → commit → `git push origin main`. ⚠️ **El push NO siempre re-apunta el dominio `solvitweb.vercel.app` al último deploy** (puede quedar sirviendo código viejo). Correr **`vercel --prod`** después para forzar el alias. (Co-author trailer: `Claude Opus 4.8 <noreply@anthropic.com>`.)
+1. **Cambio de código** → `npm run build` (verificar que compila) → `git add -A` → commit →
+   `git push origin main`. ⚠️ **El push NO siempre re-apunta el dominio `sufixapp.com` (ni
+   `solvitweb.vercel.app`) al último deploy** (puede quedar sirviendo código viejo). Correr
+   **`vercel --prod --yes`** y después **`vercel alias set <deployment> <dominio>`** para
+   los dos dominios — ver §18 para el detalle de comandos.
+   El texto del trailer de commit (`Co-Authored-By: ...`) lo da el sistema en cada sesión,
+   no es fijo — usar el que venga en las instrucciones de esa sesión, no copiar uno viejo.
 2. **Cambio de base de datos** → crear el `.sql` en `supabase/migrations/` Y **darle el SQL al usuario para correr en el SQL Editor** (no se aplica solo).
 3. **Verificar deploy**: `vercel ls solvit` (esperar `● Ready`). Smoke test con `curl`.
 4. **Env vars**: `vercel env add/rm <VAR> production` (CLI autenticado). Para Preview, el CLI pide branch (usar `--value ... --yes` o el dashboard).
@@ -447,3 +519,148 @@ con los **últimos** 8 dígitos, así da lo mismo pegar el número entero o escr
 - **Páginas del modelo viejo redirigidas** (307, en `next.config.mjs`): `/buscar`, `/oferentes`,
   `/servicio/:slug`, `/profesional/:slug` y `/publicar`. Esta última importa: seguía insertando en
   `publicaciones` y ese INSERT dispara mails a los técnicos sobre un trabajo que nadie puede ver.
+
+
+---
+
+## 17. Cómo cargar técnicos nuevos (runbook, 2026-09-11)
+
+El usuario manda técnicos en tandas por CSV/Excel (nombre, apellido, teléfono, rubros,
+zonas, a veces un link de reputación). Pasos, en orden:
+
+### 17.1 Leer el archivo sin adivinar
+- **CSV exportado de Google Sheets pierde los hipervínculos**: si una columna tiene el texto
+  "google maps" en vez de una URL, es porque el link estaba como hipervínculo sobre esa
+  palabra y el CSV solo guarda el texto visible. Pedirle al usuario el **.xlsx**, no el CSV,
+  para poder leer la URL real.
+- **Un .xlsx es un ZIP.** No hay librería de xlsx instalada en el proyecto. Para leerlo:
+  `Expand-Archive` (PowerShell) sobre una copia renombrada a `.zip`, después parsear a mano
+  `xl/worksheets/sheet1.xml` + `xl/worksheets/_rels/sheet1.xml.rels` (para los hipervínculos)
+  + `xl/sharedStrings.xml` (los textos están indexados ahí, no inline).
+- ⚠️ **GOTCHA ya pisado una vez:** una celda vacía en xlsx se guarda autocerrada
+  (`<c r="B6" s="2"/>`, sin `</c>`). Un regex ingenuo tipo `<c ...>([\s\S]*?)</c>` no distingue
+  eso y la celda vacía "roba" el contenido de la celda siguiente (corre todo el resto de la
+  fila una columna). Parsear celda por celda, chequeando primero si autocierra (`/^<c[^>]*\/>/`)
+  **antes** de buscar un `</c>`.
+- Nunca confiar en el **nombre** para saber si un técnico ya existe — viene con typos,
+  mayúsculas sueltas, columnas corridas. Matchear siempre por **teléfono**, quedándose con los
+  últimos 10 dígitos (`tel.replace(/\D/g,"").slice(-10)`) para que dé igual con o sin `+54 9`.
+
+### 17.2 Crear el técnico
+Alta vía `admin.auth.admin.createUser()` (service role) con `user_metadata.es_profesional:
+true`, `categorias` (array de slugs) y `zonas` (array de nombres) — el trigger
+`crear_perfil_al_registrarse` arma la fila de `perfiles_profesionales` solo. Después, a mano:
+- `verificado: true` explícito — los que carga el equipo entran verificados de una, no pasan
+  por el flujo de aprobación en `/admin` (ese es para altas que se registran solas por la web).
+- Rubros en texto libre → mapear a los slugs reales de `lib/data.ts` (`plomeria`, `gas`,
+  `aire`, `cerrajeria`, `pintura`, `carpinteria`, `albanileria`, `electrodomesticos`,
+  `electricidad`, `vidrieria`). "CABA" en la columna de zonas se expande a los 9 barrios
+  modelados (`ZONAS_CABA` en `lib/data.ts`), no se guarda como el string "CABA".
+
+### 17.3 Fotos
+Bucket de Storage `avatars`, ruta `${userId}/avatar`, con `?v=${Date.now()}` en la URL
+pública para que no quede cacheada. **Mirar cada foto antes de subir**, no asumir: si es un
+logo (muchos técnicos mandan el logo de su emprendimiento, no una foto de la cara) se
+redimensiona con `fit:"contain"` y fondo tomado del propio pixel de esquina del logo, para no
+recortar el diseño; si es una foto de persona, `fit:"cover"` con `sharp.strategy.attention`
+(detección de sujeto, no centro a ciegas).
+
+### 17.4 Reputación externa (Google Maps)
+El dato que hace falta es `reputacion_fuente` + `reputacion_rating` + `reputacion_total` +
+`reputacion_url`, los cuatro juntos (ver §8.0) — la URL sola no muestra nada.
+
+- **`WebFetch` no sirve para Google Maps.** Es una SPA que renderiza todo con JS; `WebFetch`
+  solo ve el HTML crudo y no encuentra ni el nombre del negocio. Hay que usar **Playwright**
+  con un browser real.
+- **Cada consulta necesita un `browser.newContext()` nuevo**, no reusar la misma `page` en un
+  loop: Maps es una SPA y las navegaciones siguientes dentro del mismo contexto no renderizan
+  igual que la primera carga (el panel de reseñas no se auto-abre). Con contexto fresco por
+  consulta, la tasa de éxito subió de 0/20 a 17/20 en la única vez que se hizo esto.
+- El rating+conteo aparece en **al menos 4 formatos de texto distintos** según cómo cargue la
+  página, sin selector CSS estable (las clases de Google son ofuscadas y cambian):
+  1. Ficha completa con reseñas ya visibles: `"\n4.4\n23 opiniones"` (regex:
+     `/\n(\d[.,]\d)\n(\d+)\s*(?:opinion|reseñ)/i`).
+  2. Página de lista/búsqueda con uno o más negocios: `"4.8(68)"` pegado, sin espacio — hay
+     que **confirmar por teléfono** que el bloque de texto alrededor corresponde al técnico
+     correcto antes de tomar el número (puede haber varios negocios en la misma página).
+  3. Ficha que carga en la pestaña "Descripción general" en vez de "Opiniones": clickear el
+     botón/tab "Opiniones" (o el propio rating) fuerza a que se abra el panel con el conteo.
+  4. Algunos links del Excel están directamente **rotos** (typo tipo un `%20` de más metido en
+     medio de una coordenada) o apuntan a una búsqueda genérica en vez de la ficha — esos no
+     se adivinan, se le devuelven al usuario para que los revise.
+- Nunca escribir un rating/total sin haber visto el patrón matchear de verdad. Mejor dejar
+  `reputacion_url` cargada sola (inerte, no rompe nada — ver §8.0) que inventar un número.
+
+---
+
+## 18. Herramientas y comandos que uso seguido
+
+### Vercel CLI
+```
+vercel --prod --yes                                  # deploy a producción
+vercel alias set <deployment-url> sufixapp.com        # re-apuntar el dominio real
+vercel alias set <deployment-url> solvitweb.vercel.app # y el alias viejo, los DOS siempre
+vercel env add/rm <VAR> production                    # cargar/sacar env vars
+vercel logs <deployment-url>                           # logs en runtime, para debug de endpoints
+vercel domains inspect <dominio>                       # nameservers actuales vs los que espera Vercel
+```
+⚠️ Las env vars quedan marcadas **Sensitive** — ni yo ni el usuario las podemos volver a leer
+por CLI ni por panel una vez cargadas. Si hace falta un secreto ya cargado (ej. `WEBHOOK_SECRET`),
+sacarlo de otro lugar que ya lo tenga (un webhook de Supabase ya configurado, por ejemplo),
+nunca inventarlo ni pedírselo de nuevo al usuario si ya existe en algún lado.
+
+⚠️ **El DNS de `sufixapp.com` vive en DonWeb, no en Vercel**, aunque `vercel domains ls` lo
+liste como dominio del proyecto. `vercel dns ls sufixapp.com` va a devolver una zona vacía o
+inactiva — no es donde hay que cargar registros MX/TXT/CNAME reales. Confirmarlo con
+`vercel domains inspect sufixapp.com` (columna "Current Nameservers").
+
+### Operar contra Supabase sin pasar por el dashboard
+El patrón que uso para casi todo (altas de técnicos, correcciones puntuales, verificaciones,
+limpieza de datos de prueba): un script Node de un solo uso en el scratchpad de la sesión,
+con el **service role key** leído de `.env.local`, ej.:
+```js
+import { createClient } from "@supabase/supabase-js";
+import fs from "node:fs";
+const env = Object.fromEntries(fs.readFileSync(".env.local","utf8").split(/\r?\n/)
+  .filter(l=>l.includes("=")&&!l.startsWith("#"))
+  .map(l=>[l.slice(0,l.indexOf("=")).trim(), l.slice(l.indexOf("=")+1).trim()]));
+const admin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {auth:{persistSession:false}});
+```
+Se corre, se lee el resultado, y **se borra el script** — no se deja código de un solo uso en
+el repo. Si además hace falta simular el registro real (no solo tocar la base), usar Playwright
+contra un `npm run build && npx next start` local — más fiel que llamar a Supabase directo,
+porque pasa por la validación del formulario real.
+
+### Verificar cambios antes de darlos por terminados
+- **Playwright** (ya instalado) para todo lo que sea flujo de usuario: registrar, loguear,
+  aprobar un técnico, dejar una reseña, etc. Correr contra `npm run start` local primero,
+  contra producción después de deployar.
+- **Datos de prueba: siempre limpiarlos después.** Contar cuántos registros hay antes de la
+  prueba, hacer la prueba, contar después, y borrar lo que se haya creado (cuenta +
+  `perfiles_profesionales` + archivos en Storage si corresponde). Usar `+algo@gmail.com` o
+  `@example.com` para que se identifiquen fácil y no se confundan con datos reales — pero ver
+  el aviso de abajo sobre `@example.com`.
+- ⚠️ **`@example.com` no sirve para probar el registro real con "Confirm email" prendido**:
+  es un dominio reservado que no recibe correo, y Resend lo rechaza con un 500 al intentar
+  mandarle la confirmación — eso rompe el registro, no es un bug de la app. Para probar el
+  flujo de alta completo (no solo tocar la base), usar una dirección real con `+alias`.
+- Antes de publicar cualquier cambio visual, screenshot con Playwright y mirarlo — no asumir
+  que un cambio de CSS/Tailwind se ve como se espera con solo leer el código.
+
+---
+
+## 19. Sistema de diseño (para que un cambio nuevo no desentone)
+
+- **Paleta** (`tailwind.config.ts`): verdes `sv-primary` #4E7A3E, `sv-dark` #1D2E20 (fondo del
+  footer y de la tira "el problema"), `sv-olive` #3C6030, `sv-mint`/`sv-light` de fondo suave.
+  Cremas `zap-50` a `zap-300`. Fondo general de página: `#FBF8EF`.
+- **Tipografía**: Poppins para títulos (`font-display`/`display`), Inter para el resto.
+- **Contenedores**: `container-home` (1140px, usado en toda la home y páginas nuevas post-pivot)
+  vs. `container-pad` (1280px, el más viejo, todavía en varias páginas pre-pivot). No mezclar
+  los dos en la misma sección.
+- **Componentes de ícono propios**: `components/icons.tsx` — línea 24×24, trazo 1.75, sin
+  relleno salvo detalles puntuales. **No usar emojis en ningún lado nuevo** — fue un pedido
+  explícito y ya se limpiaron todos los que había (oficios, pasos, seguridad, WhatsApp).
+- **Botones/tarjetas**: convención `btn-primary` / `btn-outline` / `btn-ghost`, `.card` en
+  `globals.css`. Las clases de utilidad (`@layer utilities`) le ganan a las de componente
+  (`@layer components`) en Tailwind — si un override no toma efecto, revisar en qué layer está.
