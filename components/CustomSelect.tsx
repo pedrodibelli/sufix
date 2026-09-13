@@ -109,7 +109,7 @@ export function CustomSelect({
         <div
           ref={listRef}
           role="listbox"
-          className="animate-dropdown absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-72 overflow-y-auto rounded-2xl border border-sv-dark/10 bg-white p-1.5 shadow-[0_20px_45px_-20px_rgba(29,46,32,0.35)]"
+          className="animate-dropdown absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[22rem] overflow-y-auto rounded-2xl border border-sv-dark/10 bg-white p-1.5 shadow-[0_20px_45px_-20px_rgba(29,46,32,0.35)]"
         >
           {options.map((o, i) => {
             const esElegida = o.value === value;
@@ -127,7 +127,7 @@ export function CustomSelect({
                   esElegida
                     ? "bg-sv-mint font-semibold text-sv-dark"
                     : esActiva
-                    ? "bg-zap-100 text-sv-dark"
+                    ? "bg-sv-primary/20 text-sv-dark"
                     : "text-ink-600"
                 }`}
               >
