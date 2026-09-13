@@ -113,8 +113,13 @@ export function OficiosGrid() {
 }
 
 // ---- Cómo funciona, 3 pasos (versión corta — la larga vive en /como-funciona) ----
+// El título del paso 1 NO puede repetir el H2 de la sección ("Buscá por
+// oficio y zona."): en desktop las tres tarjetas van en fila y se disimula,
+// pero en mobile van apiladas y el título de la tarjeta queda pegado justo
+// debajo del H2 — se lee como si el texto se hubiera duplicado por error
+// (reportado 2026-09-13, viendo la home real en el celular).
 const PASOS = [
-  { icon: "explorar", title: "Buscá por oficio y zona", body: "Filtrá entre técnicos verificados de tu barrio en segundos." },
+  { icon: "explorar", title: "Explorás perfiles", body: "Filtrá entre técnicos verificados de tu barrio en segundos." },
   { icon: "star", title: "Mirá su perfil y reseñas", body: "Comparás experiencia y opiniones reales de otros clientes." },
   { icon: "elegir", title: "Escribí por WhatsApp", body: "Un clic y hablás directo con el técnico. Gratis, sin registro." },
 ];

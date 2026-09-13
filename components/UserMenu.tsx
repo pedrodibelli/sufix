@@ -109,6 +109,14 @@ export function UserMenu({
               <Link href="/como-funciona" onClick={close} className={`rounded-xl px-3 py-2 text-sm font-medium transition ${itemCls}`}>
                 Cómo funciona
               </Link>
+              {/* Faltaba: un usuario logueado en mobile no tenía NINGÚN camino
+                  a /reportar — el nav de arriba se oculta en mobile, y el
+                  menú hamburguesa (que sí lo tiene) solo se renderiza para
+                  visitantes sin sesión (ver Header.tsx). Reportado 2026-09-13
+                  viendo la home real en el celular. */}
+              <Link href="/reportar" onClick={close} className={`rounded-xl px-3 py-2 text-sm font-medium transition ${itemCls}`}>
+                Reportar un problema
+              </Link>
               {isAdmin && (
                 <Link href="/admin" onClick={close} className={`rounded-xl px-3 py-2 text-sm font-medium transition ${itemCls}`}>
                   Admin
