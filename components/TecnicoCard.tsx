@@ -170,21 +170,24 @@ export function TecnicoCard({
                iguala alturas por fila). Con una sola línea garantizada, sumar
                la segunda reputación no cambia el alto de NINGUNA tarjeta, y
                las que tienen una sola fuente tampoco reservan lugar vacío. */
-            <div className="flex flex-nowrap items-center gap-x-1.5 overflow-hidden">
+            <div className="flex flex-nowrap items-center gap-x-1.5 overflow-hidden leading-none">
               <span className="shrink-0">
                 <StarRating rating={calificacion.promedio} reviews={calificacion.total} />
               </span>
               {calificacion.fuente && (
-                <span className="shrink-0 -translate-y-px text-[11px] font-medium text-ink-400">· {calificacion.fuente}</span>
+                <span className="shrink-0 text-[11px] font-medium text-ink-400">· {calificacion.fuente}</span>
               )}
               {/* La segunda fuente usa el mismo StarRating que la principal
                   (mismo tamaño de estrella, mismo negrita) para que las dos
                   se lean como la misma familia de diseño, solo que la
-                  segunda va más chica visualmente por ir después. */}
+                  segunda va más chica visualmente por ir después.
+                  leading-none en toda la fila (en vez de -translate-y-px
+                  puntuales) para que todos los tamaños de texto compartan la
+                  misma línea base y no se vayan "escalonando" hacia abajo. */}
               {calificacion.secundaria && (
                 <span className="ml-2 flex shrink items-center gap-1 truncate">
                   <StarRating rating={calificacion.secundaria.promedio} reviews={calificacion.secundaria.total} />
-                  <span className="shrink-0 -translate-y-px text-[11px] font-medium text-ink-400">· {calificacion.secundaria.fuente}</span>
+                  <span className="shrink-0 text-[11px] font-medium text-ink-400">· {calificacion.secundaria.fuente}</span>
                 </span>
               )}
             </div>
