@@ -134,7 +134,7 @@ export function ComoFuncionaPasos() {
             Buscá por <span className="text-sv-primary">oficio y zona.</span>
           </h2>
         </div>
-        <div className="mx-auto flex max-w-3xl flex-col items-start gap-8 sm:flex-row sm:items-start sm:justify-between">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 sm:flex-row sm:items-start sm:justify-between">
           {PASOS.map((p, i) => (
             <div key={p.title} className="flex flex-1 flex-col items-center text-center">
               <div className="mb-4 flex h-[70px] w-[70px] items-center justify-center rounded-full border-[1.5px] border-sv-dark/10 bg-[#FBF8EF] p-4 text-sv-primary shadow-[0_14px_30px_-18px_rgba(29,46,32,0.25)]">
