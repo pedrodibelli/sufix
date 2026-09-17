@@ -164,7 +164,7 @@ export default async function HomePage({
         {!esProfesional && (
           <>
             {/* ── HERO (rediseño 2026-08-28, look "crema/salvia") ── */}
-            <section className="relative overflow-hidden pb-8 pt-10 sm:pt-16">
+            <section className="relative pb-8 pt-10 sm:pt-16">
               <div
                 className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] opacity-70"
                 style={{ background: "#E4EAD6", borderRadius: "44% 56% 60% 40% / 48% 42% 58% 52%" }}
