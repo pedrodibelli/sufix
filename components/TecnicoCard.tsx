@@ -159,33 +159,15 @@ export function TecnicoCard({
                iguala alturas por fila). Con una sola línea garantizada, sumar
                la segunda reputación no cambia el alto de NINGUNA tarjeta, y
                las que tienen una sola fuente tampoco reservan lugar vacío. */
-            /* items-center, NO items-baseline. Se probó baseline para alinear la
-               etiqueta de la fuente (11px) con la calificación (13px) y salió
-               peor: la baseline de un inline-flex la define su primer hijo, que
-               acá es el ícono de estrella, no el texto — el desfase pasó de 1px
-               a 3.2px y la línea entera se veía caída. Medido, no supuesto.
-
-               flex-nowrap + truncate a propósito: si esto se parte en dos
-               renglones, la fila entera de tarjetas crece de alto (el grid
-               iguala alturas por fila). Con una sola línea garantizada, sumar
-               la segunda reputación no cambia el alto de NINGUNA tarjeta, y
-               las que tienen una sola fuente tampoco reservan lugar vacío. */
-            <div className="flex flex-nowrap items-center gap-x-1.5 overflow-hidden leading-none">
+            <div className="flex flex-nowrap items-baseline gap-x-1.5 overflow-hidden">
               <span className="shrink-0">
                 <StarRating rating={calificacion.promedio} reviews={calificacion.total} />
               </span>
               {calificacion.fuente && (
                 <span className="shrink-0 text-[11px] font-medium text-ink-400">· {calificacion.fuente}</span>
               )}
-              {/* La segunda fuente usa el mismo StarRating que la principal
-                  (mismo tamaño de estrella, mismo negrita) para que las dos
-                  se lean como la misma familia de diseño, solo que la
-                  segunda va más chica visualmente por ir después.
-                  leading-none en toda la fila (en vez de -translate-y-px
-                  puntuales) para que todos los tamaños de texto compartan la
-                  misma línea base y no se vayan "escalonando" hacia abajo. */}
               {calificacion.secundaria && (
-                <span className="ml-2 flex shrink items-center gap-1 truncate">
+                <span className="ml-2 flex shrink items-baseline gap-1 truncate">
                   <StarRating rating={calificacion.secundaria.promedio} reviews={calificacion.secundaria.total} />
                   <span className="shrink-0 text-[11px] font-medium text-ink-400">· {calificacion.secundaria.fuente}</span>
                 </span>
