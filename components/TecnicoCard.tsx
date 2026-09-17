@@ -174,30 +174,17 @@ export function TecnicoCard({
               <span className="shrink-0">
                 <StarRating rating={calificacion.promedio} reviews={calificacion.total} />
               </span>
-              {calificacion.fuente && (calificacion.secundaria || calificacion.externa) && (
+              {calificacion.fuente && (
                 <span className="shrink-0 -translate-y-px text-[11px] font-medium text-ink-400">· {calificacion.fuente}</span>
               )}
-              {/* La segunda fuente arranca con su propia estrella, igual que la
-                  primera, y separada — con un punto se leía como continuación
-                  de la misma frase y no como otra calificación.
-
-                  Antes esta estrella era de 10px y currentColor (heredaba el
-                  gris clarito del texto), y el número iba con 1 decimal — al
-                  lado de la principal (estrella negra sólida de 14px, número
-                  con 2 decimales) se leía como un elemento roto, no como una
-                  versión más chica del mismo diseño. Ahora usa el mismo path
-                  y el mismo fill sólido que StarRating, solo escalado y en un
-                  gris más oscuro (ink-600, no ink-400) para que se note que es
-                  la misma familia de estrella — y el número va con la misma
-                  cantidad de decimales que la principal (2026-09-13). */}
+              {/* La segunda fuente usa el mismo StarRating que la principal
+                  (mismo tamaño de estrella, mismo negrita) para que las dos
+                  se lean como la misma familia de diseño, solo que la
+                  segunda va más chica visualmente por ir después. */}
               {calificacion.secundaria && (
-                <span className="ml-2 flex shrink -translate-y-px items-center gap-1 truncate text-[11px] font-medium text-ink-600">
-                  <svg width="12" height="12" viewBox="0 0 20 20" fill="#4a5a4d" className="shrink-0" aria-hidden>
-                    <path d="M10 1.6l2.6 5.3 5.9.9-4.3 4.2 1 5.9L10 15.1l-5.3 2.8 1-5.9L1.4 7.8l5.9-.9L10 1.6z" />
-                  </svg>
-                  <span className="truncate">
-                    {calificacion.secundaria.promedio.toFixed(2)} ({calificacion.secundaria.total}) {calificacion.secundaria.fuente}
-                  </span>
+                <span className="ml-2 flex shrink items-center gap-1 truncate">
+                  <StarRating rating={calificacion.secundaria.promedio} reviews={calificacion.secundaria.total} />
+                  <span className="shrink-0 -translate-y-px text-[11px] font-medium text-ink-400">· {calificacion.secundaria.fuente}</span>
                 </span>
               )}
             </div>
