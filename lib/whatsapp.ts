@@ -11,10 +11,14 @@
 // nombra ese oficio. Desde la home, donde el técnico puede tener cinco
 // rubros y no hay forma de saber cuál necesita el que escribe, no se nombra
 // ninguno: "me interesa tu servicio" a secas.
+// Nombre completo, no solo la primera palabra (hasta 2026-09-18 usaba
+// nombre.split(" ")[0] — con técnicos reales tipo "Juan Pérez" quedaba
+// bien, "Hola Juan!", pero con los negocios cargados desde Google Maps
+// (nombre de fantasía, no una persona) rompía: "El Líder" saludaba "Hola
+// El!", sin sentido).
 export function mensajeWhatsApp(nombre: string, rubroNombre?: string | null): string {
-  const primerNombre = nombre.split(" ").filter(Boolean)[0] ?? nombre;
   const servicio = rubroNombre ? ` de ${rubroNombre}` : "";
-  return `¡Hola ${primerNombre}! Te encontré en Sufix, me interesa tu servicio${servicio}. ¿Estás disponible?`;
+  return `¡Hola ${nombre}! Te encontré en Sufix, me interesa tu servicio${servicio}. ¿Estás disponible?`;
 }
 
 // Normaliza un teléfono argentino al formato que necesita wa.me (2026-09-07).
