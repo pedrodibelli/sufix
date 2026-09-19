@@ -23,10 +23,13 @@ ALTER TABLE perfiles_profesionales
 COMMENT ON COLUMN perfiles_profesionales.cargado_por_equipo IS
   'true = alta manual del equipo Sufix (ej. scrapeo de Google Maps), no autoregistro por /registrar. Estos técnicos aparecen en el directorio público aunque verificado sea false todavía; la insignia "Verificado" sigue dependiendo solo de verificado.';
 
+-- cargado_por_equipo va AL FINAL del SELECT a propósito: CREATE OR REPLACE
+-- VIEW no permite reordenar columnas existentes (Postgres lo lee como un
+-- rename y tira 42P16), solo agregar nuevas al final.
 CREATE OR REPLACE VIEW perfiles_publicos
 WITH (security_invoker = false) AS
-  SELECT user_id, nombre, zona, rubro, verificado, cargado_por_equipo, creado_at, foto_url, telefono, titular, anos_experiencia,
-         reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url
+  SELECT user_id, nombre, zona, rubro, verificado, creado_at, foto_url, telefono, titular, anos_experiencia,
+         reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url, cargado_por_equipo
   FROM perfiles_profesionales;
 
 GRANT SELECT ON perfiles_publicos TO anon, authenticated;
