@@ -21,11 +21,8 @@ export default async function CategoriasPage() {
   const { data: tecnicos } = await supabase
     .from("perfiles_publicos")
     .select("rubro")
-      // Solo verificados (2026-09-07). La home promete "ningún técnico entra
-      // sin que lo miremos primero" y hasta ahora no era cierto: quien se
-      // registraba solo aparecía al instante. Ahora el perfil espera en
-      // /admin > Técnicos pendientes hasta que alguien lo apruebe.
-    .eq("verificado", true)
+      // Ver la nota en app/page.tsx: verificado O cargado_por_equipo.
+    .or("verificado.eq.true,cargado_por_equipo.eq.true")
     .not("rubro", "is", null)
     .not("telefono", "is", null);
 

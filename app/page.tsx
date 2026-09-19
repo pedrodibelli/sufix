@@ -45,11 +45,14 @@ export default async function HomePage({
     const { data: tecnicosRaw } = await supabaseServer
       .from("perfiles_publicos")
       .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
-      // Solo verificados (2026-09-07). La home promete "ningún técnico entra
-      // sin que lo miremos primero" y hasta ahora no era cierto: quien se
-      // registraba solo aparecía al instante. Ahora el perfil espera en
-      // /admin > Técnicos pendientes hasta que alguien lo apruebe.
-      .eq("verificado", true)
+      // Verificado (2026-09-07): la home promete "ningún técnico entra sin
+      // que lo miremos primero" — quien se autoregistra por /registrar
+      // espera en /admin > Técnicos pendientes hasta que alguien lo
+      // apruebe. cargado_por_equipo (2026-09-18) es la excepción: altas
+      // manuales del equipo (ej. scrapeo de Maps), no autoregistro — esas
+      // se muestran ya, sin esperar la llamada de verificación, solo sin
+      // la insignia verde (que sigue leyendo únicamente `verificado`).
+      .or("verificado.eq.true,cargado_por_equipo.eq.true")
       .not("rubro", "is", null)
       .not("telefono", "is", null)
       .order("creado_at", { ascending: false });
