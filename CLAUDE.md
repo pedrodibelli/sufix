@@ -749,3 +749,57 @@ usa** — se sacó `reputacion_url` de los `select` de la home y de `/categoria`
   `/tecnico/[id]`. El sitemap usa los mismos criterios de "quién es público" que la home.
 - **`/tecnico/[id]` no se tocó**: ya estaba bien en mobile (3,7 pantallas, botón de WhatsApp
   arriba del pliegue). Es la página que convierte — no meterle mano sin motivo.
+
+---
+
+## 21. Rendimiento: por qué se sentía lento y qué quedó (2026-09-21)
+
+**Síntoma reportado:** cada clic mostraba la pantalla de carga (`app/loading.tsx`) como un
+segundo. **Causa:** el servidor tardaba ~1,2 s por página.
+
+### El culpable: un `.in()` de 620 ids sobre una tabla de 3 filas
+La home filtraba `resenas_resumen` con `.in("tecnico_id", [los 620 ids])`. Esa vista sólo tiene
+una fila por técnico **con reseñas nativas de Sufix** — hoy son **3 filas, 232 bytes**. O sea
+que se armaba una URL de ~23 KB con 620 UUIDs para filtrar tres filas.
+
+Medido contra la base real: **con `.in()` 7.940 ms; trayendo la tabla entera 54 ms.** 150 veces
+más rápido. Lo mismo pasaba en `/categoria`.
+
+> ⚠️ **Regla:** nunca `.in()` con cientos de ids contra PostgREST. Si la tabla es chica, traerla
+> entera. Si es grande, paginar o filtrar por rango — pero no por lista de ids.
+
+### Lo otro que se sacó del camino
+- **`/tecnico/[id]` esperaba un INSERT** en `vistas_perfil_tecnico` antes de mandar una línea de
+  HTML. Ahora va en **`after()`** (Next 16), que corre después de enviar la respuesta. El
+  comentario viejo decía que no se podía hacer fire-and-forget porque en serverless se cortaba
+  — cierto, y `after()` es justamente la forma correcta: garantiza que termine.
+- **`getUser()` → `getSession()`** en la home y en el perfil. `getUser()` valida el token contra
+  Supabase en cada visita (una ida y vuelta más); `getSession()` lee la cookie local. Sólo se usa
+  para decidir **qué se muestra** — los datos los protege RLS. Mismo criterio que ya usaba Header.
+- **Las dos consultas de los listados van en `Promise.all`** (son independientes).
+
+### Resultado
+| | Antes | Ahora |
+|---|---|---|
+| Navegar entre páginas (clic) | ~1 s + pantalla de carga | **24-47 ms, sin pantalla de carga** |
+| Primera carga de la home | ~2,5 s | **~1,3 s** |
+| TTFB, todas las páginas | 1,2 s la home | **~0,31 s, parejo** |
+
+### Lo que queda (y es una decisión de producto, no un bug)
+El piso de latencia es **~0,30 s** (se ve en `/como-funciona`, que no toca la base): Argentina →
+edge de Vercel en São Paulo → función en **iad1** → vuelta. No se baja sin mover la función.
+
+Arriba de ese piso, a la home le quedan ~450 ms que **escalan con el payload**: manda los 620
+técnicos al navegador para que filtrar sea instantáneo. Sin comprimir son 470 KB; **con brotli
+53 KB** (el JSON es muy repetitivo), así que el costo no es la descarga sino serializar y
+comprimir en el servidor. El campo más pesado es `zona` (78 KB de 348 KB en crudo).
+
+Es el precio del filtrado instantáneo (ver §20). Si alguna vez pesa más la primera carga que la
+fluidez del filtro, la alternativa es volver a filtrar del lado del servidor por URL: la home
+bajaría a ~0,5 s y filtrar pasaría a costar ~0,4 s. **Hoy está elegido al revés a propósito.**
+
+> Ojo al medir: `curl` sin `--compressed` no pide brotli y muestra el tamaño sin comprimir
+> (470 KB en vez de 53 KB). Y Next hace **streaming**, así que `time_starttransfer` es cuándo
+> salió el primer pedazo, no cuándo terminó el servidor — hay que mirar `time_total`. La primera
+> medición de cada tanda suele incluir **cold start** de la función (se vio 1,8 s en la home y
+> 1,3 s hasta en una página estática); no confundirlo con lentitud del código.
