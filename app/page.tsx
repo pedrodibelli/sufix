@@ -81,38 +81,41 @@ export default async function HomePage({
     // el link "ver las reseñas en Google Maps" vive solo en /tecnico/[id] —
     // y son URLs largas que, multiplicadas por los 620 del directorio,
     // engordaban el HTML de la home más de 100 KB al pedo.
-    const { data: tecnicosRaw } = await supabaseServer
-      .from("perfiles_publicos")
-      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total")
-      // Verificado (2026-09-07): la home promete "ningún técnico entra sin
-      // que lo miremos primero" — quien se autoregistra por /registrar
-      // espera en /admin > Técnicos pendientes hasta que alguien lo
-      // apruebe. cargado_por_equipo (2026-09-18) es la excepción: altas
-      // manuales del equipo (ej. scrapeo de Maps), no autoregistro — esas
-      // se muestran ya, sin esperar la llamada de verificación, solo sin
-      // la insignia verde (que sigue leyendo únicamente `verificado`).
-      .or("verificado.eq.true,cargado_por_equipo.eq.true")
-      .not("rubro", "is", null)
-      .not("telefono", "is", null)
-      .order("creado_at", { ascending: false });
+    // Las dos consultas son independientes, así que van en paralelo: antes
+    // la segunda esperaba a que terminara la primera sin necesidad.
+    //
+    // `resenas_resumen` se trae ENTERA, sin `.in(ids)` (2026-09-21). Suena al
+    // revés, pero medido: filtrar por los 620 ids tardaba **7,9 segundos** y
+    // traer la tabla entera tarda **54 ms**. Esa vista sólo tiene una fila por
+    // técnico con reseñas nativas de Sufix — hoy son 3 filas, 232 bytes. El
+    // `.in()` armaba una URL de ~23 KB con 620 UUIDs para filtrar eso. Era, de
+    // lejos, lo más caro de la home.
+    //
+    // Si algún día esa tabla crece mucho (miles de técnicos con reseñas
+    // propias), volver a filtrar — pero por rango o paginado, nunca con un
+    // `.in()` de cientos de ids.
+    const [{ data: tecnicosRaw }, { data: resumenRows }] = await Promise.all([
+      supabaseServer
+        .from("perfiles_publicos")
+        .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total")
+        // Verificado (2026-09-07): la home promete "ningún técnico entra sin
+        // que lo miremos primero" — quien se autoregistra por /registrar
+        // espera en /admin > Técnicos pendientes hasta que alguien lo
+        // apruebe. cargado_por_equipo (2026-09-18) es la excepción: altas
+        // manuales del equipo (ej. scrapeo de Maps), no autoregistro — esas
+        // se muestran ya, sin esperar la llamada de verificación, solo sin
+        // la insignia verde (que sigue leyendo únicamente `verificado`).
+        .or("verificado.eq.true,cargado_por_equipo.eq.true")
+        .not("rubro", "is", null)
+        .not("telefono", "is", null)
+        .order("creado_at", { ascending: false }),
+      supabaseServer.from("resenas_resumen").select("tecnico_id, promedio, total"),
+    ]);
 
     tecnicos = ((tecnicosRaw ?? []) as TecnicoPublico[]).filter(
       (t) => Array.isArray(t.rubro) && t.rubro.length > 0
     );
 
-    // Se traen TODAS las filas, sin `.in(ids)` (2026-09-21). Suena al revés,
-    // pero medido: filtrar por los 620 ids tardaba **7,9 segundos** y traer la
-    // tabla entera tarda **54 ms**. `resenas_resumen` sólo tiene una fila por
-    // técnico con reseñas nativas de Sufix — hoy son 3 filas, 232 bytes. El
-    // `.in()` armaba una URL de ~23 KB con 620 UUIDs para filtrar eso.
-    // Era, de lejos, lo más caro de la home.
-    //
-    // Si algún día esta tabla crece mucho (miles de técnicos con reseñas
-    // propias), volver a filtrar — pero por rango o paginado, nunca con un
-    // `.in()` de cientos de ids.
-    const { data: resumenRows } = await supabaseServer
-      .from("resenas_resumen")
-      .select("tecnico_id, promedio, total");
     resumenMapTecnicos = Object.fromEntries(
       (resumenRows ?? []).map((r) => [r.tecnico_id, { promedio: Number(r.promedio), total: Number(r.total) }])
     );

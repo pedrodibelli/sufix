@@ -30,24 +30,24 @@ export default async function CategoriaPage({
   if (!cat) notFound();
 
   const supabase = await createSupabaseServer();
-  const { data: tecnicosRaw } = await supabase
-    .from("perfiles_publicos")
-    // Sin `reputacion_url`: la tarjeta no la usa, solo /tecnico/[id]. Ver la
-    // nota en app/page.tsx.
-    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total")
-    .contains("rubro", [slug])
+  // En paralelo, y `resenas_resumen` entera sin `.in(ids)`: filtrarla por
+  // cientos de ids es mucho más lento que traerla completa. Ver la nota larga
+  // en app/page.tsx.
+  const [{ data: tecnicosRaw }, { data: resumenRows }] = await Promise.all([
+    supabase
+      .from("perfiles_publicos")
+      // Sin `reputacion_url`: la tarjeta no la usa, solo /tecnico/[id]. Ver la
+      // nota en app/page.tsx.
+      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total")
+      .contains("rubro", [slug])
       // Ver la nota en app/page.tsx: verificado O cargado_por_equipo.
-    .or("verificado.eq.true,cargado_por_equipo.eq.true")
-    .not("telefono", "is", null)
-    .order("creado_at", { ascending: false });
+      .or("verificado.eq.true,cargado_por_equipo.eq.true")
+      .not("telefono", "is", null)
+      .order("creado_at", { ascending: false }),
+    supabase.from("resenas_resumen").select("tecnico_id, promedio, total"),
+  ]);
 
   const tecnicos = (tecnicosRaw ?? []) as TecnicoPublico[];
-  // Sin `.in(ids)`: la tabla entera son un puñado de filas y filtrarla por
-  // cientos de ids es mucho más lento que traerla completa. Ver la nota
-  // larga en app/page.tsx.
-  const { data: resumenRows } = await supabase
-    .from("resenas_resumen")
-    .select("tecnico_id, promedio, total");
   const resumenMap = Object.fromEntries(
     (resumenRows ?? []).map((r) => [r.tecnico_id, { promedio: Number(r.promedio), total: Number(r.total) }])
   );
