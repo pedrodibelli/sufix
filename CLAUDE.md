@@ -701,7 +701,7 @@ Nunca se ven las dos cosas ni ninguna:
 
 | Debajo de `lg` (mobile/tablet) | En `lg`+ (desktop) |
 |---|---|
-| `OficiosChips` + `TecnicosFiltroBar` (sticky) | `HeroSearchCard` |
+| `TecnicosFiltroBar` (sticky, oficio + zona) | `HeroSearchCard` |
 | conteo dentro de `TecnicosFiltroBar` | conteo dentro de `TecnicosSortBar` |
 | garantías compactas debajo del buscador | garantías largas bajo el titular |
 | sin bajada ni eyebrow en la sección de técnicos | título completo, centrado |
@@ -749,6 +749,18 @@ usa** — se sacó `reputacion_url` de los `select` de la home y de `/categoria`
   `/tecnico/[id]`. El sitemap usa los mismos criterios de "quién es público" que la home.
 - **`/tecnico/[id]` no se tocó**: ya estaba bien en mobile (3,7 pantallas, botón de WhatsApp
   arriba del pliegue). Es la página que convierte — no meterle mano sin motivo.
+
+### Corrección del 2026-09-21: se sacaron los chips de oficio
+El rediseño había puesto, además de las pastillas, una fila de chips de oficio que se deslizaba
+en horizontal (`OficiosChips`) arriba del listado. **Se sacó al día siguiente, mirándolo en un
+celular de verdad:** no se entendía que se podía deslizar — sólo se notaba porque el último chip
+quedaba cortado al medio — y hacía exactamente lo mismo que la pastilla "Oficio" de la barra
+sticky.
+
+Quedaron **sólo Oficio + Zona**, que se leen como lo que son. La lección sirve para lo que venga:
+**un control que hay que descubrir no le gana a uno que se entiende solo**, y dos controles para
+la misma acción es peor que uno. El componente se borró; está en el historial de git (commit del
+rediseño, 2026-09-20) por si se quiere volver con otra presentación.
 
 ---
 
@@ -803,3 +815,4 @@ bajaría a ~0,5 s y filtrar pasaría a costar ~0,4 s. **Hoy está elegido al rev
 > salió el primer pedazo, no cuándo terminó el servidor — hay que mirar `time_total`. La primera
 > medición de cada tanda suele incluir **cold start** de la función (se vio 1,8 s en la home y
 > 1,3 s hasta en una página estática); no confundirlo con lentitud del código.
+

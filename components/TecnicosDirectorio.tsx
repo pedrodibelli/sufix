@@ -3,7 +3,6 @@
 import { useMemo, useRef, useState } from "react";
 import { TecnicosSortBar, type OrdenTecnicos } from "@/components/TecnicosSortBar";
 import { TecnicosFiltroBar } from "@/components/TecnicosFiltroBar";
-import { OficiosChips } from "@/components/OficiosChips";
 import { TecnicosGrid } from "@/components/TecnicosGrid";
 import { type TecnicoPublico } from "@/components/TecnicoCard";
 import { filtrarTecnicos, FILTRO_VACIO, type FiltroTecnicos } from "@/lib/filtros";
@@ -99,11 +98,13 @@ export function TecnicosDirectorio({
           scrollIntoView deja las primeras tarjetas tapadas. */}
       <div ref={tope} className="scroll-mt-[116px] lg:scroll-mt-20" />
 
-      <OficiosChips
-        oficioActivo={filtro.q}
-        onElegir={(nombre) => cambiarFiltro({ ...filtro, q: nombre })}
-      />
-
+      {/* Acá había una fila de chips de oficio que se deslizaba en horizontal
+          (`OficiosChips`, 2026-09-20). Se sacó al día siguiente: no se
+          entendía que se podía deslizar — sólo se notaba porque el último
+          chip quedaba cortado al medio — y hacía exactamente lo mismo que la
+          pastilla "Oficio" de acá abajo. Dos controles para lo mismo, y el
+          menos claro primero. El componente se borró; está en el historial de
+          git si alguna vez se quiere volver con otra presentación. */}
       <TecnicosFiltroBar filtro={filtro} onFiltroChange={cambiarFiltro} total={ordenados.length} />
 
       <TecnicosSortBar total={ordenados.length} orden={orden} onOrdenChange={cambiarOrden} />
