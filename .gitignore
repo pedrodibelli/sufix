@@ -5,7 +5,12 @@ node_modules
 *.log
 next-env.d.ts
 .vercel
-.claude/
+# .claude/ entero estaba ignorado. Se destraba SOLO settings.json para que los
+# permisos del proyecto viajen con el repo (si no, una sesión de Claude en la
+# nube clona el repo sin ellos y vuelve a frenarse en cada git push).
+# settings.local.json sigue afuera: es personal de cada máquina.
+.claude/*
+!.claude/settings.json
 tsconfig.tsbuildinfo
 .opencode/
 opencode.json
