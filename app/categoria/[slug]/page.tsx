@@ -8,7 +8,7 @@ import { categoryBySlug } from "@/lib/data";
 import { IconOficio } from "@/components/icons";
 import { Avatar } from "@/components/Avatar";
 import { avatarColorFor } from "@/lib/avatarColors";
-import { toTitleCase } from "@/lib/format";
+import { toTitleCase, iniciales } from "@/lib/format";
 import { calificacionEfectiva, promedioGeneral as calcPromedioGeneral, puntajeRecomendado } from "@/lib/reputacion";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
@@ -149,7 +149,7 @@ export default async function CategoriaPage({
                         >
                           <Avatar
                             url={t.foto_url}
-                            initials={n.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
+                            initials={iniciales(n)}
                             size={48}
                             fallbackColor={avatarColorFor(t.user_id)}
                           />

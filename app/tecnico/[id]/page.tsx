@@ -9,7 +9,7 @@ import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
 import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconOficio, IconCheck } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
-import { toTitleCase } from "@/lib/format";
+import { toTitleCase, iniciales } from "@/lib/format";
 import { calificacionEfectiva } from "@/lib/reputacion";
 import { mensajeWhatsApp, telefonoWhatsApp } from "@/lib/whatsapp";
 import { createSupabaseServer } from "@/lib/supabase-server";
@@ -84,7 +84,7 @@ export default async function TecnicoPage({
   ]);
 
   const nombre = toTitleCase(perfil.nombre ?? "Profesional");
-  const initials = nombre.split(" ").filter(Boolean).map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
+  const initials = iniciales(nombre);
   const rubros: string[] = Array.isArray(perfil.rubro) ? perfil.rubro : perfil.rubro ? [perfil.rubro] : [];
   const rubroCats = rubros.map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
   const rubrosNombres = rubroCats.length > 0 ? rubroCats.map((c) => c.name) : rubros;
@@ -218,19 +218,19 @@ export default async function TecnicoPage({
                 cualquier plataforma que no verifica nada.
 
                 Solo se renderiza si verificado = true: si algún día entra un
-                perfil sin revisar, no se afirma nada sobre él. */}
-            {/* Un perfil sin revisar ya no sale en el directorio, pero el link
-                directo sigue funcionando (lo necesita /admin para revisarlo).
-                Se aclara, para que nadie lo confunda con uno aprobado. */}
-            {!perfil.verificado && (
-              <div className="mt-8 rounded-2xl border border-amber-300 bg-amber-50 p-5 sm:max-w-lg">
-                <p className="text-sm font-semibold text-amber-900">Perfil en revisión</p>
-                <p className="mt-1 text-[14px] leading-relaxed text-amber-800">
-                  Todavía no lo revisó nuestro equipo, así que no aparece en el directorio.
-                </p>
-              </div>
-            )}
+                perfil sin revisar, no se afirma nada sobre él.
 
+                Acá abajo había además un cartel ámbar de "Perfil en revisión"
+                para los no verificados ("todavía no lo revisó nuestro equipo,
+                así que no aparece en el directorio"). Se sacó el 2026-09-21:
+                es información nuestra, de trastienda, puesta justo donde el
+                visitante decide si escribe o no, y lo único que lograba era
+                sembrar desconfianza sobre un técnico que igual estamos
+                mostrando. La verificación se comunica en positivo y nada más:
+                si está verificado, va el sello y este bloque; si no, no va
+                nada. Al técnico sí se le sigue avisando el estado de su
+                propio perfil, en su home y en /perfil, que es donde
+                corresponde. */}
             {perfil.verificado && (
               <div className="mt-8 rounded-2xl border border-sv-primary/25 bg-sv-mint/60 p-5 sm:p-6">
                 <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">

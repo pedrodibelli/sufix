@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { TecnicosSortBar, type OrdenTecnicos } from "@/components/TecnicosSortBar";
+import { useMemo } from "react";
+import { TecnicosSortBar } from "@/components/TecnicosSortBar";
 import { TecnicosFiltroBar } from "@/components/TecnicosFiltroBar";
 import { TecnicosGrid } from "@/components/TecnicosGrid";
 import { type TecnicoPublico } from "@/components/TecnicoCard";
-import { filtrarTecnicos, FILTRO_VACIO, type FiltroTecnicos } from "@/lib/filtros";
+import { FILTRO_VACIO, filtrarTecnicos } from "@/lib/filtros";
+import { ID_LISTADO, useDirectorio } from "@/components/DirectorioContext";
 import { calificacionEfectiva, promedioGeneral, puntajeRecomendado } from "@/lib/reputacion";
 
 type Resumen = { promedio: number; total: number };
@@ -18,6 +19,11 @@ type Resumen = { promedio: number; total: number };
 // instantáneo y sin perder la posición, porque en el celular es la acción
 // principal del directorio, no algo que se hace una vez al principio.
 //
+// Desde 2026-09-21 el estado no vive en este componente sino en
+// DirectorioContext, un escalón más arriba: el buscador del hero es el otro
+// control del mismo filtro y está en otra sección de la página. Ver el
+// comentario largo de DirectorioContext.tsx.
+//
 // El servidor manda la lista COMPLETA (sin filtrar) más el filtro que venía
 // en la URL, y renderiza el HTML aplicando ese mismo filtro con la misma
 // función (lib/filtros.ts). Como el primer render del cliente arranca del
@@ -27,17 +33,11 @@ type Resumen = { promedio: number; total: number };
 export function TecnicosDirectorio({
   tecnicos,
   resumenMap,
-  filtroInicial = FILTRO_VACIO,
-  ordenInicial = "recomendados",
 }: {
   tecnicos: TecnicoPublico[];
   resumenMap: Record<string, Resumen>;
-  filtroInicial?: FiltroTecnicos;
-  ordenInicial?: OrdenTecnicos;
 }) {
-  const [orden, setOrden] = useState<OrdenTecnicos>(ordenInicial);
-  const [filtro, setFiltro] = useState<FiltroTecnicos>(filtroInicial);
-  const tope = useRef<HTMLDivElement>(null);
+  const { filtro, orden, aplicarFiltro, cambiarOrden } = useDirectorio();
 
   const filtrados = useMemo(() => filtrarTecnicos(tecnicos, filtro), [tecnicos, filtro]);
 
@@ -59,44 +59,12 @@ export function TecnicosDirectorio({
     });
   }, [filtrados, resumenMap, orden]);
 
-  // La URL se mantiene al día para que el link siga siendo compartible, pero
-  // con replaceState en vez de router.push: cambia la barra de direcciones
-  // sin pedirle nada al servidor ni tocar el historial.
-  function sincronizarUrl(f: FiltroTecnicos, o: OrdenTecnicos) {
-    const url = new URL(window.location.href);
-    for (const [clave, valor] of [["tecQ", f.q], ["tecZona", f.zona], ["tecSort", o === "recomendados" ? "" : o]] as const) {
-      if (valor) url.searchParams.set(clave, valor);
-      else url.searchParams.delete(clave);
-    }
-    window.history.replaceState(null, "", url.toString());
-  }
-
-  function cambiarOrden(nuevo: OrdenTecnicos) {
-    setOrden(nuevo);
-    sincronizarUrl(filtro, nuevo);
-  }
-
-  function cambiarFiltro(nuevo: FiltroTecnicos) {
-    setFiltro(nuevo);
-    sincronizarUrl(nuevo, orden);
-
-    // Sin esto, filtrar desde el medio de la lista te deja flotando: estabas
-    // en la tarjeta 40 y el resultado nuevo tiene 6 — quedabas mirando el
-    // final de la página, o directamente la sección de abajo, creyendo que
-    // no hubo resultados. Solo sube si ya estabas más abajo del listado;
-    // si estabas arriba no se mueve nada.
-    requestAnimationFrame(() => {
-      const y = tope.current?.getBoundingClientRect().top ?? 0;
-      if (y < 0) tope.current?.scrollIntoView({ block: "start", behavior: "smooth" });
-    });
-  }
-
   return (
     <>
-      {/* scroll-mt: el ancla de arriba tiene que quedar por debajo del header
-          sticky (56px) y de la propia barra de filtro (~52px), si no el
-          scrollIntoView deja las primeras tarjetas tapadas. */}
-      <div ref={tope} className="scroll-mt-[116px] lg:scroll-mt-20" />
+      {/* scroll-mt: el ancla tiene que quedar por debajo del header sticky
+          (56px) y de la propia barra de filtro (~52px), si no el salto al
+          listado deja las primeras tarjetas tapadas. */}
+      <div id={ID_LISTADO} className="scroll-mt-[116px] lg:scroll-mt-20" />
 
       {/* Acá había una fila de chips de oficio que se deslizaba en horizontal
           (`OficiosChips`, 2026-09-20). Se sacó al día siguiente: no se
@@ -105,7 +73,7 @@ export function TecnicosDirectorio({
           pastilla "Oficio" de acá abajo. Dos controles para lo mismo, y el
           menos claro primero. El componente se borró; está en el historial de
           git si alguna vez se quiere volver con otra presentación. */}
-      <TecnicosFiltroBar filtro={filtro} onFiltroChange={cambiarFiltro} total={ordenados.length} />
+      <TecnicosFiltroBar filtro={filtro} onFiltroChange={aplicarFiltro} total={ordenados.length} />
 
       <TecnicosSortBar total={ordenados.length} orden={orden} onOrdenChange={cambiarOrden} />
 
@@ -117,7 +85,7 @@ export function TecnicosDirectorio({
         tecnicos={ordenados}
         resumenMap={resumenMap}
         hayFiltrosActivos={!!(filtro.q || filtro.zona)}
-        onLimpiarFiltros={() => cambiarFiltro(FILTRO_VACIO)}
+        onLimpiarFiltros={() => aplicarFiltro(FILTRO_VACIO)}
       />
     </>
   );

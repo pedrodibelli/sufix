@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Bienvenida } from "@/components/Bienvenida";
+import { AnclaAlCargar } from "@/components/AnclaAlCargar";
 import { TecnicosDirectorio } from "@/components/TecnicosDirectorio";
+import { DirectorioProvider } from "@/components/DirectorioContext";
 import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
 import { HeroSearchCard } from "@/components/HeroSearchCard";
 import { ProblemStrip, SeguridadSection, OficiosGrid, ComoFuncionaPasos, WhatsAppMockupSection } from "@/components/HomeMarketingSections";
@@ -179,10 +181,18 @@ export default async function HomePage({
           contenedor de scroll, así que el sticky vuelve a funcionar. */}
       <main className="overflow-x-clip bg-[#FBF8EF]">
         <Bienvenida esProfesional={esProfesional} />
+        {/* Los links "/#tecnicos" del footer y de otras páginas no saltaban
+            solos al listado — ver AnclaAlCargar.tsx. */}
+        <AnclaAlCargar />
 
         {/* Directorio de técnicos — para demandantes y visitantes, no técnicos. */}
         {!esProfesional && (
-          <>
+          /* El filtro y el orden viven acá arriba, no dentro del directorio:
+             sus dos controles están en secciones distintas de la página — el
+             buscador del hero (desktop) y la barra sticky (mobile) — y tienen
+             que escribir el mismo estado. Antes el del hero navegaba con
+             router.push y no filtraba nada; ver DirectorioContext.tsx. */
+          <DirectorioProvider filtroInicial={filtroInicial} ordenInicial={tecSort}>
             {/* ── HERO (rediseño 2026-08-28, look "crema/salvia") ── */}
             {/* pt/pb más chicos en mobile: cada 16px de aire acá retrasa la
                 aparición del buscador, que es lo que la gente viene a usar. */}
@@ -292,12 +302,7 @@ export default async function HomePage({
                       cliente: cambiar de orden se resuelve en el navegador, sin
                       navegar ni saltar el scroll. El servidor igual manda la
                       lista ya ordenada, con el mismo criterio. */}
-                  <TecnicosDirectorio
-                    tecnicos={tecnicos}
-                    resumenMap={resumenMapTecnicos}
-                    filtroInicial={filtroInicial}
-                    ordenInicial={tecSort}
-                  />
+                  <TecnicosDirectorio tecnicos={tecnicos} resumenMap={resumenMapTecnicos} />
                 </div>
               </div>
             </section>
@@ -332,7 +337,7 @@ export default async function HomePage({
                 </div>
               </section>
             </>
-          </>
+          </DirectorioProvider>
         )}
 
         {/* Home del técnico — reemplaza al viejo feed de "Consultas activas". */}

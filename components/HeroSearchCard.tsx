@@ -1,40 +1,53 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { CATEGORIES, ZONES } from "@/lib/data";
 import { IconMapPin, IconOficio, IconSearch } from "@/components/icons";
 import { CustomSelect, type CustomSelectOption } from "@/components/CustomSelect";
+import { useDirectorio } from "@/components/DirectorioContext";
 
 // Buscador destacado del hero (rediseño 2026-08-28, landing nueva): oficio +
-// zona, separado del buscador con autocompletado de texto libre que ya vive
-// más abajo en la sección de técnicos (TecnicosSearchBar). Los dos navegan
-// al mismo lugar (querystring tecQ/tecZona sobre "/"), así que comparten el
-// mismo filtro real en app/page.tsx — este es solo una entrada más directa
-// desde arriba de la página.
+// zona. Solo se ve en desktop — en mobile el filtro es la barra sticky que
+// viaja pegada al listado (TecnicosFiltroBar), ver app/page.tsx.
+//
+// Arreglo 2026-09-21: antes hacía router.push("/?tecQ=…#tecnicos"). Desde que
+// el filtro vive en el navegador eso dejó de filtrar nada — cambiaba la URL y
+// el listado seguía mostrando los 620. Ahora escribe el mismo estado que lee
+// la grilla (DirectorioContext), que además mantiene la URL al día con
+// replaceState, así que el link sigue siendo igual de compartible. El detalle
+// de por qué el push fallaba está en DirectorioContext.tsx.
 export function HeroSearchCard() {
-  const router = useRouter();
-  const [oficio, setOficio] = useState("");
-  const [zona, setZona] = useState("");
+  const { filtro, aplicarFiltro } = useDirectorio();
 
-  function buscar() {
-    const sp = new URLSearchParams();
-    if (oficio) sp.set("tecQ", oficio);
-    if (zona) sp.set("tecZona", zona);
-    const s = sp.toString();
-    router.push(`/${s ? `?${s}` : ""}#tecnicos`);
-  }
+  // Borrador: acá los selectores no filtran solos, porque el listado está
+  // lejos (más abajo en la página) y no se vería moverse nada. Se aplica al
+  // apretar el botón, que es además lo que dispara el salto a las tarjetas.
+  const [oficio, setOficio] = useState(filtro.q);
+  const [zona, setZona] = useState(filtro.zona);
+
+  // Si el filtro cambia desde otro lado (ej. "Sacar los filtros" en el estado
+  // vacío de la grilla), el borrador tiene que reflejarlo: si no, el hero
+  // sigue mostrando un oficio que ya no está aplicado.
+  useEffect(() => {
+    setOficio(filtro.q);
+    setZona(filtro.zona);
+  }, [filtro]);
 
   // El valor guardado sigue siendo el NOMBRE del rubro (no el slug) — así lo
-  // espera app/page.tsx del lado del filtro (tecQ), sin tocar esa parte.
+  // espera el filtro de texto libre, que matchea contra el nombre
+  // (ver lib/filtros.ts).
   const catSeleccionada = CATEGORIES.find((c) => c.name === oficio);
 
-  const opcionesOficio: CustomSelectOption[] = CATEGORIES.map((c) => ({
-    value: c.name,
-    label: c.name,
-    icon: <IconOficio slug={c.slug} />,
-  }));
+  const opcionesOficio: CustomSelectOption[] = [
+    { value: "", label: "Cualquier oficio" },
+    ...CATEGORIES.map((c) => ({
+      value: c.name,
+      label: c.name,
+      icon: <IconOficio slug={c.slug} />,
+    })),
+  ];
   const opcionesZona: CustomSelectOption[] = [
+    { value: "", label: "Cualquier zona" },
     { value: "CABA", label: "Toda CABA" },
     ...ZONES.map((z) => ({ value: z, label: z })),
   ];
@@ -70,7 +83,11 @@ export function HeroSearchCard() {
         />
       </div>
 
-      <button type="button" onClick={buscar} className="btn-primary mt-4 w-full text-center">
+      <button
+        type="button"
+        onClick={() => aplicarFiltro({ q: oficio, zona }, { irAlListado: true })}
+        className="btn-primary mt-4 w-full text-center"
+      >
         Buscar técnicos
       </button>
     </div>

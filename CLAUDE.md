@@ -816,3 +816,58 @@ bajaría a ~0,5 s y filtrar pasaría a costar ~0,4 s. **Hoy está elegido al rev
 > medición de cada tanda suele incluir **cold start** de la función (se vio 1,8 s en la home y
 > 1,3 s hasta en una página estática); no confundirlo con lentitud del código.
 
+
+---
+
+## 22. El buscador del hero, roto por el rediseño mobile (2026-09-21)
+
+**Síntoma:** en desktop, elegir un oficio y apretar "Buscar técnicos" cambiaba la URL pero el
+listado seguía mostrando los 620. Medido contra producción: **620 antes de buscar, 620 después.**
+En mobile las pastillas sí filtraban, y entrar directo a `/?tecQ=Plomería` también — por eso pasó
+una semana sin que nadie lo viera.
+
+### Causa: navegar no re-inicializa un `useState`
+`HeroSearchCard` hacía `router.push("/?tecQ=…#tecnicos")`. Eso funcionaba cuando el servidor
+filtraba. Cuando el filtro se movió al navegador (§20) quedó así:
+
+```
+app/page.tsx (servidor)  →  <TecnicosDirectorio filtroInicial={…} />  →  useState(filtroInicial)
+```
+
+`router.push` a la **misma ruta** con otro querystring re-renderiza el componente de servidor,
+pero React reconcilia por tipo y posición y **conserva el estado** del componente cliente que ya
+estaba montado. `filtroInicial` cambiaba de valor y `useState` lo ignoraba, porque un valor
+inicial sólo se usa al montar. La URL cambiaba, el listado no.
+
+> ⚠️ **Regla:** si un dato viaja del servidor al cliente como "valor inicial" de un `useState`,
+> **no se puede refrescar navegando**. O el estado vive en un lugar donde los dos controles lo
+> comparten, o hay que remontar el componente con un `key`.
+
+### Lo que quedó
+- **`components/DirectorioContext.tsx`** (nuevo): el filtro y el orden viven acá, un escalón
+  arriba del directorio. `app/page.tsx` envuelve el hero **y** la sección `#tecnicos` con
+  `<DirectorioProvider>`, así el buscador del hero y la barra sticky de mobile escriben el mismo
+  estado. El hero ya no navega: filtra al instante, como las pastillas. La URL se sigue
+  manteniendo con `replaceState`, así que el link sigue siendo compartible.
+- `TecnicosDirectorio` ya no tiene estado propio ni props de filtro; sólo `tecnicos` + `resumenMap`.
+- El buscador del hero ganó la opción **"Cualquier oficio" / "Cualquier zona"**: no tenía forma de
+  volver atrás una vez elegido un oficio.
+
+### Dos cosas más que aparecieron revisando, y también estaban en producción
+- **Los links `"/#tecnicos"` no saltaban a ningún lado** (footer, `/como-funciona`, `/categoria`).
+  Next manda el HTML en streaming: cuando el navegador procesa el fragmento, el hero todavía no
+  tiene su alto final, así que `#tecnicos` está a 0px del tope y "saltar" ahí no mueve nada.
+  Arreglado con **`components/AnclaAlCargar.tsx`**, que rehace el salto después de hidratar.
+  (El CTA de la propia home sí andaba: ahí la página ya está armada cuando lo tocás.)
+- **`w[0]` no es "la primera letra"**, es la primera unidad UTF-16. Hay 3 técnicos con el nombre
+  fuera del BMP (`𝗣𝗟𝗢𝗠𝗘𝗥𝗢` en negrita Unicode, dos que empiezan con emoji) y la inicial del
+  avatar les salía media pareja sustituta: se dibujaba como el rombo con el signo de
+  pregunta **y rompía la hidratación de React**
+  en `/categoria` (error #418), o sea que la grilla entera se volvía a renderizar en el cliente.
+  Ahora hay `iniciales()` en `lib/format.ts`, que recorre por code points y saltea símbolos
+  (`"🟠WOLFCOLORS Pintores"` → `"WP"`). Se usa en los 6 lugares que repetían el one-liner.
+
+### Cómo verificar que el buscador anda (no alcanza con mirar el código)
+Contar resultados, no tarjetas: la grilla muestra **12 por tanda**, así que `620` y `111`
+resultados se ven los dos como 12 tarjetas. El número está en el texto
+`"N profesionales encontrados"` (desktop) y `"N técnicos"` (barra sticky de mobile).

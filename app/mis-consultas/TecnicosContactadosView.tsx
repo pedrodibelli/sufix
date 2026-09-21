@@ -7,6 +7,7 @@ import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
 import { type TecnicoPublico } from "@/components/TecnicoCard";
 import { DejarResenaForm } from "@/app/tecnico/[id]/DejarResenaForm";
+import { iniciales } from "@/lib/format";
 
 export type Resumen = { promedio: number; total: number };
 
@@ -47,7 +48,7 @@ export function TecnicosContactadosView({ items }: { items: ContactoItem[] }) {
       <div className="mt-6 space-y-4">
         {items.map(({ perfil, resumen, veces, ultimaFecha, yaResenado }) => {
           const nombre = perfil.nombre ?? "Profesional";
-          const initials = nombre.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+          const initials = iniciales(nombre);
           const rubroCats = (perfil.rubro ?? []).map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
           const telefonoLimpio = perfil.telefono?.replace(/\D/g, "") ?? "";
           const mensaje = encodeURIComponent(

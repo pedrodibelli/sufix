@@ -5,7 +5,7 @@ import { ContactarWhatsAppButton } from "@/components/ContactarWhatsAppButton";
 import { IconMapPin, IconVerifiedBadge, IconWhatsApp, IconSparkle, IconOficio } from "@/components/icons";
 import { CATEGORIES } from "@/lib/data";
 import { avatarColorFor } from "@/lib/avatarColors";
-import { toTitleCase } from "@/lib/format";
+import { toTitleCase, iniciales } from "@/lib/format";
 import { calificacionEfectiva } from "@/lib/reputacion";
 import { mensajeWhatsApp, telefonoWhatsApp } from "@/lib/whatsapp";
 
@@ -50,7 +50,7 @@ export function TecnicoCard({
   modoPreview?: boolean;
 }) {
   const nombre = toTitleCase(tecnico.nombre ?? "Profesional");
-  const initials = nombre.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const initials = iniciales(nombre);
   const zonas = tecnico.zona ?? [];
   // En la tarjeta chica se muestra solo la primera zona + "+N más" (mismo
   // truco que los chips de rubro) — un técnico puede cubrir 6 barrios, pero

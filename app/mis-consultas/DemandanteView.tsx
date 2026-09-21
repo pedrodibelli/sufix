@@ -12,6 +12,7 @@ import { AceptarModal, type PropuestaParaPago, type PublicacionParaPago } from "
 import { ReportarProblemaModal } from "./ReportarProblemaModal";
 import { StarRating } from "@/components/StarRating";
 import { Avatar } from "@/components/Avatar";
+import { iniciales } from "@/lib/format";
 
 type Resumen = { promedio: number; total: number };
 
@@ -255,7 +256,7 @@ function InteresadoRow({
 
   const nombre = propuesta.nombre_profesional ?? "Profesional";
   const primerNombre = nombre.split(" ")[0];
-  const initials = nombre.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const initials = iniciales(nombre);
   const telefono = perfil?.telefono ?? null;
 
   const cat = CATEGORIES.find((c) => c.slug === publicacion.category_slug);
@@ -468,7 +469,7 @@ function ProfesionalContacto({
   const [reportando, setReportando] = useState(false);
   const nombre = propuesta.nombre_profesional ?? "Profesional";
   const puedeReportar = pubStatus === "en_curso" || pubStatus === "cerrado";
-  const initials = nombre.split(" ").filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const initials = iniciales(nombre);
   // Prefiere datos de perfiles_profesionales; retrocompatible con propuestas antiguas
   const telefono = perfil?.telefono ?? propuesta.profesional_telefono ?? null;
   const emailPro = perfil?.email ?? propuesta.profesional_email ?? null;
