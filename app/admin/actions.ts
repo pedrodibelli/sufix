@@ -120,7 +120,7 @@ export async function verificarTecnico(
         <p style="margin:0 0 14px;">Lo revisamos y desde ahora aparecés en el directorio de Sufix. Los clientes de tu zona pueden verte y escribirte por WhatsApp directo.</p>
         <p style="margin:0 0 20px;color:#5A6B5C;">Si querés que te encuentren más fácil, sumale una foto y contá tus años de oficio desde tu perfil.</p>
         <p style="margin:0;">
-          <a href="https://sufixapp.com/tecnico/${userId}" style="display:inline-block;background:#4E7A3E;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:600;font-size:14px;">Ver mi perfil</a>
+          <a href="https://sufix.com.ar/tecnico/${userId}" style="display:inline-block;background:#4E7A3E;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:600;font-size:14px;">Ver mi perfil</a>
         </p>`,
     });
   }

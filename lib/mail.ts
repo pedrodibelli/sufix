@@ -52,7 +52,7 @@ function plantilla(contenido: string): string {
     </div>
   </div>
   <p style="max-width:520px;margin:14px auto 0;color:#8A9689;font-size:12px;text-align:center;">
-    Sufix — técnicos verificados de CABA y zona norte · <a href="https://sufixapp.com" style="color:#4E7A3E;">sufixapp.com</a>
+    Sufix — técnicos verificados de CABA y zona norte · <a href="https://sufix.com.ar" style="color:#4E7A3E;">sufix.com.ar</a>
   </p>
 </div>`;
 }

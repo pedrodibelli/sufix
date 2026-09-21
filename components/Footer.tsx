@@ -127,7 +127,7 @@ export function Footer() {
           <p className="text-[13px] text-[#FBF8EF]/45">
             © {new Date().getFullYear()} Sufix. Hecho en Buenos Aires.
           </p>
-          <p className="text-[13px] text-[#FBF8EF]/45">sufixapp.com</p>
+          <p className="text-[13px] text-[#FBF8EF]/45">sufix.com.ar</p>
         </div>
       </div>
     </footer>

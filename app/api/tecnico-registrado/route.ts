@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
         <tr><td style="padding:5px 0;color:#8A9689;">Email</td><td style="padding:5px 0;">${escapar(emailTecnico)}</td></tr>
       </table>
       <p style="margin:22px 0 0;">
-        <a href="https://sufixapp.com/admin" style="display:inline-block;background:#4E7A3E;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:600;font-size:14px;">Revisar en el panel</a>
+        <a href="https://sufix.com.ar/admin" style="display:inline-block;background:#4E7A3E;color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:10px;font-weight:600;font-size:14px;">Revisar en el panel</a>
       </p>`;
 
     // A todos los admins: si manana se suma alguien mas al equipo, lo recibe

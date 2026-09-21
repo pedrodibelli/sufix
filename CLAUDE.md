@@ -12,9 +12,9 @@
 > **Lo que sigue con el nombre viejo a propósito** (son identificadores de infraestructura,
 > no marca): el repo `github.com/pedrodibelli/solvit`, el proyecto Vercel `sope/solvit`,
 > la URL en vivo `solvitweb.vercel.app`, el email admin `solvithomes@gmail.com`, y las
-> menciones históricas a `solvit.homes` (dominio viejo de Mateo, ya no se usa). Conectar
-> `sufix.com.ar` como dominio real está **pendiente** de recuperar el acceso a la cuenta
-> de Vercel (ver §6 y la nota de la sesión sobre el 2FA).
+> menciones históricas a `solvit.homes` (dominio viejo de Mateo, ya no se usa).
+> `sufix.com.ar` **es hoy la URL principal** (2026-09-21, ver §7): todos los demás dominios,
+> incluido `sufixapp.com`, redirigen a él.
 
 > ⚠️ **Pivot de producto 2026-08-20/21: "publicar problema" → "directorio de técnicos".**
 > La home dejó de tener como flujo principal "el demandante publica su problema y espera
@@ -116,7 +116,7 @@ Vercel. El código usa:
 | `NEXT_PUBLIC_SUPABASE_URL` | **Sí** | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Sí** | Usar la **anon / publishable** key (ver abajo). Se necesita también en build. |
 | `RESEND_API_KEY` | No | Si falta, el envío de email se saltea y la app sigue andando |
-| `NEXT_PUBLIC_APP_URL` | Recomendada | Si falta, los links de confirmación apuntan a `https://sufix.com.ar` (dominio nuevo, todavía sin conectar al deploy — ver nota de rebranding arriba). Setear a la URL real del deploy. |
+| `NEXT_PUBLIC_APP_URL` | Recomendada | Si falta, los links de confirmación apuntan a `https://sufix.com.ar`. Hoy está seteada a ese mismo valor en Producción. |
 | `CRON_SECRET` | Recomendada | Sin esto, el cron diario de keepalive devuelve 401 (inofensivo) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Para el mail | **Secreta, solo servidor.** La usa `/api/propuesta-creada` para leer el email del demandante. NUNCA `NEXT_PUBLIC`. |
 | `GMAIL_USER` | Para el mail | `solvithomes@gmail.com` — remitente del aviso de propuesta |
@@ -160,11 +160,11 @@ Vercel. El código usa:
 
 ### ✅ Estado: DEPLOYADO y EN PRODUCCIÓN
 - **Proyecto Vercel:** `sope/solvit` (CLI autenticado como `pedrodibelli`).
-- **URL de producción:** **https://solvitweb.vercel.app** (la vieja `solvit-navy.vercel.app`
-  redirige acá).
+- **URL de producción:** **https://sufix.com.ar** (desde 2026-09-21, ver §7; todos los demás
+  dominios, incluidos `sufixapp.com` y los `.vercel.app`, redirigen 308 acá).
 - **Repo GitHub conectado** → auto-deploy: push a `main` = producción.
 - **Env vars (Production):** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-  `NEXT_PUBLIC_APP_URL` (= `https://solvitweb.vercel.app`), `CRON_SECRET` (seteado).
+  `NEXT_PUBLIC_APP_URL` (= `https://sufix.com.ar`), `CRON_SECRET` (seteado).
   `RESEND_API_KEY` (2026-09-07, ver §7 y §16), `WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`.
   ⚠️ Vercel las marca **Sensitive**: no se pueden volver a leer, ni por CLI ni por panel. El
   `WEBHOOK_SECRET` se recupera copiándolo de un webhook ya configurado en Supabase.
@@ -192,9 +192,27 @@ Vercel. El código usa:
   `hola@sufixapp.com`. Ver §16 para el detalle.
 - `/publicar/actions.ts` (email dormido de Resend, referencia `sufix.com.ar`) sigue sin usarse:
   `/publicar` está redirigido desde el pivot, así que ese código no se ejecuta.
-- **URL de producción: `https://sufixapp.com`** (`solvitweb.vercel.app` sigue como alias).
-  `sufix.com.ar`, `sufix.store`, `sufix.online` y `sufixapp.online/.store` están registrados en
-  Vercel pero **no resuelven** — no se conectaron a ningún deploy.
+- ✅ **URL de producción: `https://sufix.com.ar`** (desde 2026-09-21, antes era `sufixapp.com`).
+  Es el único dominio sin redirect. **Todos los demás redirigen 308 a `sufix.com.ar`**:
+  `www.sufix.com.ar`, `sufixapp.com`, `sufixapp.online/.store`, `sufix.online/.store`,
+  `solvitweb.vercel.app` y `solvit-navy.vercel.app`. `sufixapp.com` tiene que seguir conectado al
+  proyecto en Vercel (es lo que hace andar su redirect).
+- `sufix.com.ar` es un `.com.ar` con **DNS en DonWeb** (`ns1/ns2.donweb.com`), no en Vercel — por eso
+  `vercel domains inspect` marca los nameservers con ☓, es normal. En DonWeb: registro A
+  `sufix.com.ar → 76.76.21.21` y CNAME `www → sufix.com.ar`. Tiene certificado propio en Vercel.
+  ⚠️ El certificado no se emitió solo apenas se cargó el dominio: `https` daba error de handshake
+  hasta que Vercel lo generó (unos minutos después de que el DNS quedó bien).
+- `sufixapp.online/.store` y `sufix.online/.store` están en Vercel pero su DNS no apunta ahí, así que
+  **no resuelven**: el redirect existe pero nadie llega a él.
+- **Los redirects de dominio se cambian por API**, no hay comando de CLI:
+  `vercel api /v9/projects/solvit/domains/<dominio> -X PATCH --input <json>` con
+  `{"redirect":"sufix.com.ar","redirectStatusCode":308}` (o `{"redirect":null}` para hacerlo
+  principal). Vercel no deja redirigir un dominio mientras otro redirija hacia él: hay que soltar
+  primero a los que apuntan a él.
+- El remitente de mails sigue siendo `hola@sufixapp.com` a propósito (Resend está verificado para
+  ese dominio). Solo cambiaron los **links** dentro de los mails, que ahora apuntan a `sufix.com.ar`.
+- **Google Search Console:** todavía no está dado de alta. Cuando se haga, registrar
+  `sufix.com.ar` como propiedad principal.
 
 ---
 
@@ -435,10 +453,9 @@ poder registrarse — pasó una vez en esta sesión por apurar el orden.
 
 ## 14. Cómo trabajar en este repo (workflow para Claude)
 1. **Cambio de código** → `npm run build` (verificar que compila) → `git add -A` → commit →
-   `git push origin main`. ⚠️ **El push NO siempre re-apunta el dominio `sufixapp.com` (ni
-   `solvitweb.vercel.app`) al último deploy** (puede quedar sirviendo código viejo). Correr
-   **`vercel --prod --yes`** y después **`vercel alias set <deployment> <dominio>`** para
-   los dos dominios — ver §18 para el detalle de comandos.
+   `git push origin main`. ⚠️ **El push NO siempre re-apunta el dominio `sufix.com.ar` al último
+   deploy** (puede quedar sirviendo código viejo). Correr **`vercel --prod --yes`** y después
+   **`vercel alias set <deployment> sufix.com.ar`** — ver §18 para el detalle de comandos.
    El texto del trailer de commit (`Co-Authored-By: ...`) lo da el sistema en cada sesión,
    no es fijo — usar el que venga en las instrucciones de esa sesión, no copiar uno viejo.
 2. **Cambio de base de datos** → crear el `.sql` en `supabase/migrations/` Y **darle el SQL al usuario para correr en el SQL Editor** (no se aplica solo).
@@ -598,8 +615,7 @@ El dato que hace falta es `reputacion_fuente` + `reputacion_rating` + `reputacio
 ### Vercel CLI
 ```
 vercel --prod --yes                                  # deploy a producción
-vercel alias set <deployment-url> sufixapp.com        # re-apuntar el dominio real
-vercel alias set <deployment-url> solvitweb.vercel.app # y el alias viejo, los DOS siempre
+vercel alias set <deployment-url> sufix.com.ar        # re-apuntar el dominio real (los demás solo redirigen)
 vercel env add/rm <VAR> production                    # cargar/sacar env vars
 vercel logs <deployment-url>                           # logs en runtime, para debug de endpoints
 vercel domains inspect <dominio>                       # nameservers actuales vs los que espera Vercel
