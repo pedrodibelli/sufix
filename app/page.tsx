@@ -60,9 +60,14 @@ export default async function HomePage({
   // que antes hacían los chips de categoría (ver lib/filtros.ts).
   const tecZona = params.tecZona ?? "";
 
-  // Rol del usuario actual
+  // Rol del usuario actual. getSession() lee la cookie local (sin red);
+  // getUser() valida el token contra Supabase, o sea una ida y vuelta más
+  // antes de renderizar. Acá sólo decide qué home mostrar (directorio vs.
+  // panel del técnico) — los datos siguen protegidos por RLS. Mismo criterio
+  // que Header y /tecnico/[id].
   const supabaseServer = await createSupabaseServer();
-  const { data: { user } } = await supabaseServer.auth.getUser();
+  const { data: { session } } = await supabaseServer.auth.getSession();
+  const user = session?.user ?? null;
   const esProfesional = user?.user_metadata?.es_profesional === true;
   const sinSesion = !user;
 
@@ -95,10 +100,19 @@ export default async function HomePage({
       (t) => Array.isArray(t.rubro) && t.rubro.length > 0
     );
 
-    const tecnicoIds = tecnicos.map((t) => t.user_id);
-    const { data: resumenRows } = tecnicoIds.length > 0
-      ? await supabaseServer.from("resenas_resumen").select("tecnico_id, promedio, total").in("tecnico_id", tecnicoIds)
-      : { data: [] as { tecnico_id: string; promedio: number; total: number }[] };
+    // Se traen TODAS las filas, sin `.in(ids)` (2026-09-21). Suena al revés,
+    // pero medido: filtrar por los 620 ids tardaba **7,9 segundos** y traer la
+    // tabla entera tarda **54 ms**. `resenas_resumen` sólo tiene una fila por
+    // técnico con reseñas nativas de Sufix — hoy son 3 filas, 232 bytes. El
+    // `.in()` armaba una URL de ~23 KB con 620 UUIDs para filtrar eso.
+    // Era, de lejos, lo más caro de la home.
+    //
+    // Si algún día esta tabla crece mucho (miles de técnicos con reseñas
+    // propias), volver a filtrar — pero por rango o paginado, nunca con un
+    // `.in()` de cientos de ids.
+    const { data: resumenRows } = await supabaseServer
+      .from("resenas_resumen")
+      .select("tecnico_id, promedio, total");
     resumenMapTecnicos = Object.fromEntries(
       (resumenRows ?? []).map((r) => [r.tecnico_id, { promedio: Number(r.promedio), total: Number(r.total) }])
     );

@@ -42,10 +42,12 @@ export default async function CategoriaPage({
     .order("creado_at", { ascending: false });
 
   const tecnicos = (tecnicosRaw ?? []) as TecnicoPublico[];
-  const tecnicoIds = tecnicos.map((t) => t.user_id);
-  const { data: resumenRows } = tecnicoIds.length > 0
-    ? await supabase.from("resenas_resumen").select("tecnico_id, promedio, total").in("tecnico_id", tecnicoIds)
-    : { data: [] as { tecnico_id: string; promedio: number; total: number }[] };
+  // Sin `.in(ids)`: la tabla entera son un puñado de filas y filtrarla por
+  // cientos de ids es mucho más lento que traerla completa. Ver la nota
+  // larga en app/page.tsx.
+  const { data: resumenRows } = await supabase
+    .from("resenas_resumen")
+    .select("tecnico_id, promedio, total");
   const resumenMap = Object.fromEntries(
     (resumenRows ?? []).map((r) => [r.tecnico_id, { promedio: Number(r.promedio), total: Number(r.total) }])
   );

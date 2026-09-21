@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -38,7 +39,13 @@ export default async function TecnicoPage({
   const { id } = await params;
   const { rubro: rubroContexto } = await searchParams;
   const supabase = await createSupabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
+  // getSession() (cookie local, sin red) en vez de getUser() (valida el token
+  // contra Supabase en cada visita, o sea una ida y vuelta más antes de poder
+  // renderizar). Acá `user` sólo decide QUÉ SE MUESTRA — el formulario de
+  // reseña y si se cuenta la visita — y quién puede escribir de verdad lo
+  // sigue decidiendo RLS del lado de la base. Mismo criterio que Header.
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   const { data: perfil } = await supabase
     .from("perfiles_publicos")
@@ -49,16 +56,23 @@ export default async function TecnicoPage({
   if (!perfil) notFound();
 
   // Registro de vista (best-effort): no cuenta si el técnico mira su propio
-  // perfil. Se espera (no fire-and-forget) porque en un entorno serverless
-  // un insert sin await puede cortarse cuando termina la respuesta de la
-  // página — pero envuelto en try/catch para que un fallo acá nunca rompa
-  // la carga del perfil.
+  // perfil.
+  //
+  // Va dentro de `after()` (2026-09-21): antes se hacía con `await` en medio
+  // del render, así que cada visita al perfil esperaba a que terminara un
+  // INSERT antes de mandar una sola línea de HTML. Un contador de visitas no
+  // puede retrasar la página que cuenta. `after()` lo corre después de enviar
+  // la respuesta, que es lo que el comentario viejo quería evitar hacer con un
+  // fire-and-forget suelto (en serverless se cortaba al terminar la respuesta)
+  // — `after()` justamente garantiza que el trabajo se complete.
   if (!user || user.id !== id) {
-    try {
-      await supabase.from("vistas_perfil_tecnico").insert({ tecnico_id: id, visitante: user?.id ?? null });
-    } catch {
-      // silencioso a propósito
-    }
+    after(async () => {
+      try {
+        await supabase.from("vistas_perfil_tecnico").insert({ tecnico_id: id, visitante: user?.id ?? null });
+      } catch {
+        // silencioso a propósito
+      }
+    });
   }
 
   // Se sacó la cuenta de "trabajos completados" (2026-09-04): consultaba
