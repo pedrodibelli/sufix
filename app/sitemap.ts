@@ -1,13 +1,12 @@
 import type { MetadataRoute } from "next";
 import { CATEGORIES } from "@/lib/data";
+import { APP_URL as BASE } from "@/lib/appUrl";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 // Se regenera cada hora: los técnicos nuevos no son tan frecuentes como para
 // consultar la base en cada pedido del sitemap, pero sí lo bastante como para
 // que un sitemap congelado al build quede viejo enseguida.
 export const revalidate = 3600;
-
-const BASE = (process.env.NEXT_PUBLIC_APP_URL ?? "https://sufix.com.ar").replace(/\/$/, "");
 
 // Sitemap (2026-09-20). No había ninguno, y desde este rediseño hace más
 // falta que antes: la home y /categoria ahora muestran 12 técnicos por tanda

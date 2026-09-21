@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-
-const BASE = (process.env.NEXT_PUBLIC_APP_URL ?? "https://sufix.com.ar").replace(/\/$/, "");
+import { APP_URL as BASE } from "@/lib/appUrl";
 
 // robots.txt (2026-09-20). Antes no existía, así que Google no tenía de dónde
 // sacar el sitemap salvo que se lo cargara a mano en Search Console.
