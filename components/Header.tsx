@@ -104,7 +104,9 @@ export async function Header() {
 
       </div>
     </header>
-    {user && <BottomNav novedades={novedades} />}
+    {/* Para todos, no solo logueados (2026-09-20): el directorio se usa sin
+        cuenta, así que el visitante también necesita navegación fija. */}
+    <BottomNav hasUser={!!user} novedades={novedades} />
     {user && <RealtimeRefresh />}
     </>
   );

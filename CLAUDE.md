@@ -680,3 +680,72 @@ porque pasa por la validación del formulario real.
 - **Botones/tarjetas**: convención `btn-primary` / `btn-outline` / `btn-ghost`, `.card` en
   `globals.css`. Las clases de utilidad (`@layer utilities`) le ganan a las de componente
   (`@layer components`) en Tailwind — si un override no toma efecto, revisar en qué layer está.
+
+---
+
+## 20. Mobile primero en el directorio (rediseño 2026-09-20)
+
+**Por qué:** el 90-95% del tráfico entra desde el celular, y la web estaba hecha en desktop y
+sólo *adaptada* a mobile. Medido en un iPhone 13 (390×664) contra producción, la home eran
+**54 pantallas de scroll**: la grilla sola eran 44, porque se renderizaban 100 tarjetas en una
+columna, y el único filtro estaba en el hero — a la tarjeta 40 no había forma de cambiar de
+oficio sin volver 20 pantallas arriba. Las secciones de marketing quedaban debajo de todo eso,
+o sea invisibles en mobile.
+
+**Resultado:** home 54 → **14,1 pantallas**, `/categoria` 46,9 → **7,8**, primera tarjeta de la
+pantalla 1,8 → **0,9**, HTML de la home 949 KB → **471 KB**.
+
+### Regla que ordena todo: el corte es `lg`
+Debajo de `lg` manda el directorio; en `lg`+ queda **exactamente** la home de desktop de antes.
+Nunca se ven las dos cosas ni ninguna:
+
+| Debajo de `lg` (mobile/tablet) | En `lg`+ (desktop) |
+|---|---|
+| `OficiosChips` + `TecnicosFiltroBar` (sticky) | `HeroSearchCard` |
+| conteo dentro de `TecnicosFiltroBar` | conteo dentro de `TecnicosSortBar` |
+| garantías compactas debajo del buscador | garantías largas bajo el titular |
+| sin bajada ni eyebrow en la sección de técnicos | título completo, centrado |
+
+**Si tocás uno, tocá el otro** — si no, queda un hueco (nada visible) o dos buscadores.
+
+### Cosas que ya se pisaron (no repetir)
+- **`overflow-x-hidden` rompe `position: sticky`.** `<main>` lo tenía y la barra de filtro se
+  pegaba al tope de `<main>` (fuera de pantalla) en vez de al viewport. Se cambió por
+  **`overflow-x-clip`**, que recorta igual pero no crea contenedor de scroll.
+- **El blob decorativo del hero pinta sobre la sección siguiente.** Es `absolute` dentro de una
+  sección `relative`; al acortar el hero en mobile empezó a asomar sobre el título de
+  `#tecnicos`. Se arregla poniendo `relative` en la sección que va abajo (va después en el DOM,
+  así que pinta encima), no tocando el blob.
+- **Al filtrar hay que reposicionar el scroll.** Si filtrás desde la tarjeta 40 y quedan 6
+  resultados, te quedás mirando el pie de página creyendo que no hubo resultados.
+  `TecnicosDirectorio` sube al tope del listado, pero **sólo si ya estabas más abajo**.
+- **La grilla se reinicia al filtrar** (`key` por filtro en `TecnicosGrid`): sin eso, quien tocó
+  "Ver más" hasta 60 y después filtra un oficio con 8 se queda con el "mostrando 60" viejo.
+
+### Filtrado: ahora vive en el navegador
+`app/page.tsx` manda la lista **completa** (sin filtrar) + `filtroInicial` de la URL;
+`TecnicosDirectorio` filtra y ordena con `useMemo`. Servidor y cliente usan **la misma**
+función (`lib/filtros.ts`) — eso es lo que evita el error de hidratación, porque el primer
+render del cliente arranca del mismo estado que renderizó el servidor. La URL se mantiene con
+`replaceState` (compartible, sin tocar el historial ni pegarle al servidor).
+
+Tener los 620 en memoria es **a propósito**: es lo que hace que cambiar de oficio sea
+instantáneo. El costo es el peso del HTML, y por eso **no se mandan campos que la tarjeta no
+usa** — se sacó `reputacion_url` de los `select` de la home y de `/categoria` (sólo la usa
+`/tecnico/[id]`), que eran ~130 KB de URLs de Google Maps al pedo. Si agregás un campo al
+`select`, fijate primero si `TecnicoCard` lo usa.
+
+### Otros cambios de esta tanda
+- **`TANDA` de 100 → 12** en `TecnicosGrid` (sirve para mobile y desktop: 4 filas de 3).
+- **`BottomNav` para todos**, no sólo logueados. Antes era `{user && <BottomNav/>}`, así que el
+  90-95% del tráfico no la veía nunca — y encima el `<body>` ya reservaba su alto en mobile,
+  o sea que al visitante le quedaba una franja vacía abajo. Ítems nuevos: Inicio / Oficios /
+  (Contactos si hay sesión, Ingresar si no).
+- **`CustomSelect` tiene variante `pill`** (chata, para la barra de filtro) además de `campo`
+  (la original del hero), con `menuAlign` para que el menú de la pastilla derecha no se salga
+  de la pantalla.
+- **`app/sitemap.ts` + `app/robots.ts`** (no existían). Con 12 tarjetas por tanda, los otros 608
+  perfiles ya no están linkeados en el HTML, así que sin sitemap Google no llega a
+  `/tecnico/[id]`. El sitemap usa los mismos criterios de "quién es público" que la home.
+- **`/tecnico/[id]` no se tocó**: ya estaba bien en mobile (3,7 pantallas, botón de WhatsApp
+  arriba del pliegue). Es la página que convierte — no meterle mano sin motivo.

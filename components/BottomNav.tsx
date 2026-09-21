@@ -15,10 +15,31 @@ const ListIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// El prop "dark" queda en la firma solo para no romper los call sites que
-// todavía lo pasan (Header, etc.) — desde el rediseño 2026-08-28 se unificó
-// todo a un solo tema claro, así que ya no cambia nada visualmente.
-export function BottomNav({ novedades = 0 }: { dark?: boolean; novedades?: number }) {
+const GridIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6a2.25 2.25 0 012.25-2.25h1.5A2.25 2.25 0 019.75 6v1.5A2.25 2.25 0 017.5 9.75H6A2.25 2.25 0 013.75 7.5V6zM14.25 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v1.5A2.25 2.25 0 0118 9.75h-1.5a2.25 2.25 0 01-2.25-2.25V6zM3.75 16.5a2.25 2.25 0 012.25-2.25h1.5a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-1.5zM14.25 16.5a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-1.5A2.25 2.25 0 0114.25 18v-1.5z" />
+  </svg>
+);
+
+const UserIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+  </svg>
+);
+
+// Barra de navegación de abajo, solo mobile.
+//
+// Hasta 2026-09-20 se mostraba ÚNICAMENTE a usuarios logueados (Header hacía
+// `{user && <BottomNav/>}`). Como la web es un directorio público que se usa
+// sin cuenta, eso dejaba sin navegación fija justo al 90-95% del tráfico —
+// que además ya pagaba su costo: el <body> reserva el alto de esta barra en
+// mobile pase lo que pase, así que al visitante le quedaba una franja vacía
+// abajo de todo.
+//
+// Los ítems también eran del modelo viejo (Inicio / Contactos, pensados para
+// el flujo de publicar un problema). Ahora el segundo ítem es Oficios, que es
+// la forma real de moverse en un directorio de 620 técnicos.
+export function BottomNav({ hasUser = false, novedades = 0 }: { dark?: boolean; hasUser?: boolean; novedades?: number }) {
   const pathname = usePathname();
 
   // Se oculta donde estorbaría o no aplica
@@ -32,7 +53,10 @@ export function BottomNav({ novedades = 0 }: { dark?: boolean; novedades?: numbe
 
   const items = [
     { href: "/", label: "Inicio", Icon: HomeIcon },
-    { href: "/mis-consultas", label: "Contactos", Icon: ListIcon },
+    { href: "/categorias", label: "Oficios", Icon: GridIcon },
+    hasUser
+      ? { href: "/mis-consultas", label: "Contactos", Icon: ListIcon }
+      : { href: "/ingresar", label: "Ingresar", Icon: UserIcon },
   ];
 
   return (

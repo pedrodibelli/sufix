@@ -14,6 +14,15 @@ export function IconSearch({ className = "h-4 w-4" }: IconProps) {
   );
 }
 
+// Cruz para "limpiar" un filtro puesto (barra del directorio en mobile).
+export function IconClose({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.8} className={className} aria-hidden>
+      <path d="M5 5l10 10M15 5L5 15" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconMapPin({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.8} className={className} aria-hidden>

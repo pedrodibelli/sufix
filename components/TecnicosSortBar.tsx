@@ -33,8 +33,13 @@ export function TecnicosSortBar({
   const activo = indice === -1 ? 0 : indice;
 
   return (
-    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm font-medium text-ink-500">
+    <div className="mb-5 flex flex-wrap items-center justify-end gap-3 lg:justify-between">
+      {/* Oculto en mobile (2026-09-20): ahí el conteo lo muestra la barra de
+          filtro sticky (TecnicosFiltroBar), que es la que queda a la vista
+          mientras scrolleás. Tenerlo en los dos lados lo mostraba dos veces,
+          uno debajo del otro. En desktop no hay barra sticky, así que el
+          conteo sigue viviendo acá. */}
+      <p className="hidden text-sm font-medium text-ink-500 lg:block">
         {total} {total === 1 ? "profesional encontrado" : "profesionales encontrados"}
       </p>
 

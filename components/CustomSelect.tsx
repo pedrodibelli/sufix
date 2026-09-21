@@ -28,6 +28,8 @@ export function CustomSelect({
   options,
   placeholder,
   triggerIcon,
+  variant = "campo",
+  menuAlign = "left",
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -36,13 +38,30 @@ export function CustomSelect({
   // El cuadrito de ícono a la izquierda del botón (ya lo maneja el padre:
   // en Oficio cambia según la selección, en Zona es siempre el pin fijo).
   triggerIcon: React.ReactNode;
+  // "campo": el look original, un input alto con el ícono en un cuadrito —
+  // es el del buscador del hero, donde hay lugar de sobra.
+  // "pill" (2026-09-20): versión chata para la barra de filtro sticky del
+  // directorio en mobile, donde el alto es lo más caro que hay. Sin cuadrito
+  // de ícono, y cuando hay algo elegido el botón se pinta de verde para que
+  // se vea de un vistazo que el listado está filtrado.
+  variant?: "campo" | "pill";
+  // Solo para "pill": de qué lado se ancla el menú. Una pastilla es angosta
+  // (media pantalla), así que el menú crece más que ella — anclado a la
+  // izquierda se sale por el borde derecho cuando la pastilla ya está a la
+  // derecha. El padre dice de qué lado está cada una.
+  menuAlign?: "left" | "right";
 }) {
   const [open, setOpen] = useState(false);
   const [activo, setActivo] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const seleccionada = options.find((o) => o.value === value);
+  // Ojo con el value "": varias listas traen una opción "Todos los oficios"
+  // con value "" para poder limpiar el filtro. Esa opción sirve DENTRO del
+  // menú, pero como texto del botón es peor que el placeholder (más larga,
+  // se corta en una pastilla angosta), así que con value vacío se muestra
+  // siempre el placeholder.
+  const seleccionada = value ? options.find((o) => o.value === value) : undefined;
   const indiceActual = Math.max(0, options.findIndex((o) => o.value === value));
 
   useEffect(() => {
@@ -83,6 +102,9 @@ export function CustomSelect({
     else if (e.key === "Escape") { e.preventDefault(); setOpen(false); }
   }
 
+  const esPill = variant === "pill";
+  const activoPill = esPill && !!seleccionada;
+
   return (
     <div ref={boxRef} className="relative">
       <button
@@ -92,16 +114,38 @@ export function CustomSelect({
         aria-haspopup="listbox"
         onClick={() => setOpen((v) => !v)}
         onKeyDown={onKeyDown}
-        className="flex w-full items-center gap-2.5 rounded-2xl border border-sv-dark/10 bg-white px-3.5 py-1 text-left"
+        className={
+          esPill
+            ? `flex w-full items-center gap-1.5 rounded-full border px-3 py-2 text-left transition-colors ${
+                activoPill
+                  ? "border-sv-primary bg-sv-mint text-sv-dark"
+                  : "border-sv-dark/12 bg-white text-sv-dark"
+              }`
+            : "flex w-full items-center gap-2.5 rounded-2xl border border-sv-dark/10 bg-white px-3.5 py-1 text-left"
+        }
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sv-mint p-2 text-sv-primary">
+        <span
+          className={
+            esPill
+              ? "flex h-4 w-4 shrink-0 items-center justify-center text-sv-primary"
+              : "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sv-mint p-2 text-sv-primary"
+          }
+        >
           {triggerIcon}
         </span>
-        <span className="min-w-0 flex-1 truncate py-2.5 text-[14.5px] font-medium text-sv-dark">
+        <span
+          className={
+            esPill
+              ? "min-w-0 flex-1 truncate text-[13.5px] font-semibold"
+              : "min-w-0 flex-1 truncate py-2.5 text-[14.5px] font-medium text-sv-dark"
+          }
+        >
           {seleccionada ? seleccionada.label : placeholder}
         </span>
         <IconChevronDown
-          className={`h-4 w-4 shrink-0 text-ink-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 transition-transform duration-200 ${esPill ? "h-3.5 w-3.5" : "h-4 w-4"} ${
+            activoPill ? "text-sv-primary" : "text-ink-400"
+          } ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -109,7 +153,11 @@ export function CustomSelect({
         <div
           ref={listRef}
           role="listbox"
-          className="animate-dropdown absolute left-0 right-0 top-[calc(100%+6px)] z-30 max-h-[22rem] overflow-y-auto rounded-2xl border border-sv-dark/10 bg-white p-1.5 shadow-[0_20px_45px_-20px_rgba(29,46,32,0.35)]"
+          className={`animate-dropdown absolute top-[calc(100%+6px)] z-30 max-h-[22rem] overflow-y-auto rounded-2xl border border-sv-dark/10 bg-white p-1.5 shadow-[0_20px_45px_-20px_rgba(29,46,32,0.35)] ${
+            esPill
+              ? `w-max min-w-full max-w-[calc(100vw-2.5rem)] ${menuAlign === "right" ? "right-0" : "left-0"}`
+              : "left-0 right-0"
+          }`}
         >
           {options.map((o, i) => {
             const esElegida = o.value === value;

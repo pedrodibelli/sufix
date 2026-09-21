@@ -32,7 +32,9 @@ export default async function CategoriaPage({
   const supabase = await createSupabaseServer();
   const { data: tecnicosRaw } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
+    // Sin `reputacion_url`: la tarjeta no la usa, solo /tecnico/[id]. Ver la
+    // nota en app/page.tsx.
+    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total")
     .contains("rubro", [slug])
       // Ver la nota en app/page.tsx: verificado O cargado_por_equipo.
     .or("verificado.eq.true,cargado_por_equipo.eq.true")

@@ -100,7 +100,12 @@ export function TecnicoCard({
   return (
     // border-sv-dark/[0.09] pisa el borde casi invisible de .card (zap-100)
     // para que coincida con el mockup — ahí sv-dark es literalmente rgb(29,46,32).
-    <div className="card relative flex flex-col border-sv-dark/[0.09] p-5 transition-all duration-200 hover:-translate-y-1.5 hover:border-sv-dark/20 hover:shadow-[0_24px_46px_-18px_rgba(29,46,32,0.38)]">
+    // Espaciados algo más ajustados en mobile (2026-09-20): la tarjeta medía
+    // 171px y en una sola columna eso son menos de 4 por pantalla. Se recorta
+    // solo el aire (padding y separaciones), sin tocar tamaños de texto, el
+    // avatar ni el botón de WhatsApp — que es la acción que convierte y no se
+    // achica. En sm+ queda todo exactamente como estaba.
+    <div className="card relative flex flex-col border-sv-dark/[0.09] p-4 transition-all duration-200 hover:-translate-y-1.5 hover:border-sv-dark/20 hover:shadow-[0_24px_46px_-18px_rgba(29,46,32,0.38)] sm:p-5">
       {tecnico.verificado && (
         <span className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-[#25D366]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#25D366] shadow-sm">
           <IconVerifiedBadge className="h-3 w-3" /> Verificado
@@ -116,7 +121,7 @@ export function TecnicoCard({
             tarjetas necesitan el mismo aire reservado — si no, las que no
             tienen Verificado quedan con la foto/nombre más arriba que las
             que sí, y se nota feo la desalineación en la grilla. */}
-        <div className="mt-6 flex items-start gap-3.5">
+        <div className="mt-5 flex items-start gap-3.5 sm:mt-6">
           <Avatar
             url={tecnico.foto_url}
             initials={initials}
@@ -150,7 +155,7 @@ export function TecnicoCard({
           </div>
         </div>
 
-        <div className="mt-3">
+        <div className="mt-2 sm:mt-3">
           {sinResenas ? (
             <span className="text-xs text-ink-400">Sin reseñas aún</span>
           ) : (
@@ -181,8 +186,8 @@ export function TecnicoCard({
         {chipsVisibles.length > 0 && (
           <>
             {/* Separador punteado (look nuevo 2026-08-28) antes de los rubros */}
-            <div className="mt-3.5 border-t border-dashed border-ink-200" />
-            <div className="mt-3.5 flex flex-wrap gap-1.5">
+            <div className="mt-3 border-t border-dashed border-ink-200 sm:mt-3.5" />
+            <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-3.5">
               {chipsVisibles.map((c) => (
                 <span key={c.slug} className="chip inline-flex items-center gap-1 border-sv-primary px-2 py-0.5 text-[11px]">
                   <IconOficio slug={c.slug} className="h-3 w-3 shrink-0 text-sv-primary" />
@@ -208,7 +213,7 @@ export function TecnicoCard({
           tecnicoId={tecnico.user_id}
           waLink={waLink}
           origen="home"
-          className={`btn mt-4 w-full border-[1.5px] border-[#25D366] bg-[#FBF8EF] text-[#1a9e4d] transition hover:bg-[#25D366] hover:text-white ${!waLink ? "pointer-events-none opacity-50" : ""}`}
+          className={`btn mt-3 w-full border-[1.5px] border-[#25D366] bg-[#FBF8EF] text-[#1a9e4d] transition hover:bg-[#25D366] hover:text-white sm:mt-4 ${!waLink ? "pointer-events-none opacity-50" : ""}`}
         >
           <IconWhatsApp className="h-4 w-4" /> Contactar por WhatsApp
         </ContactarWhatsAppButton>

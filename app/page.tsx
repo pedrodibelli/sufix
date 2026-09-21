@@ -6,11 +6,43 @@ import { TecnicosDirectorio } from "@/components/TecnicosDirectorio";
 import { TecnicoCard, type TecnicoPublico } from "@/components/TecnicoCard";
 import { HeroSearchCard } from "@/components/HeroSearchCard";
 import { ProblemStrip, SeguridadSection, OficiosGrid, ComoFuncionaPasos, WhatsAppMockupSection } from "@/components/HomeMarketingSections";
-import { CATEGORIES, ZONAS_CABA } from "@/lib/data";
-import { calificacionEfectiva, promedioGeneral, puntajeRecomendado } from "@/lib/reputacion";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 export const revalidate = 0; // siempre datos frescos
+
+// Cada garantía con dos redacciones: la larga de siempre para desktop, y una
+// corta para mobile. En pantalla chica las tres largas ocupaban tres
+// renglones enteros (190px) entre el titular y el primer técnico; dicen lo
+// mismo en la mitad de lugar.
+const GARANTIAS = [
+  { largo: "Identidad verificada", corto: "Identidad verificada" },
+  { largo: "Reputación real, no inventada", corto: "Reputación real" },
+  { largo: "Revisado a mano por Sufix", corto: "Revisado a mano" },
+];
+
+// Las tres garantías del hero. Se renderiza en dos lugares con visibilidad
+// opuesta (2026-09-20): en desktop va donde estuvo siempre, debajo del
+// titular; en mobile va DESPUÉS del buscador. El motivo es cuánto tarda en
+// aparecer el buscador: puestas antes, empujaban el campo de búsqueda fuera
+// de la primera pantalla, y esa es la acción principal de la home.
+function Garantias({ className = "", compacto = false }: { className?: string; compacto?: boolean }) {
+  return (
+    <div className={`flex flex-wrap ${compacto ? "gap-x-3 gap-y-1.5" : "gap-x-5 gap-y-2"} ${className}`}>
+      {GARANTIAS.map((g) => (
+        <div
+          key={g.largo}
+          className={`flex items-center gap-1.5 font-semibold text-sv-olive ${compacto ? "text-[11.5px]" : "text-[13px]"}`}
+        >
+          <svg viewBox="0 0 24 24" fill="none" className={compacto ? "h-[14px] w-[14px] shrink-0" : "h-[17px] w-[17px] shrink-0"}>
+            <path d="M12 3 4 6v6c0 5 3.4 8.7 8 9 4.6-.3 8-4 8-9V6l-8-3Z" stroke="#3C6030" strokeWidth="1.7" strokeLinejoin="round" />
+            <path d="M9 12l2 2 4-4" stroke="#3C6030" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {compacto ? g.corto : g.largo}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default async function HomePage({
   searchParams,
@@ -23,11 +55,9 @@ export default async function HomePage({
   const tecSort = params.tecSort === "resenas" ? "resenas" : "recomendados";
 
   // Filtros del directorio de técnicos, con prefijo "tec" (venían compartiendo
-  // URL con los filtros viejos de "Consultas activas", ya retirados). Ya no
-  // hay chips de rubro ni toggle de orden (2026-08-21) — el buscador de texto
-  // ya matchea por rubro (ver tecnicosFiltrados) y el orden es siempre por
-  // mejor calificación.
-  const tecQ = params.tecQ?.toLowerCase().trim() ?? "";
+  // URL con los filtros viejos de "Consultas activas", ya retirados). El
+  // buscador de texto matchea también por nombre de rubro, así que cubre lo
+  // que antes hacían los chips de categoría (ver lib/filtros.ts).
   const tecZona = params.tecZona ?? "";
 
   // Rol del usuario actual
@@ -42,9 +72,13 @@ export default async function HomePage({
   let tecnicos: TecnicoPublico[] = [];
   let resumenMapTecnicos: Record<string, { promedio: number; total: number }> = {};
   if (!esProfesional) {
+    // Sin `reputacion_url` a propósito (2026-09-20): la tarjeta no la usa —
+    // el link "ver las reseñas en Google Maps" vive solo en /tecnico/[id] —
+    // y son URLs largas que, multiplicadas por los 620 del directorio,
+    // engordaban el HTML de la home más de 100 KB al pedo.
     const { data: tecnicosRaw } = await supabaseServer
       .from("perfiles_publicos")
-      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
+      .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, creado_at, reputacion_fuente, reputacion_rating, reputacion_total")
       // Verificado (2026-09-07): la home promete "ningún técnico entra sin
       // que lo miremos primero" — quien se autoregistra por /registrar
       // espera en /admin > Técnicos pendientes hasta que alguien lo
@@ -70,54 +104,14 @@ export default async function HomePage({
     );
   }
 
-  // Filtro del directorio: texto libre (nombre, titular o rubro) y zona. El
-  // texto ya matchea por nombre del rubro, así que cubre lo que antes hacían
-  // los chips de categoría sin necesitar un filtro aparte.
-  const tecnicosFiltrados = tecnicos.filter((t) => {
-    // "CABA" no es un barrio real, es el atajo que carga ZonaChips (ver
-    // ZONAS_CABA en lib/data.ts) — matchea si el técnico cubre cualquiera
-    // de los 9 barrios de Capital, no un string literal "CABA".
-    if (tecZona === "CABA") {
-      if (!(t.zona ?? []).some((z) => ZONAS_CABA.includes(z))) return false;
-    } else if (tecZona && !(t.zona ?? []).includes(tecZona)) return false;
-    if (tecQ) {
-      const rubrosNombres = (t.rubro ?? []).map((slug) => CATEGORIES.find((c) => c.slug === slug)?.name ?? slug);
-      const hay = `${t.nombre ?? ""} ${t.titular ?? ""} ${rubrosNombres.join(" ")}`.toLowerCase();
-      if (!hay.includes(tecQ)) return false;
-    }
-    return true;
-  });
-
-  // Orden (2026-08-29: vuelve a ser elegible, "Recomendados" / "Más reseñas"
-  // — antes era fijo por calificación, ver git history si hace falta el
-  // porqué de esa decisión). "Recomendados" = mejor calificación primero,
-  // sin reseñas todavía = -1 así un técnico recién registrado cae al final
-  // solo y sube a medida que junta reseñas buenas. "Más reseñas" = más
-  // cantidad de reseñas primero, sin importar el promedio. Ambos empatan
-  // por más nuevo primero.
-  // La reputación de Google Maps (para quien la tenga cargada, ver
-  // lib/reputacion.ts) cuenta acá igual que una reseña nativa de Sufix —
-  // es reputación real y verificable, no tiene sentido que un técnico
-  // arranque de cero en el orden solo porque las reseñas están en Google.
-  // "Recomendados" usa un promedio ponderado por confianza, no el promedio
-  // pelado (2026-09-04): así un 4.90 con 570 reseñas le gana a un 5.00 con
-  // una sola, que es lo que pasaba antes. Ver puntajeRecomendado() para la
-  // fórmula y el porqué. "Más reseñas" sigue ordenando por cantidad, que es
-  // lo que dice la etiqueta.
-  const califs = tecnicosFiltrados.map((t) => calificacionEfectiva(t, resumenMapTecnicos[t.user_id]));
-  const globalTecnicos = promedioGeneral(califs);
-  const tecnicosOrdenados = [...tecnicosFiltrados].sort((a, b) => {
-    const ca = calificacionEfectiva(a, resumenMapTecnicos[a.user_id]);
-    const cb = calificacionEfectiva(b, resumenMapTecnicos[b.user_id]);
-    if (tecSort === "resenas") {
-      if (cb.total !== ca.total) return cb.total - ca.total;
-    } else {
-      const pa = puntajeRecomendado(ca.promedio, ca.total, globalTecnicos);
-      const pb = puntajeRecomendado(cb.promedio, cb.total, globalTecnicos);
-      if (pb !== pa) return pb - pa;
-    }
-    return new Date(b.creado_at ?? 0).getTime() - new Date(a.creado_at ?? 0).getTime();
-  });
+  // Filtrar y ordenar ya no se hace acá (2026-09-20): lo hace
+  // TecnicosDirectorio, que recibe la lista completa y el filtro que venía en
+  // la URL. Igual sale renderizado y ordenado del servidor — es un componente
+  // cliente, pero su primer render ocurre acá, con este mismo `filtroInicial`.
+  // El motivo del cambio es mobile: con el filtro del lado del navegador,
+  // cambiar de oficio es instantáneo y no pierde la posición del scroll, en
+  // vez de ser una navegación nueva contra el servidor.
+  const filtroInicial = { q: params.tecQ?.trim() ?? "", zona: tecZona };
 
   // Home del técnico (ver CLAUDE.md "Pivot 2026-08-2x"): antes mostraba el
   // feed de "Consultas activas", que quedó muerto para siempre — ya no hay
@@ -160,30 +154,41 @@ export default async function HomePage({
   return (
     <>
       <Header />
-      <main className="overflow-x-hidden bg-[#FBF8EF]">
+      {/* overflow-x-clip, no -hidden (2026-09-20): `hidden` convierte a <main>
+          en un contenedor de scroll, y eso rompe el `position: sticky` de la
+          barra de filtro del directorio — se quedaba pegada al tope de <main>
+          (o sea, fuera de la pantalla) en vez de al viewport. `clip` recorta
+          igual el desborde horizontal del blob del hero, pero sin crear
+          contenedor de scroll, así que el sticky vuelve a funcionar. */}
+      <main className="overflow-x-clip bg-[#FBF8EF]">
         <Bienvenida esProfesional={esProfesional} />
 
         {/* Directorio de técnicos — para demandantes y visitantes, no técnicos. */}
         {!esProfesional && (
           <>
             {/* ── HERO (rediseño 2026-08-28, look "crema/salvia") ── */}
-            <section className="relative pb-8 pt-10 sm:pt-16">
+            {/* pt/pb más chicos en mobile: cada 16px de aire acá retrasa la
+                aparición del buscador, que es lo que la gente viene a usar. */}
+            <section className="relative pb-6 pt-6 sm:pb-8 sm:pt-16">
               <div
                 className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] opacity-70"
                 style={{ background: "#E4EAD6", borderRadius: "44% 56% 60% 40% / 48% 42% 58% 52%" }}
                 aria-hidden
               />
-              <div className="container-home relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-11">
+              <div className="container-home relative grid gap-5 sm:gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-11">
                 <div>
                   <span className="mb-3.5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-sv-olive">
                     ✦ Ya funcionamos en CABA y zona norte
                   </span>
+                  {/* El párrafo se esconde en mobile: dice lo mismo que ya
+                      dicen el titular y las garantías, y en pantalla chica
+                      son 5 renglones que empujan el buscador fuera de vista. */}
                   {sinSesion ? (
                     <>
                       <h1 className="display max-w-lg text-3xl font-extrabold leading-[1.15] text-sv-dark sm:text-4xl">
                         ¿Se rompió algo en casa? <span className="text-sv-primary">Encontrá a quien lo resuelva.</span>
                       </h1>
-                      <p className="mt-3.5 max-w-md text-sm leading-relaxed text-ink-500 sm:text-base">
+                      <p className="mt-3.5 hidden max-w-md text-sm leading-relaxed text-ink-500 sm:block sm:text-base">
                         No empieces a pedir contactos por WhatsApp. Mirá perfiles verificados por nuestro equipo, sus
                         reseñas y su zona, y escribile directo — sin publicar nada, sin esperar propuestas.
                       </p>
@@ -193,7 +198,7 @@ export default async function HomePage({
                       <h1 className="display max-w-lg text-3xl font-extrabold leading-[1.15] text-sv-dark sm:text-4xl">
                         Encontrá tu <span className="text-sv-primary">técnico ideal.</span>
                       </h1>
-                      <p className="mt-3.5 max-w-md text-sm leading-relaxed text-ink-500 sm:text-base">
+                      <p className="mt-3.5 hidden max-w-md text-sm leading-relaxed text-ink-500 sm:block sm:text-base">
                         Mirá su perfil, sus reseñas y escribile por WhatsApp directo.
                       </p>
                     </>
@@ -204,20 +209,22 @@ export default async function HomePage({
                       "primer contacto", es refuerzo de confianza válido
                       para cualquiera (pedido 2026-08-31, unificar la home
                       logueada con la de visitante). */}
-                  <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
-                    {["Identidad verificada", "Reputación real, no inventada", "Revisado a mano por Sufix"].map((t) => (
-                      <div key={t} className="flex items-center gap-1.5 text-[13px] font-semibold text-sv-olive">
-                        <svg viewBox="0 0 24 24" fill="none" className="h-[17px] w-[17px] shrink-0">
-                          <path d="M12 3 4 6v6c0 5 3.4 8.7 8 9 4.6-.3 8-4 8-9V6l-8-3Z" stroke="#3C6030" strokeWidth="1.7" strokeLinejoin="round" />
-                          <path d="M9 12l2 2 4-4" stroke="#3C6030" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        {t}
-                      </div>
-                    ))}
-                  </div>
+                  <Garantias className="mt-6 hidden lg:flex" />
                 </div>
 
-                <HeroSearchCard />
+                {/* Solo desktop (2026-09-20). En mobile este buscador hace lo
+                    mismo que los chips de oficio + las pastillas de filtro que
+                    están a un dedo de distancia y encima quedan pegadas al
+                    scrollear — pero ocupa 318px, o sea media pantalla de
+                    formulario antes de ver un solo técnico. El corte es en lg,
+                    el mismo punto donde aparecen los chips y la barra sticky,
+                    así que nunca se ven las dos cosas ni ninguna. */}
+                <div className="hidden lg:block">
+                  <HeroSearchCard />
+                </div>
+
+                {/* Misma lista, del otro lado del buscador — ver Garantias. */}
+                <Garantias compacto className="lg:hidden" />
               </div>
             </section>
 
@@ -236,29 +243,42 @@ export default async function HomePage({
                 secciones de más abajo. Restando esos 40px acá (en vez de
                 sacarle el margen a la línea) el salto final da igual sin
                 mover nada de posición dentro de la grilla. */}
-            <section id="tecnicos" className="bg-zap-50 pb-7 pt-14 sm:pb-10 sm:pt-20">
+            {/* relative (2026-09-20): el blob decorativo del hero es absolute
+                dentro de una sección `relative`, así que pinta por encima del
+                fondo de las secciones que siguen. Antes no se notaba porque el
+                hero era alto y el blob terminaba adentro; al acortarlo en
+                mobile empezó a asomar sobre este título. Con `relative` acá,
+                esta sección pinta después (va después en el DOM) y lo tapa. */}
+            <section id="tecnicos" className="relative bg-zap-50 pb-7 pt-6 sm:pb-10 sm:pt-20">
               <div className="container-home">
-                <div className="mx-auto max-w-2xl text-center">
-                  <span className="text-[13px] font-bold uppercase tracking-wider text-sv-primary">Técnicos verificados</span>
-                  <h2 className="display mt-2 text-3xl leading-tight text-sv-dark sm:text-4xl">
+                {/* En mobile queda solo el h2, y chico: el volante de arriba
+                    (eyebrow + bajada) repetía lo que ya dice el hero dos dedos
+                    más arriba, y entre los tres se comían 263px — media
+                    pantalla de títulos entre el hero y el primer técnico. En
+                    desktop no molesta y se deja como estaba. */}
+                <div className="mx-auto max-w-2xl sm:text-center">
+                  <span className="hidden text-[13px] font-bold uppercase tracking-wider text-sv-primary sm:block">
+                    Técnicos verificados
+                  </span>
+                  <h2 className="display text-xl leading-tight text-sv-dark sm:mt-2 sm:text-4xl">
                     {sinSesion ? "Perfiles listos, apenas entrás." : "Elegí con quién hablar."}
                   </h2>
-                  <p className="mt-3 text-base text-ink-500">
+                  <p className="mt-3 hidden text-base text-ink-500 sm:block">
                     {sinSesion
                       ? "Así se ven los técnicos disponibles en tu zona ahora mismo."
                       : "Mirá su perfil, sus reseñas y escribile por WhatsApp directo."}
                   </p>
                 </div>
 
-                <div className="mt-10">
+                <div className="mt-4 sm:mt-10">
                   {/* La barra de orden y la grilla van juntas en un componente
                       cliente: cambiar de orden se resuelve en el navegador, sin
                       navegar ni saltar el scroll. El servidor igual manda la
                       lista ya ordenada, con el mismo criterio. */}
                   <TecnicosDirectorio
-                    tecnicos={tecnicosOrdenados}
+                    tecnicos={tecnicos}
                     resumenMap={resumenMapTecnicos}
-                    hayFiltrosActivos={!!(tecQ || tecZona)}
+                    filtroInicial={filtroInicial}
                     ordenInicial={tecSort}
                   />
                 </div>
