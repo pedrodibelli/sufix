@@ -453,9 +453,11 @@ poder registrarse — pasó una vez en esta sesión por apurar el orden.
 
 ## 14. Cómo trabajar en este repo (workflow para Claude)
 1. **Cambio de código** → `npm run build` (verificar que compila) → `git add -A` → commit →
-   `git push origin main`. ⚠️ **El push NO siempre re-apunta el dominio `sufix.com.ar` al último
-   deploy** (puede quedar sirviendo código viejo). Correr **`vercel --prod --yes`** y después
-   **`vercel alias set <deployment> sufix.com.ar`** — ver §18 para el detalle de comandos.
+   `git push origin main`. **Y listo: con el push alcanza.** Vercel arranca el build solo unos
+   8 segundos después y le pasa el dominio `sufix.com.ar` al deploy nuevo cuando termina.
+   **Tarda entre 35 y 50 segundos**, así que hay que esperarlo: mirar el sitio a los 10 segundos
+   y ver código viejo no significa que el deploy falló, significa que todavía está compilando.
+   ⚠️ **NO correr `vercel --prod` después del push.** Ver la corrección de §23.
    El texto del trailer de commit (`Co-Authored-By: ...`) lo da el sistema en cada sesión,
    no es fijo — usar el que venga en las instrucciones de esa sesión, no copiar uno viejo.
 2. **Cambio de base de datos** → crear el `.sql` en `supabase/migrations/` Y **darle el SQL al usuario para correr en el SQL Editor** (no se aplica solo).
@@ -481,8 +483,8 @@ poder registrarse — pasó una vez en esta sesión por apurar el orden.
 - **Endpoints**: `app/api/propuesta-creada/route.ts` y `app/api/publicacion-creada/route.ts`
   (nodemailer + Gmail SMTP, `runtime = "nodejs"`). El de publicación cruza `perfiles_profesionales`
   por `rubro` + `zona` para avisar a los técnicos. Límite Gmail ~500/día.
-- ⚠️ Tras tocar estos endpoints: `git push` **y** `vercel --prod` (el alias `solvitweb` no se
-  reapunta solo — ver §14.1). Si un aviso "no llega", revisar `select … from net._http_response`
+- ⚠️ Tras tocar estos endpoints alcanza con `git push` (acá decía que además había que correr
+  `vercel --prod` porque el alias no se reapuntaba solo; era falso, ver §23). Si un aviso "no llega", revisar `select … from net._http_response`
   en el SQL Editor (status 200 = llegó al endpoint; 401 = header mal; vacío = el webhook no disparó).
 - A futuro (con dominio): migrar a **Resend** para mejor entregabilidad y remitente `@dominio`.
 
@@ -614,8 +616,10 @@ El dato que hace falta es `reputacion_fuente` + `reputacion_rating` + `reputacio
 
 ### Vercel CLI
 ```
-vercel --prod --yes                                  # deploy a producción
-vercel alias set <deployment-url> sufix.com.ar        # re-apuntar el dominio real (los demás solo redirigen)
+vercel ls solvit                                      # ver los deploys y en qué estado están
+vercel inspect <deployment-url>                       # detalle de uno: build, alias asignado, errores
+vercel --prod --yes                                   # deploy MANUAL — sólo sin acceso a git (ver §23)
+vercel alias set <deployment-url> sufix.com.ar        # mover el dominio a mano — sólo para un rollback
 vercel env add/rm <VAR> production                    # cargar/sacar env vars
 vercel logs <deployment-url>                           # logs en runtime, para debug de endpoints
 vercel domains inspect <dominio>                       # nameservers actuales vs los que espera Vercel
@@ -871,3 +875,60 @@ inicial sólo se usa al montar. La URL cambiaba, el listado no.
 Contar resultados, no tarjetas: la grilla muestra **12 por tanda**, así que `620` y `111`
 resultados se ven los dos como 12 tarjetas. El número está en el texto
 `"N profesionales encontrados"` (desktop) y `"N técnicos"` (barra sticky de mobile).
+
+---
+
+## 23. El auto-deploy de Vercel SÍ anda — corrección de §14 (2026-09-21)
+
+Hasta hoy este archivo decía que "el push no siempre re-apunta el dominio" y mandaba a correr
+`vercel --prod --yes` + `vercel alias set` después de cada push. **Era falso**, y el paso manual
+no arreglaba nada: lo empeoraba.
+
+### La configuración real del proyecto
+| | |
+|---|---|
+| Repo conectado | `pedrodibelli/sufix` (GitHub) — sí, el repo se renombró de `solvit` a `sufix`; el proyecto de Vercel se sigue llamando `solvit` |
+| Rama de producción | `main` |
+| `autoAssignCustomDomains` | `true` — el deploy de producción se queda con los dominios solo |
+| Alias pinneado a mano / rollback activo | ninguno (`lastAliasRequest` y `lastRollbackTarget` en `null`) |
+
+O sea: push a `main` → Vercel buildea → el deploy nuevo se queda con `sufix.com.ar`. Sin tocar nada.
+
+### La prueba, del historial de deploys
+Cada commit de la sesión del 2026-09-21 tiene **dos** deploys de producción del **mismo sha**,
+separados por 7-8 segundos: uno `source=git` y otro `source=cli`.
+
+| sha | source | duración del build |
+|---|---|---|
+| `867a58f` | git | 37 s |
+| `867a58f` | cli | 66 s |
+| `a1f28f3` | git | 39 s |
+| `a1f28f3` | cli | 66 s |
+| `ac8eef4` | git | 35 s |
+| `ac8eef4` | cli | 60 s |
+
+Y el commit `88a482e` (2026-09-19), que **sólo** tuvo deploy de git, sin `vercel --prod` detrás,
+tiene `aliasAssigned` con fecha y `aliasError: null`: se quedó con el dominio él solo.
+
+### Qué había pasado en realidad
+Se pusheaba, se miraba el sitio **7 segundos después** — cuando el build de git todavía estaba
+corriendo, porque tarda ~40 s — se veía código viejo, y de ahí salió la conclusión de que "el
+push no re-apunta el dominio". El `vercel --prod` que se corría a continuación tardaba ~65 s más,
+y para cuando terminaba el sitio ya estaba bien: parecía que lo había arreglado el comando, pero
+lo había arreglado el tiempo.
+
+### Por qué el paso manual era peor que no hacer nada
+`vercel --prod` crea un **segundo deploy de producción** del mismo código, que sube los archivos
+locales en vez de usar el repo. Tarda casi el doble (~65 s contra ~37 s), así que **termina
+después** y le saca el dominio al de git. Dos builds compitiendo por el mismo alias, el doble de
+minutos de build gastados, y una ventana en la que el dominio salta de uno a otro. Encima sube
+**lo que haya en la carpeta local**, commiteado o no — lo que está en producción puede terminar
+no siendo lo que está en GitHub.
+
+### La regla
+- **Deploy normal: `git push origin main` y esperar ~40-60 s.** Nada más.
+- Verificar con `vercel ls solvit` (esperar `● Ready`) antes de sacar conclusiones mirando el sitio.
+  Un `curl` inmediato después del push siempre va a mostrar lo viejo.
+- `vercel --prod` queda para dos casos puntuales: probar algo **sin** commitear (y ahí conviene
+  que NO sea `--prod`), o deployar sin acceso a git.
+- `vercel alias set` queda sólo para un **rollback** a mano (mover el dominio a un deploy anterior).
