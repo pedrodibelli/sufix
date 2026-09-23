@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Poppins, Plus_Jakarta_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const inter = Inter({
@@ -60,6 +61,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen overflow-x-hidden antialiased max-sm:pb-[calc(5rem+env(safe-area-inset-bottom))]">
         {children}
+        <Analytics />
       </body>
     </html>
   );
