@@ -6,6 +6,7 @@ import { createSupabaseServer } from "@/lib/supabase-server";
 import { isAdminEmail } from "@/lib/admin";
 import { ReportesClient, type Reporte } from "./ReportesClient";
 import { TecnicosPendientesClient, type TecnicoPendiente } from "./TecnicosPendientesClient";
+import { MailsContactoSection } from "./MailsContactoSection";
 // AdminClient/DisputasClient (pagos en revisión y disputas) quedan sin usar
 // a propósito — ver comentario más abajo. No se borran, listos para
 // reactivar si se vuelve al flujo viejo (tag de git
@@ -135,6 +136,15 @@ export default async function AdminPage() {
               marcalo verificado — recién ahí su perfil muestra que lo revisaste.
             </p>
             <TecnicosPendientesClient tecnicos={pendientes} />
+          </section>
+
+          <section className="mt-12">
+            <h2 className="display text-lg">Mails de quienes contactan</h2>
+            <p className="mt-1 text-sm text-ink-500">
+              El mail que se pide antes de abrir WhatsApp. A los 7 días les llega un &quot;¿cómo te fue?&quot; con un
+              link para reseñar al técnico sin crear cuenta. Las novedades sólo se le pueden mandar a quien las aceptó.
+            </p>
+            <MailsContactoSection />
           </section>
         </div>
       </main>

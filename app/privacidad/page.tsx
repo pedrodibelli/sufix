@@ -13,7 +13,12 @@ export const metadata = {
 // usamos hoy. IMPORTANTE: es un punto de partida honesto, NO un documento
 // revisado por un abogado. Si se agregan servicios nuevos (analytics,
 // publicidad, pagos), hay que actualizar esta página.
-const ACTUALIZADO = "3 de septiembre de 2026";
+//
+// 2026-10-22: se sumó el mail que se pide antes de abrir WhatsApp (tabla
+// contactantes, ver CLAUDE.md §24), los mails de consejos y de "¿cómo te
+// fue?", las reseñas sin cuenta, y Vercel Web Analytics (que se había
+// agregado el 2026-09-23 sin actualizar esta página).
+const ACTUALIZADO = "22 de octubre de 2026";
 
 export default function PrivacidadPage() {
   return (
@@ -64,12 +69,23 @@ export default function PrivacidadPage() {
                 </li>
               </ul>
 
+              <p className="mt-4 font-medium text-sv-dark">Si contactás a un técnico sin tener cuenta:</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                <li>Tu email (obligatorio para seguir a WhatsApp) y tu WhatsApp (opcional).</li>
+                <li>A qué técnicos contactaste y cuándo.</li>
+                <li>Si marcaste la casilla para recibir novedades de Sufix.</li>
+                <li>
+                  Tu email queda guardado en tu navegador para no volver a pedírtelo la próxima vez que
+                  contactes a alguien.
+                </li>
+              </ul>
+
               <p className="mt-4 font-medium text-sv-dark">Cuando usás el sitio:</p>
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li>
                   Registramos cuándo alguien toca &quot;Contactar por WhatsApp&quot; en un perfil, para
                   saber si el directorio está sirviendo. Si estás con sesión iniciada queda asociado a
-                  tu cuenta; si no, se registra de forma anónima.
+                  tu cuenta; si no, al email que nos dejaste.
                 </li>
                 <li>
                   Registramos las visitas a los perfiles de técnicos, de la misma forma (asociadas a
@@ -78,8 +94,9 @@ export default function PrivacidadPage() {
                 <li>Las reseñas que dejás: tu nombre, la puntuación y el comentario.</li>
               </ul>
               <p className="mt-3 text-sm text-ink-500">
-                No usamos cookies de publicidad ni herramientas de seguimiento de terceros. Solo las
-                cookies necesarias para mantener tu sesión iniciada.
+                No usamos cookies de publicidad ni herramientas de seguimiento entre sitios. Solo las
+                cookies necesarias para mantener tu sesión iniciada. Para contar visitas usamos Vercel
+                Web Analytics, que mide páginas vistas de forma agregada y sin cookies.
               </p>
             </section>
 
@@ -92,16 +109,23 @@ export default function PrivacidadPage() {
                 <li>Entender qué tan bien funciona el directorio y mejorarlo.</li>
               </ul>
               <p className="mt-3">
-                <strong>Los emails que te podemos mandar son estos, y ninguno es publicidad:</strong>
+                <strong>Los emails que te podemos mandar son estos:</strong>
               </p>
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li>Confirmación de tu dirección de email al crear la cuenta.</li>
                 <li>Recuperación de contraseña, solo si vos la pedís.</li>
                 <li>Si sos técnico: el aviso de que revisamos tu perfil y ya está publicado.</li>
+                <li>
+                  Si contactaste a un técnico: unos consejos de seguridad la primera vez, y unos días
+                  después un email preguntándote cómo te fue, con la opción de dejarle una reseña.
+                </li>
+                <li>
+                  Novedades de Sufix, <strong>solo si marcaste la casilla</strong> para recibirlas.
+                </li>
               </ul>
               <p className="mt-3">
-                No mandamos newsletters ni promociones. Si algún día quisiéramos hacerlo, lo
-                aclaramos acá antes y te vamos a pedir permiso.
+                Todos estos emails, salvo los de tu cuenta, traen un link para darte de baja. Si te das
+                de baja, no te escribimos más.
               </p>
               <p className="mt-3">
                 <strong>No vendemos tus datos personales ni los cedemos con fines publicitarios.</strong>
@@ -117,8 +141,9 @@ export default function PrivacidadPage() {
                 visible, no deberías tener un perfil publicado.
               </p>
               <p className="mt-2">
-                Si sos <strong>usuario que busca un servicio</strong>, tu email y tus datos de cuenta
-                no son públicos. Sí es público tu nombre en las reseñas que dejes.
+                Si sos <strong>usuario que busca un servicio</strong>, tu email, tu WhatsApp y tus
+                datos de cuenta no son públicos — tampoco para los técnicos que contactás. Sí es
+                público el nombre con el que firmes las reseñas que dejes.
               </p>
             </section>
 
@@ -130,7 +155,7 @@ export default function PrivacidadPage() {
               </p>
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li><strong>Supabase</strong> — base de datos, autenticación y almacenamiento de fotos.</li>
-                <li><strong>Vercel</strong> — hosting del sitio.</li>
+                <li><strong>Vercel</strong> — hosting del sitio y conteo de visitas (Web Analytics).</li>
                 <li><strong>Resend</strong> — envío de los emails de arriba. Solo recibe tu dirección y el contenido del aviso.</li>
               </ul>
               <p className="mt-2">

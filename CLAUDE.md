@@ -240,7 +240,9 @@ Vercel. El código usa:
 | `/restablecer` | Pantalla para poner la contraseña nueva, llega por el mail de "olvidé mi contraseña" | Quien pidió el reset |
 | `/perfil` | Edición de datos propios; el técnico completa foto/experiencia; sección "Borrar mi cuenta" (los dos roles) | Usuarios logueados |
 | `/reportar` | Reportar un problema general (con el sitio o con un técnico) — **exige cuenta**, es una conversación | Usuarios logueados |
-| `/admin` | Panel: **Reportes** + **Técnicos pendientes de revisión** (ver §11, actualizado) | Solo los dos emails admin |
+| `/admin` | Panel: **Reportes** + **Técnicos pendientes de revisión** (ver §11, actualizado) + **Mails de quienes contactan** (§24) | Solo los dos emails admin |
+| `/resena/[token]` | Reseñar a un técnico **sin cuenta**, con el link del mail "¿cómo te fue?" (§24) | Quien recibió el mail |
+| `/baja/[token]` | Dejar de recibir los mails a clientes (§24) | Quien recibió un mail |
 | `/terminos`, `/privacidad` | Legales, linkeados del footer | Todos |
 
 **Redirigidas (307), del modelo viejo — no tocar salvo que se restaure ese modelo:**
@@ -512,6 +514,8 @@ cierto: quien se registraba aparecía al instante. Ahora los tres listados públ
 | Técnico nuevo → a los admins | Webhook `aviso-tecnico-nuevo`: INSERT en `perfiles_profesionales` → `/api/tecnico-registrado` |
 | Perfil aprobado → al técnico | `verificarTecnico()` en `app/admin/actions.ts` |
 | Confirmación de cuenta y recuperar contraseña | Supabase Auth vía SMTP de Resend (no pasa por nuestro código) |
+| Consejos de seguridad → al cliente (1 vez por mail) | `registrarContacto()` al contactar a un técnico (§24) |
+| "¿Cómo te fue?" → al cliente, a los 7 días | Cron diario `/api/cron/seguimiento` (§24) |
 
 `enviarMail()` nunca tira: si falta la key loguea y devuelve `false`. Un aviso que no sale no
 debe tumbar la acción que lo dispara. Los mails salen **de a uno**, no en paralelo: Resend
@@ -932,3 +936,63 @@ no siendo lo que está en GitHub.
 - `vercel --prod` queda para dos casos puntuales: probar algo **sin** commitear (y ahí conviene
   que NO sea `--prod`), o deployar sin acceso a git.
 - `vercel alias set` queda sólo para un **rollback** a mano (mover el dominio a un deploy anterior).
+
+---
+
+## 24. Mail antes de WhatsApp + "¿cómo te fue?" + reseña sin cuenta (2026-10-22)
+
+**Por qué:** el 81% de los clics en "Contactar por WhatsApp" eran anónimos (56 de 69 desde el
+pivot; 24 de 24 en el último mes) y había **3 reseñas nativas** en total. No sabíamos quién usa
+Sufix ni cómo les fue. Idea tomada de parairnos.com.
+
+### El flujo
+1. **Pop-up** (`components/MailContactoModal.tsx`) la primera vez que alguien **sin sesión** toca
+   "Contactar por WhatsApp": mail **obligatorio**, WhatsApp **opcional**, casilla de novedades
+   **desmarcada**. Lo abre `ContactarWhatsAppButton`. Con sesión no aparece (se usa el mail de la
+   cuenta). El mail queda en `localStorage` (`sufix_contacto_email`): los contactos siguientes van
+   directo, sin pop-up.
+2. **Consejos de seguridad** al instante, **una sola vez por mail en toda la vida**
+   (`enviarConsejosSiCorresponde` en `lib/contactantes.ts`, corre en `after()`).
+3. **"¿Cómo te fue?"** a los 7 días: cron diario `/api/cron/seguimiento` (14:00 UTC, `vercel.json`).
+   **Un mail por persona**, con hasta 5 técnicos, cada uno con dos botones: "Lo contraté: dejar
+   reseña" y "No lo contraté". `?prueba=1` devuelve el plan sin mandar ni escribir nada (pide el
+   mismo `Authorization: Bearer CRON_SECRET`).
+4. **`/resena/[token]`**: reseña sin cuenta. El token (uuid, uno por persona+técnico, vence a los
+   30 días) **es** la autorización. Se guarda en `resenas` con `autor_id NULL` y el nombre que
+   elija la persona en `autor_nombre`. Si vuelve a entrar, corrige su reseña, no suma otra.
+   Con `?no=1` pregunta por qué no lo contrató (motivos en `app/resena/[token]/motivos.ts`).
+5. **Baja**: link en el pie de cada mail → `/baja/[token]` (con botón de confirmación), y encabezado
+   `List-Unsubscribe` → `POST /api/baja/[token]` (el botón "Anular suscripción" de Gmail).
+
+### Base de datos — migración `20261022_mails_de_contacto.sql`
+- `contactantes`: una fila por mail (minúsculas). `mail_invalido`, `consejos_enviados_at`,
+  `baja_at`, `token_baja`, `acepta_novedades`.
+- `contactos_tecnico` + `contactante_id` + `seguimiento_enviado_at`.
+- `invitaciones_resena`: token, vencimiento, respuesta (`contratado`/`no_contratado`), motivo,
+  `resena_id`.
+- `aperturas_popup_contacto`: cuánta gente abre el pop-up y cuánta sigue (`continuo_at`). El id lo
+  genera el navegador para que "se abrió" y "siguió" puedan llegar en cualquier orden.
+- **Las tres tablas nuevas tienen RLS prendido y NINGUNA policy**: sólo el service role las lee
+  (`lib/supabaseAdmin.ts`). Un técnico puede leer sus `contactos_tecnico`; si los tokens vivieran
+  ahí, se podría reseñar a sí mismo. Por eso el token está en otra tabla, y el vínculo
+  reseña↔mail vive en `invitaciones_resena.resena_id`, no en `resenas` (que es de lectura pública).
+- La policy de INSERT de `contactos_tecnico` ahora exige `contactante_id IS NULL`: desde el
+  navegador no se le puede colgar un contacto al mail de otro.
+
+### Cosas que no son obvias
+- **Abrir `/resena/...` o `/baja/...` no guarda nada; sólo los botones.** Los antivirus de algunos
+  mails abren los links solos para revisarlos: si abrir la página registrara "no lo contraté" o
+  diera de baja, se guardarían cosas que nadie hizo.
+- **"Continuar a WhatsApp" es un `<a>` real**, no un botón que después hace `window.open`. En iOS un
+  `window.open` después de esperar al servidor lo bloquea el bloqueador de pop-ups. El registro del
+  contacto va en paralelo, como siempre.
+- **Rebotes = reputación del dominio.** Al dar de alta un mail se chequea que el dominio tenga MX
+  (`dominioRecibeMail`); si no, `mail_invalido = true` y no se le escribe nunca. Además el pop-up
+  sugiere correcciones de typos (`lib/email.ts`: "gmial.com", "gmail.com.ar"…) y el primer
+  "Continuar" con un typo sospechoso avisa en vez de seguir.
+- **Novedades/marketing: sólo a `acepta_novedades = true` y `baja_at IS NULL`.** La política de
+  privacidad lo promete así. El resto de la base es sólo para consejos y seguimiento.
+- **Medir si el pop-up espanta gente:** `/admin` → "Mails de quienes contactan" muestra cuántos lo
+  abrieron y cuántos siguieron (últimos 30 días). Si el abandono es alto, la salida pensada es
+  agregar "Seguir sin mail" — no sacar el pop-up.
+- `/admin/contactantes.csv` descarga todos los mails (paginado; PostgREST corta en 1000 filas).

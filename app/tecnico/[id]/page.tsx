@@ -190,6 +190,7 @@ export default async function TecnicoPage({
               {waLink && (
                 <ContactarWhatsAppButton
                   tecnicoId={id}
+                  tecnicoNombre={nombre}
                   waLink={waLink}
                   origen="perfil"
                   // shrink-0 + whitespace-nowrap: sin esto, cuando la

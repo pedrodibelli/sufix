@@ -13,9 +13,20 @@ import { Resend } from "resend";
 // aviso que no sale nunca debe tumbar la acción que lo dispara.
 const REMITENTE = "Sufix <hola@sufixapp.com>";
 
-export type MailArgs = { para: string; asunto: string; html: string };
+export type MailArgs = {
+  para: string;
+  asunto: string;
+  html: string;
+  // Mails a clientes (consejos de seguridad, "¿cómo te fue?"): link de baja en
+  // el pie Y en el encabezado List-Unsubscribe, que es lo que usa Gmail para
+  // mostrar su propio botón de "Anular suscripción". Sin ese botón, el que no
+  // quiere más mails toca "Es spam" — y eso sí le pega a la reputación del
+  // dominio. `urlUnClic` recibe un POST sin confirmación (RFC 8058); `url` es
+  // la página con botón, para el link del pie.
+  baja?: { url: string; urlUnClic: string };
+};
 
-export async function enviarMail({ para, asunto, html }: MailArgs): Promise<boolean> {
+export async function enviarMail({ para, asunto, html, baja }: MailArgs): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
   if (!key || key.startsWith("re_REEMPLAZAR")) {
     console.warn(`[mail] RESEND_API_KEY sin configurar — no se envió "${asunto}" a ${para}`);
@@ -26,7 +37,13 @@ export async function enviarMail({ para, asunto, html }: MailArgs): Promise<bool
       from: REMITENTE,
       to: para,
       subject: asunto,
-      html: plantilla(html),
+      html: plantilla(html, baja?.url),
+      headers: baja
+        ? {
+            "List-Unsubscribe": `<${baja.urlUnClic}>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+          }
+        : undefined,
     });
     if (error) {
       console.error(`[mail] fallo enviando "${asunto}" a ${para}:`, error.message);
@@ -41,7 +58,10 @@ export async function enviarMail({ para, asunto, html }: MailArgs): Promise<bool
 
 // Marco común: los clientes de mail ignoran casi todo el CSS moderno, así que
 // va con estilos en línea y colores de la marca (sv-dark / crema).
-function plantilla(contenido: string): string {
+function plantilla(contenido: string, urlBaja?: string): string {
+  const pieBaja = urlBaja
+    ? `<br>Te llega porque contactaste a un técnico desde Sufix. <a href="${urlBaja}" style="color:#8A9689;">Darme de baja</a>`
+    : "";
   return `<div style="margin:0;padding:24px;background:#FBF8EF;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
   <div style="max-width:520px;margin:0 auto;background:#ffffff;border:1px solid rgba(29,46,32,0.1);border-radius:16px;overflow:hidden;">
     <div style="background:#1D2E20;padding:18px 24px;">
@@ -52,7 +72,7 @@ function plantilla(contenido: string): string {
     </div>
   </div>
   <p style="max-width:520px;margin:14px auto 0;color:#8A9689;font-size:12px;text-align:center;">
-    Sufix — técnicos verificados de CABA y zona norte · <a href="https://sufix.com.ar" style="color:#4E7A3E;">sufix.com.ar</a>
+    Sufix — técnicos verificados de CABA y zona norte · <a href="https://sufix.com.ar" style="color:#4E7A3E;">sufix.com.ar</a>${pieBaja}
   </p>
 </div>`;
 }

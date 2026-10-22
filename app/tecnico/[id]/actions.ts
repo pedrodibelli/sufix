@@ -2,6 +2,16 @@
 
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { clienteAdmin } from "@/lib/supabaseAdmin";
+import { emailValido, normalizarEmail } from "@/lib/email";
+import {
+  enviarConsejosSiCorresponde,
+  esUuid,
+  limpiarTelefono,
+  obtenerOCrearContactante,
+  type Contactante,
+} from "@/lib/contactantes";
 
 // Reseña directa: cualquier usuario logueado puede calificar a cualquier
 // técnico desde su perfil público, sin pasar por publicar/cerrar un trabajo
@@ -37,19 +47,67 @@ export async function crearResenaDirecta(
 // un Sheet en vivo (vía Zap: Catch Hook → Create Spreadsheet Row) para que
 // el equipo lo mire sin entrar a Supabase. Si no está seteada la env var, se
 // saltea sin romper nada — mismo patrón que RESEND_API_KEY/WEBHOOK_SECRET.
+//
+// Mail del contacto (2026-10-22, ver CLAUDE.md §24): sin sesión, el pop-up
+// pide el mail antes de abrir WhatsApp y llega acá en `datos`. Con sesión no
+// hay pop-up y se usa el mail de la cuenta. Con ese mail se le cuelga el
+// contacto a un `contactante`, que es lo que habilita los consejos de
+// seguridad (ya) y el "¿cómo te fue?" (a los 7 días, /api/cron/seguimiento).
 export async function registrarContacto(
   tecnicoId: string,
-  origen: "home" | "perfil" | "consultas"
+  origen: "home" | "perfil" | "consultas",
+  datos?: { email?: string; telefono?: string; aceptaNovedades?: boolean; aperturaId?: string }
 ): Promise<void> {
   try {
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
+    const admin = clienteAdmin();
 
-    await supabase.from("contactos_tecnico").insert({
+    // No se confía en el navegador: si el mail del pop-up no es válido se
+    // ignora, y si hay sesión gana el de la cuenta (que ya está confirmado).
+    const emailPopup = normalizarEmail(datos?.email ?? "");
+    const email = user?.email
+      ? normalizarEmail(user.email)
+      : emailValido(emailPopup) ? emailPopup : "";
+
+    let contactante: Contactante | null = null;
+    if (admin && email) {
+      contactante = await obtenerOCrearContactante(admin, {
+        email,
+        telefono: limpiarTelefono(datos?.telefono),
+        aceptaNovedades: datos?.aceptaNovedades === true,
+      });
+    }
+
+    const fila = {
       tecnico_id: tecnicoId,
       contactado_por: user?.id ?? null,
       origen,
-    });
+    };
+    // contactante_id sólo lo puede escribir el service role (ver la policy de
+    // INSERT en la migración 20261022). Sin la key, se guarda el clic pelado,
+    // como antes.
+    const { error: errorAdmin } = admin
+      ? await admin.from("contactos_tecnico").insert({ ...fila, contactante_id: contactante?.id ?? null })
+      : { error: true };
+    // Si el insert con service role falló por lo que sea, el clic se guarda
+    // igual por la vía de siempre: el registro del contacto no se pierde.
+    if (errorAdmin) await supabase.from("contactos_tecnico").insert(fila);
+
+    // El pop-up se abrió y la persona siguió: así se mide cuánta gente se
+    // pierde en el pop-up (ver registrarAperturaPopup).
+    const aperturaId = datos?.aperturaId;
+    if (admin && esUuid(aperturaId)) {
+      await admin
+        .from("aperturas_popup_contacto")
+        .upsert({ id: aperturaId, tecnico_id: tecnicoId, continuo_at: new Date().toISOString() });
+    }
+
+    // Después de responder: el mail no tiene por qué demorar nada.
+    if (admin && contactante) {
+      const c = contactante;
+      after(() => enviarConsejosSiCorresponde(admin, c, tecnicoId).catch(() => {}));
+    }
 
     const webhookUrl = process.env.ZAPIER_CONTACTO_WEBHOOK_URL;
     if (!webhookUrl) return;
@@ -60,7 +118,11 @@ export async function registrarContacto(
 
     const contactadoPor = user
       ? [user.user_metadata?.nombre, user.user_metadata?.apellido].filter(Boolean).join(" ") || user.email || "Usuario logueado"
-      : "Anónimo (sin cuenta)";
+      : email
+        // El mail en sí no viaja a Zapier/Google Sheets: la política de
+        // privacidad sólo nombra a Supabase, Vercel y Resend. Está en /admin.
+        ? "Sin cuenta (dejó su mail)"
+        : "Anónimo (sin cuenta)";
 
     await fetch(webhookUrl, {
       method: "POST",
@@ -74,6 +136,23 @@ export async function registrarContacto(
         fecha: new Date().toISOString(),
       }),
     }).catch(() => {});
+  } catch {
+    // silencioso a propósito
+  }
+}
+
+// Se abrió el pop-up del mail (2026-10-22). Junto con el `continuo_at` que
+// marca registrarContacto, da la cuenta de cuánta gente cierra el pop-up sin
+// seguir — la medición de si pedir el mail obligatorio espanta gente. El id
+// lo genera el navegador: si "siguió" llega antes que "se abrió", el upsert
+// de acá no pisa nada (ignoreDuplicates).
+export async function registrarAperturaPopup(tecnicoId: string, aperturaId: string): Promise<void> {
+  try {
+    const admin = clienteAdmin();
+    if (!admin || !esUuid(aperturaId) || !esUuid(tecnicoId)) return;
+    await admin
+      .from("aperturas_popup_contacto")
+      .upsert({ id: aperturaId, tecnico_id: tecnicoId }, { onConflict: "id", ignoreDuplicates: true });
   } catch {
     // silencioso a propósito
   }

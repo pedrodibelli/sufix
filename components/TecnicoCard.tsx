@@ -211,6 +211,7 @@ export function TecnicoCard({
         // ahora fondo claro + borde/texto verde WhatsApp, se rellena al hover.
         <ContactarWhatsAppButton
           tecnicoId={tecnico.user_id}
+          tecnicoNombre={nombre}
           waLink={waLink}
           origen="home"
           className={`btn mt-3 w-full border-[1.5px] border-[#25D366] bg-[#FBF8EF] text-[#1a9e4d] transition hover:bg-[#25D366] hover:text-white sm:mt-4 ${!waLink ? "pointer-events-none opacity-50" : ""}`}

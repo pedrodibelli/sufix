@@ -114,6 +114,7 @@ export function TecnicosContactadosView({ items }: { items: ContactoItem[] }) {
 
               <ContactarWhatsAppButton
                 tecnicoId={perfil.user_id}
+                tecnicoNombre={nombre}
                 waLink={waLink}
                 origen="consultas"
                 className={`btn mt-4 w-full bg-[#25D366] text-sm text-white hover:brightness-95 ${!waLink ? "pointer-events-none opacity-50" : ""}`}
