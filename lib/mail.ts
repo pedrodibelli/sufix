@@ -13,18 +13,33 @@ import { Resend } from "resend";
 // aviso que no sale nunca debe tumbar la acción que lo dispara.
 const REMITENTE = "Sufix <hola@sufixapp.com>";
 
+// Las respuestas van a una casilla real (2026-10-22). sufixapp.com no tiene MX:
+// hola@ sólo sirve para MANDAR. Sin esto, quien contestaba un mail ("lo
+// contraté, anduvo todo bien") recibía un rebote y nosotros nunca nos
+// enterábamos.
+const RESPONDER_A = "sufixar@gmail.com";
+
 export type MailArgs = {
   para: string;
   asunto: string;
   html: string;
   // Mails a clientes (consejos de seguridad, "¿cómo te fue?"): link de baja en
-  // el pie Y en el encabezado List-Unsubscribe, que es lo que usa Gmail para
-  // mostrar su propio botón de "Anular suscripción". Sin ese botón, el que no
-  // quiere más mails toca "Es spam" — y eso sí le pega a la reputación del
-  // dominio. `urlUnClic` recibe un POST sin confirmación (RFC 8058); `url` es
-  // la página con botón, para el link del pie.
+  // el pie. `url` es la página con botón; `urlUnClic` recibe un POST sin
+  // confirmación (RFC 8058) y es la que iría en el encabezado List-Unsubscribe
+  // (ver CON_LIST_UNSUBSCRIBE).
   baja?: { url: string; urlUnClic: string };
 };
+
+// Encabezado List-Unsubscribe: APAGADO a propósito (2026-10-22). Con él, Gmail
+// mostraba su botón de "Anular suscripción", pero también mandaba los mails a
+// la pestaña Promociones (probado: el de consejos de seguridad cayó ahí). Es
+// la señal típica de un envío masivo de marketing. El "¿cómo te fue?" en
+// Promociones no lo ve nadie, y sin eso no hay reseñas.
+//
+// Gmail sólo lo EXIGE a quien manda más de 5000 mails por día a Gmail; si
+// algún día llegamos a eso, prenderlo (el endpoint /api/baja/[token] ya está).
+// Mientras tanto, la baja es el link del pie.
+const CON_LIST_UNSUBSCRIBE = false;
 
 export async function enviarMail({ para, asunto, html, baja }: MailArgs): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
@@ -33,12 +48,17 @@ export async function enviarMail({ para, asunto, html, baja }: MailArgs): Promis
     return false;
   }
   try {
+    const completo = plantilla(html, baja?.url);
     const { error } = await new Resend(key).emails.send({
       from: REMITENTE,
       to: para,
+      replyTo: RESPONDER_A,
       subject: asunto,
-      html: plantilla(html, baja?.url),
-      headers: baja
+      html: completo,
+      // Versión de texto plano al lado del HTML: los filtros de spam
+      // desconfían de los mails que vienen sólo en HTML.
+      text: htmlATexto(completo),
+      headers: baja && CON_LIST_UNSUBSCRIBE
         ? {
             "List-Unsubscribe": `<${baja.urlUnClic}>`,
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
@@ -54,6 +74,30 @@ export async function enviarMail({ para, asunto, html, baja }: MailArgs): Promis
     console.error(`[mail] excepción enviando "${asunto}":`, e);
     return false;
   }
+}
+
+// El mismo mail, en texto plano: los links quedan como "texto: url" y cada
+// párrafo o ítem en su propia línea.
+export function htmlATexto(html: string): string {
+  return html
+    .replace(/<a\s[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, (_, url: string, texto: string) => {
+      const limpio = texto.replace(/<[^>]+>/g, "").trim();
+      return limpio ? `${limpio}: ${url}` : url;
+    })
+    .replace(/<li[^>]*>/gi, "- ")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|li|div|ol|ul)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .split("\n")
+    .map((linea) => linea.replace(/\s+/g, " ").trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 // Marco común: los clientes de mail ignoran casi todo el CSS moderno, así que

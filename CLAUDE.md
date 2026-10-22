@@ -961,8 +961,12 @@ Sufix ni cómo les fue. Idea tomada de parairnos.com.
    30 días) **es** la autorización. Se guarda en `resenas` con `autor_id NULL` y el nombre que
    elija la persona en `autor_nombre`. Si vuelve a entrar, corrige su reseña, no suma otra.
    Con `?no=1` pregunta por qué no lo contrató (motivos en `app/resena/[token]/motivos.ts`).
-5. **Baja**: link en el pie de cada mail → `/baja/[token]` (con botón de confirmación), y encabezado
-   `List-Unsubscribe` → `POST /api/baja/[token]` (el botón "Anular suscripción" de Gmail).
+5. **Baja**: link en el pie de cada mail → `/baja/[token]` (con botón de confirmación). Existe
+   también `POST /api/baja/[token]` para el encabezado `List-Unsubscribe` de un clic, pero el
+   encabezado está **apagado** (`CON_LIST_UNSUBSCRIBE` en `lib/mail.ts`): con él, Gmail mandó el
+   mail de consejos a **Promociones**. Gmail sólo lo exige a partir de 5000 mails/día.
+6. **Todos los mails (`enviarMail`) salen con versión de texto plano y `Reply-To: sufixar@gmail.com`.**
+   `sufixapp.com` no tiene MX: sin el Reply-To, contestar un mail rebotaba.
 
 ### Base de datos — migración `20261022_mails_de_contacto.sql`
 - `contactantes`: una fila por mail (minúsculas). `mail_invalido`, `consejos_enviados_at`,
