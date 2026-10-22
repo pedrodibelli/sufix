@@ -1000,3 +1000,57 @@ Sufix ni cómo les fue. Idea tomada de parairnos.com.
   abrieron y cuántos siguieron (últimos 30 días). Si el abandono es alto, la salida pensada es
   agregar "Seguir sin mail" — no sacar el pop-up.
 - `/admin/contactantes.csv` descarga todos los mails (paginado; PostgREST corta en 1000 filas).
+
+---
+
+## 25. Puntaje de Google Maps para todos + técnicos ocultos (2026-10-22)
+
+**Qué se hizo:** el usuario relevó a mano la ficha de Google Maps de los 586 técnicos cargados
+por el equipo (hoja "Copia de Tecnicos Agregados 1" del Excel "Contactos - Sufix.xlsx": nombre,
+teléfono, rubro, zona, puntaje, cantidad de reseñas, link). Con eso:
+
+- **546 perfiles recibieron `reputacion_fuente = 'Google Maps'` + rating + total + url** (la url
+  sin el querystring de tracking). 38 no tienen reseñas en Maps y quedan como "Nuevo en Sufix".
+  Cuando el perfil ya tenía otra ficha con MÁS reseñas, se dejó la que tenía (Santos Márquez,
+  Esteban Cevari).
+- **12 duplicados unificados.** Eran la misma persona dos veces: el perfil verificado a mano y la
+  ficha de Maps cargada aparte, con el mismo teléfono. Queda el verificado (con la unión de rubros
+  de los dos y la reputación de Maps); el otro se oculta con motivo `duplicado de <user_id>`.
+- **Se BORRARON de la base los 86 con menos de 4 estrellas en Google**, sin importar cuántas
+  reseñas tengan (pedido explícito del usuario: borrar, no ocultar). Cuenta, perfil, foto,
+  contactos, reportes y visitas, con el mismo método que "Borrar mi cuenta" de /perfil. Eran
+  todas cuentas creadas por el equipo (`lead-…@sufixapp.com` o `…@sufix-tecnicos.local`),
+  ninguna de alguien que se registró solo. Hay una copia JSON de lo borrado en el scratchpad de
+  esa sesión. Cayó un solo verificado: Walter Roldán (3,5 con 10).
+  Motivo del corte: las notas de Google están infladas (mediana 4,7; el 69% tiene 4,5 o más), así
+  que un 3,5 está entre el 10% peor. Con 1-4 reseñas son casi todos 1★ con una sola reseña: poca
+  información, pero un "1,0" en la tarjeta le saca más confianza a Sufix de lo que suma. Los sin
+  reseñas y los 5,0 con 1-2 reseñas **se quedan** (el orden "Recomendados" ya los pone abajo).
+- Resultado: **620 → 534 en la base, 522 visibles** (los 12 duplicados siguen en la base, ocultos).
+  Los oficios que más bajaron: vidriería 15→9, electrodomésticos 31→20, carpintería 80→58.
+
+### Cómo funciona "oculto" — migración `20261022b_ocultar_tecnicos.sql`
+- Columna `perfiles_profesionales.oculto_motivo` (NULL = visible).
+- **El filtro está en la vista `perfiles_publicos` (`WHERE oculto_motivo IS NULL`), no en el
+  código.** Es lo que leen la home, /categoria, /categorias, /tecnico/[id] (da 404), el sitemap,
+  /admin y el cron de seguimiento: un oculto desaparece de todos lados a la vez, y un listado
+  nuevo no se puede olvidar del filtro.
+- Hoy lo usan sólo los 12 duplicados (`oculto_motivo = 'duplicado de <user_id>'`). Ocultar no
+  borra nada: para volver a mostrar a alguien, `oculto_motivo = NULL`. Es la herramienta para
+  sacar a alguien de la web de forma reversible (los de menos de 4 se borraron directamente).
+- El perfil propio de un técnico oculto (`/perfil`) sigue andando: lee la tabla, no la vista.
+
+### Link a Google Maps
+**Sólo en el perfil** ("Ver las N reseñas en Google Maps"), no en la tarjeta, a propósito: la
+tarjeta ya lleva al perfil, un segundo link chico al lado de WhatsApp se toca sin querer en el
+celular, y mandar gente a Google desde el listado la saca de Sufix (ve el teléfono y a la
+competencia, y ese contacto no pasa por el pop-up del mail → no hay seguimiento ni reseña). La
+tarjeta muestra el puntaje con "· Google Maps" como texto. Por eso `reputacion_url` sigue fuera
+del `select` de la home (§20).
+
+### Ojo
+- **Los datos son una foto del 2026-10-22.** Los puntajes de Google cambian; conviene repetir el
+  relevamiento cada algunos meses (mismo método: Excel → cruzar por teléfono, nunca por nombre).
+- La política de privacidad decía que la nota externa se mostraba "solo con consentimiento
+  explícito". Se cambió: ahora dice que se muestra la de la ficha pública y que se saca si el
+  técnico lo pide.

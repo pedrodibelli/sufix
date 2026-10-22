@@ -17,7 +17,9 @@ export const metadata = {
 // 2026-10-22: se sumó el mail que se pide antes de abrir WhatsApp (tabla
 // contactantes, ver CLAUDE.md §24), los mails de consejos y de "¿cómo te
 // fue?", las reseñas sin cuenta, y Vercel Web Analytics (que se había
-// agregado el 2026-09-23 sin actualizar esta página).
+// agregado el 2026-09-23 sin actualizar esta página). Ese mismo día se cargó
+// el puntaje de Google Maps de todos los técnicos cargados por el equipo: la
+// línea que decía "solo con tu consentimiento explícito" dejó de ser cierta.
 const ACTUALIZADO = "22 de octubre de 2026";
 
 export default function PrivacidadPage() {
@@ -64,8 +66,8 @@ export default function PrivacidadPage() {
                 <li>Foto de perfil</li>
                 <li>Frase descriptiva y años de experiencia (opcionales)</li>
                 <li>
-                  Calificación de sitios externos (Google Maps, PorAca), solo si nos diste tu
-                  consentimiento explícito para mostrarla
+                  Si tu negocio tiene una ficha pública en Google Maps: su puntaje, la cantidad de
+                  reseñas y el link a la ficha. Si no querés que lo mostremos, escribinos y lo sacamos.
                 </li>
               </ul>
 
