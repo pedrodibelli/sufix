@@ -1039,6 +1039,14 @@ teléfono, rubro, zona, puntaje, cantidad de reseñas, link). Con eso:
   borra nada: para volver a mostrar a alguien, `oculto_motivo = NULL`. Es la herramienta para
   sacar a alguien de la web de forma reversible (los de menos de 4 se borraron directamente).
 - El perfil propio de un técnico oculto (`/perfil`) sigue andando: lee la tabla, no la vista.
+- ⚠️ **El Security Advisor de Supabase marca `perfiles_publicos` como error ("SECURITY DEFINER
+  view"). Es intencional desde 2026-06-21 — NO cambiarla a `security_invoker = true`.** La tabla
+  `perfiles_profesionales` está cerrada por RLS (cada técnico sólo ve su fila, porque tiene el
+  email); la vista es la ventana pública que expone sólo columnas no sensibles, y para eso tiene
+  que correr con los permisos de su dueño. Con `security_invoker = true` los visitantes chocan
+  contra el RLS de la tabla y **el directorio queda vacío**. Si se agrega una columna a la vista,
+  revisar que no sea sensible. (El otro aviso igual, `propuestas_count_por_publicacion`, es del
+  modelo viejo: sólo cuenta propuestas por publicación y no la usa el código.)
 
 ### Link a Google Maps
 **Sólo en el perfil** ("Ver las N reseñas en Google Maps"), no en la tarjeta, a propósito: la
