@@ -10,15 +10,22 @@
 // Desde un oficio (/categoria/[slug], o una tarjeta abierta desde ahí) se
 // nombra ese oficio. Desde la home, donde el técnico puede tener cinco
 // rubros y no hay forma de saber cuál necesita el que escribe, no se nombra
-// ninguno: "me interesa tu servicio" a secas.
-// Nombre completo, no solo la primera palabra (hasta 2026-09-18 usaba
-// nombre.split(" ")[0] — con técnicos reales tipo "Juan Pérez" quedaba
-// bien, "Hola Juan!", pero con los negocios cargados desde Google Maps
-// (nombre de fantasía, no una persona) rompía: "El Líder" saludaba "Hola
-// El!", sin sentido).
-export function mensajeWhatsApp(nombre: string, rubroNombre?: string | null): string {
-  const servicio = rubroNombre ? ` de ${rubroNombre}` : "";
-  return `¡Hola ${nombre}! Te encontré en Sufix, me interesa tu servicio${servicio}. ¿Estás disponible?`;
+// ninguno: "necesito tus servicios" a secas.
+//
+// Sin nombre y sin mencionar a Sufix (2026-11-05). La mayoría de los técnicos
+// se cargaron desde su ficha pública de Google Maps, no se anotaron ellos: un
+// "te encontré en Sufix" le habla de una plataforma que no conoce y puede
+// armar un problema. Y el nombre de muchas tarjetas todavía era el título de
+// Maps ("¡Hola Electricista Matriculado 24 hs urgencia!"). Cuando estén todos
+// los nombres reales se puede volver a saludar por el nombre de pila, pero
+// sólo a los que tengan nombre_tipo = 'persona' — a una marca nunca ("El
+// Líder" saludaba "Hola El!" cuando se usaba la primera palabra).
+const RUBRO_EN_FRASE: Record<string, string> = { "Gas matriculado": "gas" };
+
+export function mensajeWhatsApp(rubroNombre?: string | null): string {
+  if (!rubroNombre) return "¡Hola! Necesito tus servicios. ¿Estás disponible?";
+  const rubro = RUBRO_EN_FRASE[rubroNombre] ?? rubroNombre.toLowerCase();
+  return `¡Hola! Necesito un servicio de ${rubro}. ¿Estás disponible?`;
 }
 
 // Normaliza un teléfono argentino al formato que necesita wa.me (2026-09-07).

@@ -110,7 +110,7 @@ export default async function TecnicoPage({
   const rubroDelContexto = rubroContexto && rubros.includes(rubroContexto)
     ? rubroCats.find((c) => c.slug === rubroContexto)?.name ?? null
     : null;
-  const mensajeWa = encodeURIComponent(mensajeWhatsApp(nombre, rubroDelContexto));
+  const mensajeWa = encodeURIComponent(mensajeWhatsApp(rubroDelContexto));
   const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensajeWa}` : null;
 
   return (

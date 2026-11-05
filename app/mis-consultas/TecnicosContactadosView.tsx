@@ -8,6 +8,7 @@ import { avatarColorFor } from "@/lib/avatarColors";
 import { type TecnicoPublico } from "@/components/TecnicoCard";
 import { DejarResenaForm } from "@/app/tecnico/[id]/DejarResenaForm";
 import { iniciales } from "@/lib/format";
+import { mensajeWhatsApp, telefonoWhatsApp } from "@/lib/whatsapp";
 
 export type Resumen = { promedio: number; total: number };
 
@@ -50,10 +51,8 @@ export function TecnicosContactadosView({ items }: { items: ContactoItem[] }) {
           const nombre = perfil.nombre ?? "Profesional";
           const initials = iniciales(nombre);
           const rubroCats = (perfil.rubro ?? []).map((slug) => CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof CATEGORIES)[number] => !!c);
-          const telefonoLimpio = perfil.telefono?.replace(/\D/g, "") ?? "";
-          const mensaje = encodeURIComponent(
-            `Hola ${nombre.split(" ")[0]}! Te contacto por Sufix por mi consulta. ¿Podemos hablar?`
-          );
+          const telefonoLimpio = telefonoWhatsApp(perfil.telefono) ?? "";
+          const mensaje = encodeURIComponent(mensajeWhatsApp());
           const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensaje}` : null;
 
           const sinResenas = !resumen || resumen.total === 0;

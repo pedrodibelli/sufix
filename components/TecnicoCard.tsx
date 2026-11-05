@@ -71,9 +71,7 @@ export function TecnicoCard({
   // Normalizado, no solo "sacar lo que no sea numero": un telefono cargado
   // sin el 9 hacia que el link de WhatsApp no abriera nada (ver lib/whatsapp.ts).
   const telefonoLimpio = telefonoWhatsApp(tecnico.telefono) ?? "";
-  const mensaje = encodeURIComponent(
-    mensajeWhatsApp(nombre, rubroDelContexto)
-  );
+  const mensaje = encodeURIComponent(mensajeWhatsApp(rubroDelContexto));
   const waLink = telefonoLimpio ? `https://wa.me/${telefonoLimpio}?text=${mensaje}` : null;
 
   const calificacion = calificacionEfectiva(tecnico, resumen);
