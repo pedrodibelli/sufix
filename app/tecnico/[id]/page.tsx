@@ -49,7 +49,7 @@ export default async function TecnicoPage({
 
   const { data: perfil } = await supabase
     .from("perfiles_publicos")
-    .select("user_id, nombre, zona, rubro, verificado, foto_url, telefono, titular, anos_experiencia, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
+    .select("user_id, nombre, nombre_tipo, cargado_por_equipo, zona, rubro, verificado, foto_url, telefono, titular, anos_experiencia, creado_at, reputacion_fuente, reputacion_rating, reputacion_total, reputacion_url")
     .eq("user_id", id)
     .maybeSingle();
 
@@ -96,7 +96,13 @@ export default async function TecnicoPage({
   const externa = calificacion.externa;
   const lista = (resenas ?? []) as Resena[];
   const zonas: string[] = Array.isArray(perfil.zona) ? perfil.zona : perfil.zona ? [perfil.zona] : [];
-  const primerNombre = nombre.split(" ")[0];
+  // "Hablamos con Raúl" sólo si el nombre es de una persona: con una marca
+  // salía "Hablamos con Cerrajería" (2026-11-05). Sin clasificar (NULL) y
+  // registrado solo por la web = puso su propio nombre.
+  const esPersona = perfil.nombre_tipo
+    ? perfil.nombre_tipo === "persona"
+    : perfil.cargado_por_equipo === false;
+  const conQuien = esPersona ? nombre.split(" ")[0] : "el técnico";
   // Fecha de alta del perfil. El equipo verifica ANTES de publicar, así que
   // "desde" es exacto sin afirmar de más sobre cuándo fue la revisión.
   const mesVerificacion = perfil.creado_at
@@ -248,7 +254,7 @@ export default async function TecnicoPage({
 
                 <ul className="mt-4 grid gap-2.5 sm:grid-cols-3 sm:gap-x-7">
                   {[
-                    "Hablamos con " + primerNombre + " antes de publicar su perfil.",
+                    "Hablamos con " + conQuien + " antes de publicar su perfil.",
                     "Confirmamos que este WhatsApp es suyo.",
                     "Revisamos su trayectoria en el oficio.",
                   ].map((t) => (

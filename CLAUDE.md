@@ -579,6 +579,8 @@ true`, `categorias` (array de slugs) y `zonas` (array de nombres) — el trigger
   `aire`, `cerrajeria`, `pintura`, `carpinteria`, `albanileria`, `electrodomesticos`,
   `electricidad`, `vidrieria`). "CABA" en la columna de zonas se expande a los 9 barrios
   modelados (`ZONAS_CABA` en `lib/data.ts`), no se guarda como el string "CABA".
+- **Nombre:** nunca el título de la ficha de Maps tal cual. Guardar el título en `nombre_maps`,
+  poner en `nombre` la persona o la marca limpia, y `nombre_tipo` (ver §26).
 
 ### 17.3 Fotos
 Bucket de Storage `avatars`, ruta `${userId}/avatar`, con `?v=${Date.now()}` en la URL
@@ -1062,3 +1064,61 @@ del `select` de la home (§20).
 - La política de privacidad decía que la nota externa se mostraba "solo con consentimiento
   explícito". Se cambió: ahora dice que se muestra la de la ficha pública y que se saca si el
   técnico lo pide.
+
+---
+
+## 26. Nombres reales, WhatsApp genérico y fotos desde Maps (2026-11-05)
+
+### El mensaje de WhatsApp no nombra a Sufix ni al técnico
+`mensajeWhatsApp()` en `lib/whatsapp.ts`: "¡Hola! Necesito un servicio de plomería. ¿Estás
+disponible?" (desde un oficio) o "¡Hola! Necesito tus servicios. ¿Estás disponible?" (desde la
+home). Decisión del usuario: casi todos los técnicos se cargaron desde su ficha pública de Maps,
+no se anotaron, y un "te encontré en Sufix" les habla de una plataforma que no conocen y puede
+armar un problema. **Sin nombre hasta que estén todos los nombres reales**; cuando se vuelva a
+saludar por nombre, sólo a `nombre_tipo = 'persona'` y con el nombre de pila — a una marca nunca.
+"Técnicos que contacté" (`/mis-consultas`) usa el mismo mensaje.
+
+### `nombre` es lo que se muestra — migración `20261105_nombres_reales.sql`
+Las tarjetas mostraban el título de la ficha de Maps ("Gasista Matriculado Plomero Instalacion
+Cocina Termotanque Estufa Calefon Vanitory"). Se reescribieron a mano los 521 visibles:
+- `nombre_maps`: el título original (sólo en cargados por el equipo). Sirve para deshacer y para
+  el próximo relevamiento. **No está en la vista** `perfiles_publicos`, no hace falta en la web.
+- `nombre_tipo` (sí está en la vista): `persona` (112), `marca` (324), `pendiente` (85).
+  `NULL` = sin clasificar (altas nuevas); quien se registró solo por la web (`cargado_por_equipo
+  = false`) puso su nombre, así que el código lo trata como persona.
+- Criterio: nombre y apellido en el título → persona. Oficio de persona + nombre de pila
+  ("Electricista Rolando") → persona. Local + nombre de pila ("Cerrajería Aldo", "Plomería Tony")
+  → **marca**: no se sabe si es el dueño, y muchas cerrajerías llevan el nombre de la CALLE
+  ("Charcas", "Tacuarí", "Borges", "Valentín"). Sólo apellido → marca. Sólo el oficio →
+  `pendiente`, mostrado corto ("Gasista matriculado").
+- **Los `pendiente` los completa el usuario a mano** (escribiéndoles si hace falta). Al cargar
+  uno: `nombre` + `nombre_tipo = 'persona'`.
+- `/tecnico/[id]` decía "Hablamos con Cerrajería antes de publicar su perfil": ahora, si no es
+  persona, "Hablamos con el técnico".
+- La búsqueda por oficio matchea también contra el nombre (`lib/filtros.ts`), así que a 11 que
+  sólo salían en un oficio por la palabra del título se les sumó ese rubro. Se midió antes y
+  después: ningún filtro perdió a nadie.
+
+### `toTitleCase` respeta siglas y uniones
+Antes pasaba todo a minúscula ("TKD" → "Tkd"). Ahora sólo normaliza lo escrito entero en
+mayúscula o en minúscula; las siglas de hasta 4 letras en un texto mixto quedan, y "de/del/y/en…"
+van en minúscula. Detalle en el comentario de `lib/format.ts`.
+
+### Fotos de perfil desde la ficha de Maps
+- **Sin cuenta de Google, Maps muestra una "vista limitada"** (desde 2026-11): sólo la portada de
+  la ficha, sin galería y **sin reseñas** (ni la pestaña). No intentar esquivarlo (flags para que
+  no detecte la automatización, etc.): es saltear la protección anti-bots de Google, y el
+  control de permisos de Claude Code lo bloquea con razón. Para leer reseñas hace falta un
+  navegador con una cuenta real (Claude en Chrome, con la del usuario).
+- Lo que sí hay: la **portada** y, en el visor (clic en la portada), quién la subió
+  (`[aria-label^="Ver el perfil de"]`) con su avatar. Si lo subió el propio negocio, ese avatar es
+  su **logo o foto de perfil**, casi siempre la mejor opción (se baja grande cambiando el sufijo
+  `=s48-…` por `=s800-p-k-no-mo`; viene con `//` sin `https:`). Si es la letra que Google pone
+  por defecto (C, M, E…), se descarta y queda la portada.
+- **Si la portada la subió un cliente, no se usa** (derechos, y suele ser la casa del cliente).
+- La categoría de la ficha ("Electricista", "Escuela de arte"…) está en
+  `button[jsaction*="category"]`: sirve para detectar lo que no es un técnico de hogar mejor
+  que el nombre ("Cafeterra" parecía un café y es reparación de electrodomésticos).
+- Procesado: logos enteros (`trim` del borde liso + margen del color de la esquina, para que el
+  redondeo del avatar no los corte); fotos con `cover` + `attention`. 512×512 JPEG.
+- Criterio del usuario: **mejor alguna foto que nada** — una foto prolija de un trabajo sirve.
