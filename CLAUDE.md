@@ -1047,7 +1047,8 @@ teléfono, rubro, zona, puntaje, cantidad de reseñas, link). Con eso:
   nuevo no se puede olvidar del filtro.
 - Lo usan los 12 duplicados (`oculto_motivo = 'duplicado de <user_id>'`) y, desde 2026-11-05,
   30 fichas que no sirven para ningún rubro de Sufix (`'no es servicio de hogar: <qué es>'`:
-  pinturerías, escuelas, galerías de arte, talleres de autos; ver §26). Ocultar no
+  pinturerías, escuelas, galerías de arte, talleres de autos; ver §26), 11 dudosos (`'dudoso:
+  ficha de Maps sin reclamar y menos de 5 reseñas'`) y 1 cerrado temporalmente en Maps. Ocultar no
   borra nada: para volver a mostrar a alguien, `oculto_motivo = NULL`. Es la herramienta para
   sacar a alguien de la web de forma reversible (los de menos de 4 se borraron directamente).
 - El perfil propio de un técnico oculto (`/perfil`) sigue andando: lee la tabla, no la vista.
