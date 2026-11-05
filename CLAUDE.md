@@ -1037,7 +1037,9 @@ teléfono, rubro, zona, puntaje, cantidad de reseñas, link). Con eso:
   código.** Es lo que leen la home, /categoria, /categorias, /tecnico/[id] (da 404), el sitemap,
   /admin y el cron de seguimiento: un oculto desaparece de todos lados a la vez, y un listado
   nuevo no se puede olvidar del filtro.
-- Hoy lo usan sólo los 12 duplicados (`oculto_motivo = 'duplicado de <user_id>'`). Ocultar no
+- Lo usan los 12 duplicados (`oculto_motivo = 'duplicado de <user_id>'`) y, desde 2026-11-05,
+  30 fichas que no sirven para ningún rubro de Sufix (`'no es servicio de hogar: <qué es>'`:
+  pinturerías, escuelas, galerías de arte, talleres de autos; ver §26). Ocultar no
   borra nada: para volver a mostrar a alguien, `oculto_motivo = NULL`. Es la herramienta para
   sacar a alguien de la web de forma reversible (los de menos de 4 se borraron directamente).
 - El perfil propio de un técnico oculto (`/perfil`) sigue andando: lee la tabla, no la vista.
@@ -1083,7 +1085,9 @@ Las tarjetas mostraban el título de la ficha de Maps ("Gasista Matriculado Plom
 Cocina Termotanque Estufa Calefon Vanitory"). Se reescribieron a mano los 521 visibles:
 - `nombre_maps`: el título original (sólo en cargados por el equipo). Sirve para deshacer y para
   el próximo relevamiento. **No está en la vista** `perfiles_publicos`, no hace falta en la web.
-- `nombre_tipo` (sí está en la vista): `persona` (112), `marca` (324), `pendiente` (85).
+- `nombre_tipo` (sí está en la vista): al arrancar, `persona` 112, `marca` 324, `pendiente` 85.
+  Después se resolvieron 19 pendientes (13 por el nombre en su propio logo de Maps, con el
+  teléfono del cartel igual al cargado; 6 que consiguió el usuario): quedan 66.
   `NULL` = sin clasificar (altas nuevas); quien se registró solo por la web (`cargado_por_equipo
   = false`) puso su nombre, así que el código lo trata como persona.
 - Criterio: nombre y apellido en el título → persona. Oficio de persona + nombre de pila
@@ -1121,4 +1125,8 @@ van en minúscula. Detalle en el comentario de `lib/format.ts`.
   que el nombre ("Cafeterra" parecía un café y es reparación de electrodomésticos).
 - Procesado: logos enteros (`trim` del borde liso + margen del color de la esquina, para que el
   redondeo del avatar no los corte); fotos con `cover` + `attention`. 512×512 JPEG.
-- Criterio del usuario: **mejor alguna foto que nada** — una foto prolija de un trabajo sirve.
+- Criterio del usuario: **mejor alguna foto que nada** — una foto prolija de un trabajo sirve, y
+  también se usaron las portadas que subieron clientes (sí se descartan las de banco de imágenes
+  con marca de agua, y nunca un logo que muestre un DNI).
+- Resultado (2026-11-05): de 491 visibles, **422 con foto** (antes 36). 15 del piloto, 249 con
+  material del propio negocio, 123 con la portada de un cliente.
