@@ -211,8 +211,9 @@ Vercel. El código usa:
   primero a los que apuntan a él.
 - El remitente de mails sigue siendo `hola@sufixapp.com` a propósito (Resend está verificado para
   ese dominio). Solo cambiaron los **links** dentro de los mails, que ahora apuntan a `sufix.com.ar`.
-- **Google Search Console:** todavía no está dado de alta. Cuando se haga, registrar
-  `sufix.com.ar` como propiedad principal.
+- **Google Search Console:** dado de alta (confirmado por el usuario el 2026-11-05). El sitemap
+  (`app/sitemap.ts`) lista sólo los perfiles visibles: lee `perfiles_publicos`, así que un técnico
+  oculto sale solo.
 
 ---
 
@@ -419,9 +420,9 @@ poder registrarse — pasó una vez en esta sesión por apurar el orden.
   cayeron en spam — el dominio es nuevo y todavía está construyendo reputación con Gmail.
 
 **Pendiente (sigue abierto):**
-- **Rotar `RESEND_API_KEY`**: la que está en uso hoy se pegó en un chat en algún momento
-  de la sesión del 2026-09-07. Cambiarla en Vercel **y** en el password del SMTP de Supabase
-  (usan la misma clave) — no está confirmado que ya se haya rotado.
+- ~~Rotar `RESEND_API_KEY`~~: se pegó en un chat el 2026-09-07, pero el usuario es el único con
+  acceso a ese chat y decidió (2026-11-05) que no hace falta rotarla. Si algún día se rota,
+  cambiarla en Vercel **y** en el password del SMTP de Supabase (usan la misma clave).
 
 **Negocio:**
 - Cambiar datos de pago (transferencia + WhatsApp) de Mateo por los propios → Mercado Pago.
