@@ -1001,6 +1001,13 @@ Sufix ni cómo les fue. Idea tomada de parairnos.com.
 - **Medir si el pop-up espanta gente:** `/admin` → "Mails de quienes contactan" muestra cuántos lo
   abrieron y cuántos siguieron (últimos 30 días). Si el abandono es alto, la salida pensada es
   agregar "Seguir sin mail" — no sacar el pop-up.
+  **2026-11-05: el usuario decidió NO agregar "Seguir sin mail".** En los primeros 14 días hubo 3
+  aperturas reales y las 3 cerraron sin seguir, pero recién están empezando a promocionar Sufix:
+  el tráfico bajo es esperable y la prioridad es dejar la web lista para cuando haya visitas. No
+  volver a proponerlo por estos números; sí si con tráfico real el abandono se sostiene alto.
+- **Los contactos que hace el equipo ensucian estas métricas** (y les llega el "¿cómo te fue?"):
+  el 2026-11-05 se borraron los de Ana, Lara y un mail de prueba (`a@gmail.com`). Para escribirle
+  a un técnico por trabajo interno, usar su WhatsApp directo, no el botón de la web.
 - `/admin/contactantes.csv` descarga todos los mails (paginado; PostgREST corta en 1000 filas).
 
 ---
